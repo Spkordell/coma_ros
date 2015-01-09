@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package>
+  <name>coma_ros</name>
+  <version>0.0.0</version>
+  <description>The coma_ros package</description>
+
+  <maintainer email="spkordell@wpi.edu">Steven Kordell</maintainer>
+  <author email="spkordell@wpi.edu">Steven Kordell</author>
+
+  <license>BSD</license>
+
+  <url type="bugtracker">https://github.com/spkordell/coma_ros/coma_ros/issues</url>
+  <url type="repository">https://github.com/spkordell/coma_ros</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <export>
+    <metapackage/>
+  </export>
+</package>
