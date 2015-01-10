@@ -12,7 +12,7 @@
 #define SERIAL_NODE_H_
 
 #include <ros/ros.h>
-
+#include <boost/asio.hpp>
 
 class serial_node
 {
@@ -22,6 +22,8 @@ public:
    */
   serial_node();
 
+  void writeString(std::string s);
+  std::string readLine();
 
 private:
   ros::NodeHandle nh; /*!< a handle for this ros node */
@@ -29,7 +31,12 @@ private:
  //ros::Subscriber cmd_vel_in; /*!< the cmd_vel_in topic */
 
   //parameters
-  //int cameraCount; /*!< the number of cameras */
+  std::string port; /*!< the port to use for sending the serial data */
+  int baud; /*!< the baud rate for communication */
+
+
+  boost::asio::io_service io;
+  boost::asio::serial_port serial;
 
 
   /*!
