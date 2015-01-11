@@ -14,7 +14,10 @@
 #include <ros/ros.h>
 #include <boost/asio.hpp>
 
-#include "coma_serial/command.h"
+#include "coma_serial/path_command.h"
+#include "coma_serial/teleop_command.h"
+
+typedef enum {TELEOP, PATH} mode_type;
 
 class serial_node {
 public:
@@ -25,20 +28,27 @@ public:
 
 	void writeString(std::string s);
 	std::string readLine();
+	char readChar();
+	void writeChar(char c);
+	mode_type get_mode();
 
 private:
 	ros::NodeHandle nh; /*!< a handle for this ros node */
 
 	ros::Subscriber step_cmd_in; /*!< the step_cmd_in topic */
 
+
 	//parameters
 	std::string port; /*!< the port to use for sending the serial data */
 	int baud; /*!< the baud rate for communication */
+	std::string mode_string; /*!< the mode to communicate with the board in (path or teleop) */
+	mode_type mode;
 
 	boost::asio::io_service io;
 	boost::asio::serial_port serial;
 
-	void step_cmd_cback(const coma_serial::command::ConstPtr& cmd);
+	void step_cmd_cback(const coma_serial::path_command::ConstPtr& cmd);
+	void step_cmd_cback(const coma_serial::teleop_command::ConstPtr& cmd);
 };
 
 /*!

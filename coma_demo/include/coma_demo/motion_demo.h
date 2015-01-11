@@ -13,7 +13,7 @@
 
 #include <ros/ros.h>
 
-#include "coma_serial/command.h"
+#include "coma_serial/teleop_command.h"
 
 /*!
  * \class motion_demo
@@ -40,7 +40,7 @@ private:
 
 	ros::Publisher step_cmd_out; /*!< angular arm command topic */
 
-	coma_serial::command cmd; /*!< stepper command */
+	coma_serial::teleop_command cmd; /*!< stepper command */
 };
 
 /*!

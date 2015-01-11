@@ -17,21 +17,19 @@ motion_demo::motion_demo() {
 	ros::NodeHandle private_nh("~");
 
 	// create the ROS topics
-	step_cmd_out = node.advertise < coma_serial::command > ("/serial_node/step_cmd", 1000);
+	step_cmd_out = node.advertise < coma_serial::teleop_command > ("/serial_node/step_cmd", 1000);
 
 	ROS_INFO("COMA Motion Demo Node Started");
 }
 
 
 void motion_demo::publish_cmd() {
-	static int stepper_count = 1;
-	static int timestamp = 1;
-	cmd.timestamp = timestamp;
-	cmd.stepper = 0;
-	cmd.counts = stepper_count;
+	static int counts[12];
+	for (unsigned int i; i < 12; i++) {
+		counts[i] += 1;
+		cmd.stepper_counts[i] = counts[i];
+	}
 	step_cmd_out.publish(cmd);
-	stepper_count++;
-	timestamp+=3;
 }
 
 int main(int argc, char **argv) {
@@ -41,7 +39,7 @@ int main(int argc, char **argv) {
 	// initialize the joystick controller
 	motion_demo demo;
 
-	ros::Rate loop_rate(0.5);  //rate at which to publish arm velocity commands
+	ros::Rate loop_rate(100);  //rate at which to publish arm velocity commands
 	while (ros::ok()) {
 		demo.publish_cmd();
 		ros::spinOnce();
