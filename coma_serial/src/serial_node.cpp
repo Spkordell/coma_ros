@@ -12,98 +12,81 @@
 
 using namespace std;
 
-serial_node::serial_node() : io(), serial(io,"/dev/ttyUSB0")
-{
-  //a private handle for this ROS node
-  ros::NodeHandle node("~");
-  nh = node;
+serial_node::serial_node() :
+		io(), serial(io, "/dev/ttyUSB0") {
+	//a private handle for this ROS node
+	ros::NodeHandle node("~");
+	nh = node;
 
-  //Read in parameters
-  node.param<string>("port", port, "/dev/ttyUSB0"); //todo: this needs to be implemented (Currently always opens the default port)
-  node.param<int>("baud", baud, 115200);
+	//Read in parameters
+	node.param < string > ("port", port, "/dev/ttyUSB0"); //todo: this needs to be implemented (Currently always opens the default port)
+	node.param<int>("baud", baud, 115200);
 
-  //create the ROS topics
-  //cmd_vel_in = node.subscribe < geometry_msgs::Twist > ("cmd_vel", 1, &serial_node::cmd_vel_cback, this);
+	//create the ROS topics
+	step_cmd_in = node.subscribe < coma_serial::command
+			> ("step_cmd", 0, &serial_node::step_cmd_cback, this);
 
-  //set serial communication options
+	//set serial communication options
 
+	serial.set_option(boost::asio::serial_port_base::baud_rate(baud));
+	//serial.open(port);
 
-  serial.set_option(boost::asio::serial_port_base::baud_rate(baud));
-  //serial.open(port);
-
-
-  ROS_INFO("COMA Serial Node Started");
+	ROS_INFO("COMA Serial Node Started");
 }
 
-
-
-void serial_node::writeString(std::string s)
-{
-    boost::asio::write(serial, boost::asio::buffer(s.c_str(),s.size()));
+void serial_node::writeString(std::string s) {
+	boost::asio::write(serial, boost::asio::buffer(s.c_str(), s.size()));
 }
 
-std::string serial_node::readLine()
-{
-    //Reading data char by char, code is optimized for simplicity, not speed
-    using namespace boost;
-    char c;
-    std::string result;
-    for(;;)
-    {
-        asio::read(serial,asio::buffer(&c,1));
-        switch(c)
-        {
-            case '\r':
-                break;
-            case '\n':
-                return result;
-            default:
-                result+=c;
-        }
-    }
+std::string serial_node::readLine() {
+	//Reading data char by char, code is optimized for simplicity, not speed
+	using namespace boost;
+	char c;
+	std::string result;
+	for (;;) {
+		asio::read(serial, asio::buffer(&c, 1));
+		switch (c) {
+		case '\r':
+			break;
+		case '\n':
+			return result;
+		default:
+			result += c;
+		}
+	}
 }
 
+void serial_node::step_cmd_cback(const coma_serial::command::ConstPtr& cmd) {
+	char buffer[30];
+	sprintf(buffer, "%ld:%d:%ld\r",cmd->timestamp, cmd->stepper, cmd->counts);
+	std::string out_buffer(buffer);
+	writeString(out_buffer);
+	ROS_INFO("%s",out_buffer.c_str());
+}
 
+int main(int argc, char **argv) {
 
-//void serial_node::cmd_vel_cback(const geometry_msgs::Twist::ConstPtr& vel)
-//{
-//  cmdVelTimer.stop();
-//  driving = true;
-//  cmdVelTimer.start();
-//}
+	//initialize ROS and the node
+	ros::init(argc, argv, "serial_node");
 
+	try {
+		serial_node node;
 
-int main(int argc, char **argv)
-{
+		//cout << node.readLine() << endl;
 
-  //initialize ROS and the node
-  ros::init(argc, argv, "serial_node");
+		ros::Rate r(40);
 
+		while (ros::ok()) {
+			ros::spinOnce();
+			r.sleep();
+		}
 
-  try {
-	serial_node node;
+	} catch (boost::system::system_error& e) {
+		cerr << "Error: " << e.what() << endl;
+		return 1;
 
-    node.writeString("Hello world\n");
-    cout<<node.readLine()<<endl;
+	}
 
-    ros::Rate r(40);
-
-    while (ros::ok())
-    {
-      ros::spinOnce();
-      r.sleep();
-    }
-    ROS_INFO("HERE");
-
-    return EXIT_SUCCESS;
-
-
-  } catch(boost::system::system_error& e) {
-	  ROS_ERROR("ERROR");
-    cout<<"Error: "<<e.what()<<endl;
-    return 1;
-
-  }
-
+	return EXIT_SUCCESS;
 
 }

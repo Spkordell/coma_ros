@@ -14,36 +14,31 @@
 #include <ros/ros.h>
 #include <boost/asio.hpp>
 
-class serial_node
-{
-public:
-  /*!
-   * Creates a serial_node object
-   */
-  serial_node();
+#include "coma_serial/command.h"
 
-  void writeString(std::string s);
-  std::string readLine();
+class serial_node {
+public:
+	/*!
+	 * Creates a serial_node object
+	 */
+	serial_node();
+
+	void writeString(std::string s);
+	std::string readLine();
 
 private:
-  ros::NodeHandle nh; /*!< a handle for this ros node */
+	ros::NodeHandle nh; /*!< a handle for this ros node */
 
- //ros::Subscriber cmd_vel_in; /*!< the cmd_vel_in topic */
+	ros::Subscriber step_cmd_in; /*!< the step_cmd_in topic */
 
-  //parameters
-  std::string port; /*!< the port to use for sending the serial data */
-  int baud; /*!< the baud rate for communication */
+	//parameters
+	std::string port; /*!< the port to use for sending the serial data */
+	int baud; /*!< the baud rate for communication */
 
+	boost::asio::io_service io;
+	boost::asio::serial_port serial;
 
-  boost::asio::io_service io;
-  boost::asio::serial_port serial;
-
-
-  /*!
-   * callback for receiving command velocities
-   * \param vel The cmd_vel
-   */
-  //void cmd_vel_cback(const geometry_msgs::Twist::ConstPtr& vel);
+	void step_cmd_cback(const coma_serial::command::ConstPtr& cmd);
 };
 
 /*!
