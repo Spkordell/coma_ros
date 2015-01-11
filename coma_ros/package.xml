@@ -15,6 +15,10 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <run_depend>coma_serial</run_depend>
+  <run_depend>coma_bringup</run_depend>
+  <run_depend>coma_demo</run_depend>
+  <run_depend>coma_kinematics</run_depend>
+  <run_depend>coma_teleop</run_depend>
 
   <export>
     <metapackage/>

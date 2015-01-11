@@ -32,7 +32,7 @@ public:
 	coma_joy_teleop();
 
 	/*!
-	 * Periodically publish velocity message to the arm controller
+	 * Periodically publish commands to the arm controller
 	 */
 	void publish_cmd();
 

@@ -1,0 +1,11 @@
+<!--
+  Author: Steven Kordell, Worcester Polytechnic Institute
+  Version: January 11, 2015
+-->
+
+<launch>
+
+  <node pkg="coma_serial" type="serial_node" name="serial_node" output="screen"/>
+  <node pkg="coma_demo" type="motion_demo" name="motion_demo" output="screen"/>
+	
+</launch>

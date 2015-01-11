@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(coma_demo)
+project(coma_bringup)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -26,8 +26,8 @@ include_directories(
 )
 
 ## Declare a cpp executable
-add_executable(motion_demo src/motion_demo.cpp)
-target_link_libraries(motion_demo ${catkin_LIBRARIES})
+##add_executable(motion_demo src/motion_demo.cpp)
+##target_link_libraries(motion_demo ${catkin_LIBRARIES})
 
 
 #############
