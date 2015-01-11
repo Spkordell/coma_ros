@@ -13,6 +13,8 @@
 
 #include <ros/ros.h>
 
+#include "coma_serial/command.h"
+
 /*!
  * \class motion_demo
  * \brief Sends simple motion commands to coma for demonstration/testing purposes
@@ -36,7 +38,9 @@ private:
 
 	ros::NodeHandle node; /*!< a handle for this ROS node */
 
-	//ros::Publisher angular_cmd; /*!< angular arm command topic */
+	ros::Publisher step_cmd_out; /*!< angular arm command topic */
+
+	coma_serial::command cmd; /*!< stepper command */
 };
 
 /*!

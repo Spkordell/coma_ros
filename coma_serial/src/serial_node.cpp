@@ -74,15 +74,19 @@ int main(int argc, char **argv) {
 
 		//cout << node.readLine() << endl;
 
+
+		ros::spin();
+		/*
 		ros::Rate r(40);
 
 		while (ros::ok()) {
 			ros::spinOnce();
 			r.sleep();
 		}
+		*/
 
 	} catch (boost::system::system_error& e) {
-		cerr << "Error: " << e.what() << endl;
+		cerr << "Serial Communication Error: " << e.what() << endl;
 		return 1;
 
 	}
