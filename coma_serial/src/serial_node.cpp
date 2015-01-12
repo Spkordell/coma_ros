@@ -106,6 +106,9 @@ void serial_node::respThread() {
 		try {
 			resp.data = readChar();
 			resp_out.publish(resp);
+			if (resp.data == 'F') {
+				ROS_ERROR("FAULT: Stepper Driver Thermal Shutdown or Overcurrent!");
+			}
 			boost::this_thread::interruption_point();
 		} catch (boost::thread_interrupted&) {
 			cout << "Resp thread stopped" << endl;
