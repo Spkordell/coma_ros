@@ -33,6 +33,7 @@ serial_node::serial_node() :
 		step_cmd_in = node.subscribe < coma_serial::path_command
 				> ("step_cmd", 0, &serial_node::step_cmd_cback, this);
 	}
+	resp_out = node.advertise < std_msgs::Char > ("resp", 1000);
 
 	//set serial communication options
 	serial.set_option(boost::asio::serial_port_base::baud_rate(baud));
@@ -87,7 +88,6 @@ void serial_node::step_cmd_cback(
 
 void serial_node::step_cmd_cback(
 		const coma_serial::teleop_command::ConstPtr& cmd) {
-
 	ostringstream buffer("");
 	for (int i = 0; i < 11; i++) {
 		buffer << cmd->stepper_counts[i] << ':';
@@ -101,7 +101,21 @@ mode_type serial_node::get_mode() {
 	return this->mode;
 }
 
+void serial_node::respThread() {
+	while(1) {
+		try {
+			resp.data = readChar();
+			resp_out.publish(resp);
+			boost::this_thread::interruption_point();
+		} catch (boost::thread_interrupted&) {
+			cout << "Resp thread stopped" << endl;
+			return;
+		}
+	}
+}
+
 int main(int argc, char **argv) {
+	boost::thread* t;
 
 	//initialize ROS and the node
 	ros::init(argc, argv, "serial_node");
@@ -115,16 +129,19 @@ int main(int argc, char **argv) {
 			node.writeChar('P'); //use path mode
 		}
 
+		t = new boost::thread(&serial_node::respThread, &node);
+		//boost::thread t(&serial_node::respThread, &node);
+
 		//cout << node.readLine() << endl;
 
 		ros::spin();
-		/*
-		 ros::Rate r(40);
 
-		 while (ros::ok()) {
-		 ros::spinOnce();
-		 r.sleep();
-		 }
+		/*
+		ros::Rate r(40);
+		while (ros::ok()) {
+			ros::spinOnce();
+			r.sleep();
+		}
 		 */
 
 	} catch (boost::system::system_error& e) {
@@ -132,7 +149,7 @@ int main(int argc, char **argv) {
 		return 1;
 
 	}
-
+	t->interrupt();
 	return EXIT_SUCCESS;
 
 }

@@ -13,6 +13,8 @@
 
 #include <ros/ros.h>
 #include <boost/asio.hpp>
+#include <std_msgs/Char.h>
+#include <boost/thread.hpp>
 
 #include "coma_serial/path_command.h"
 #include "coma_serial/teleop_command.h"
@@ -30,13 +32,14 @@ public:
 	std::string readLine();
 	char readChar();
 	void writeChar(char c);
+	void respThread();
 	mode_type get_mode();
 
 private:
 	ros::NodeHandle nh; /*!< a handle for this ros node */
 
 	ros::Subscriber step_cmd_in; /*!< the step_cmd_in topic */
-
+	ros::Publisher resp_out;
 
 	//parameters
 	std::string port; /*!< the port to use for sending the serial data */
@@ -46,6 +49,8 @@ private:
 
 	boost::asio::io_service io;
 	boost::asio::serial_port serial;
+
+	std_msgs::Char resp;
 
 	void step_cmd_cback(const coma_serial::path_command::ConstPtr& cmd);
 	void step_cmd_cback(const coma_serial::teleop_command::ConstPtr& cmd);

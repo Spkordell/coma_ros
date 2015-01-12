@@ -12,8 +12,10 @@
 #define MOTION_DEMO_H_
 
 #include <ros/ros.h>
+#include <std_msgs/Char.h>
 
 #include "coma_serial/teleop_command.h"
+
 
 /*!
  * \class motion_demo
@@ -35,12 +37,15 @@ public:
 	void publish_cmd();
 
 private:
-
 	ros::NodeHandle node; /*!< a handle for this ROS node */
 
 	ros::Publisher step_cmd_out; /*!< angular arm command topic */
+	ros::Subscriber resp_in;
+
+	void resp_cback(const std_msgs::Char::ConstPtr& resp);
 
 	coma_serial::teleop_command cmd; /*!< stepper command */
+	bool response_received;
 };
 
 /*!
