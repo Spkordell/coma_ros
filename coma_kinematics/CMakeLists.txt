@@ -5,6 +5,7 @@ project(coma_kinematics)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS roscpp)
+find_package(Ceres REQUIRED)
 
 ###################################################
 ## Declare things to be passed to other projects ##
@@ -22,12 +23,17 @@ catkin_package()
 ## Specify additional locations of header files
 include_directories(
   include
-  ${catkin_INCLUDE_DIRS}	
+  ${catkin_INCLUDE_DIRS}
+  ${CERES_INCLUDES}
 )
+
+
 
 ## Declare a cpp executable
 add_executable(coma_kinematics src/ik.cpp)
-target_link_libraries(coma_kinematics ${catkin_LIBRARIES})
+target_link_libraries(coma_kinematics ${catkin_LIBRARIES} ${CERES_LIBRARIES})
+
+
 
 
 #############

@@ -13,10 +13,23 @@
 
 #include <ros/ros.h>
 
+#include "ceres/ceres.h"
+#include "glog/logging.h"
+
+
+struct CostFunctor {
+   template <typename T>
+   bool operator()(const T* const x, T* residual) const {
+     residual[0] = T(10.0) - x[0];
+     return true;
+   }
+};
+
 
 class ik {
 public:
 	ik();
+	void solvetest(int argc, char **argv);
 
 private:
 	ros::NodeHandle node; /*!< a handle for this ROS node */
