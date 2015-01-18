@@ -26,8 +26,8 @@ include_directories(
 )
 
 ## Declare a cpp executable
-##add_executable(coma_joy_teleop src/coma_joy_teleop.cpp)
-##target_link_libraries(coma_joy_teleop ${catkin_LIBRARIES})
+add_executable(coma_kinematics src/ik.cpp)
+target_link_libraries(coma_kinematics ${catkin_LIBRARIES})
 
 
 #############
