@@ -18,6 +18,13 @@ using ceres::Problem;
 using ceres::Solver;
 using ceres::Solve;
 
+using Eigen::Vector3d;
+using Eigen::Matrix3d;
+
+double ik::rad(double degrees) {
+    return degrees*(M_PI/180.0);
+}
+
 ik::ik() {
 	// a private handle for this ROS node (allows retrieval of relative parameters)
 	ros::NodeHandle private_nh("~");
@@ -25,6 +32,39 @@ ik::ik() {
 	// create the ROS topics
 	//step_cmd_out = node.advertise < coma_serial::teleop_command > ("/serial_node/step_cmd", 1000);
 	//resp_in = node.subscribe < std_msgs::Char > ("/serial_node/resp", 100, &ik::resp_cback, this);
+
+	//initialize system parameters
+    double r_in = 0.06126; 	//radius of inner leg hole pattern
+    double r_out = 0.06770; //radius of outer leg hole pattern
+    double deg = 10; 		//separation in degrees between the hole pairs that are close
+
+    //position of the leg constraints in the local frame at the bottom
+    p1_init = *(new Vector3d(r_in*cos(rad(0-deg)), r_in*sin(rad(0-deg)), 0));
+    p2_init = *(new Vector3d(r_in*cos(rad(0+deg)), r_in*sin(rad(0+deg)), 0));
+    p3_init = *(new Vector3d(r_in*cos(rad(120-deg)), r_in*sin(rad(120-deg)), 0));
+    p4_init = *(new Vector3d(r_in*cos(rad(120+deg)), r_in*sin(rad(120+deg)), 0));
+    p5_init = *(new Vector3d(r_in*cos(rad(240-deg)), r_in*sin(rad(240-deg)), 0));
+    p6_init = *(new Vector3d(r_in*cos(rad(240+deg)), r_in*sin(rad(240+deg)), 0));
+    p7_init = *(new Vector3d(r_out*cos(rad(60-deg)), r_out*sin(rad(60-deg)), 0));
+    p8_init = *(new Vector3d(r_out*cos(rad(60+deg)), r_out*sin(rad(60+deg)), 0));
+    p9_init = *(new Vector3d(r_out*cos(rad(180-deg)), r_out*sin(rad(180-deg)), 0));
+    p10_init = *(new Vector3d(r_out*cos(rad(180+deg)), r_out*sin(rad(180+deg)), 0));
+    p11_init = *(new Vector3d(r_out*cos(rad(300-deg)), r_out*sin(rad(300-deg)), 0));
+    p12_init = *(new Vector3d(r_out*cos(rad(300+deg)), r_out*sin(rad(300+deg)), 0));
+
+    //position of the leg constraints in the local frame at the top
+    p6_final = *(new Vector3d(r_in*cos(rad(0-deg)), r_in*sin(rad(0-deg)), 0));
+    p1_final = *(new Vector3d(r_in*cos(rad(0+deg)), r_in*sin(rad(0+deg)), 0));
+    p2_final = *(new Vector3d(r_in*cos(rad(120-deg)), r_in*sin(rad(120-deg)), 0));
+    p3_final = *(new Vector3d(r_in*cos(rad(120+deg)), r_in*sin(rad(120+deg)), 0));
+    p4_final = *(new Vector3d(r_in*cos(rad(240-deg)), r_in*sin(rad(240-deg)), 0));
+    p5_final = *(new Vector3d(r_in*cos(rad(240+deg)), r_in*sin(rad(240+deg)), 0));
+    p12_final = *(new Vector3d(r_out*cos(rad(0-deg)), r_out*sin(rad(0-deg)), 0));
+    p7_final = *(new Vector3d(r_out*cos(rad(0+deg)), r_out*sin(rad(0+deg)), 0));
+    p8_final = *(new Vector3d(r_out*cos(rad(120-deg)), r_out*sin(rad(120-deg)), 0));
+    p9_final = *(new Vector3d(r_out*cos(rad(120+deg)), r_out*sin(rad(120+deg)), 0));
+    p10_final = *(new Vector3d(r_out*cos(rad(240-deg)), r_out*sin(rad(240-deg)), 0));
+    p11_final = *(new Vector3d(r_out*cos(rad(240+deg)), r_out*sin(rad(240+deg)), 0));
 
 	ROS_INFO("COMA IK Solver Started");
 }
@@ -57,8 +97,26 @@ void ik::solvetest() {
 	std::cout << "x : " << initial_x << " -> " << x << "\n";
 }
 
-//TODO: rename node "ik_server"
+void ik::solve() {
+    //this matrix is the u matrix of unknowns described in the REACH paper.
+	boost::array<double, 7*12> guess_init;
+	std::fill(guess_init.begin(), guess_init.end(), 0);
+	for (unsigned int i = 7*12-1; i >= 6*12; i--) {
+		guess_init[i] = 0.12; //initialize leg lengths to 0.12 m
+	}
 
+	//set desired forces, moments, position, and rotation
+    Vector3d F(0, 0, 0); //applied force at end effector
+    Vector3d L(0, 0, 0); //applied moment at end effector
+    Matrix3d Rd = cosserat_rod::hat(*(new Vector3d(rad(0),rad(0),rad(-60)))); //desired end effector orientation
+    Eigen::MatrixExponential<Matrix3d> Rdm(Rd);
+    Rdm.compute(Rd);
+    Vector3d pd(0.0, 0.0, 0.6); //desired end effector position
+
+
+}
+
+//TODO: rename node "ik_server"
 int main(int argc, char **argv) {
 	// initialize ROS and the node
 	ros::init(argc, argv, "ik");
@@ -70,6 +128,7 @@ int main(int argc, char **argv) {
 	rod.integrate();
 
 	solver.solvetest();
+	solver.solve();
 
 	//ros::spin();
 
