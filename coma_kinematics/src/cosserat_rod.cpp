@@ -9,6 +9,7 @@
  */
 
 #include <coma_kinematics/cosserat_rod.h>
+//#include <time.h>
 
 using namespace std;
 using namespace boost::numeric::odeint;
@@ -75,26 +76,27 @@ void cosserat_rod::write_deriv(const state_type &x, const double t) {
 }
 
 void cosserat_rod::integrate() {
+	namespace pl = std::placeholders;
 	const double start = 0.0;
 	const double end = 20.0;
     const double dt = 0.1;
     typedef runge_kutta_dopri5<state_type> stepper_type;
 
     state_type x = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0}; // initial conditions
-    integrate_const(make_dense_output<stepper_type>( 1E-6, 1E-3 ), deriv, x, start, end, dt, write_deriv);
+    //int start_s=clock();
+    integrate_const(make_dense_output<stepper_type>( 1E-6, 1E-3 ), std::bind(&cosserat_rod::deriv, *this, pl::_1, pl::_2, pl::_3), x, start, end, dt, std::bind(&cosserat_rod::write_deriv, *this, pl::_1, pl::_2));
+    //int stop_s=clock();
+    //cout << "time: " << double( stop_s - start_s) / double(CLOCKS_PER_SEC)<< " seconds." << endl;
 }
 
 cosserat_rod::cosserat_rod() {
-	cosserat_rod::K_bt_inv << 1/(E*I),0,0,0,1/(E*I),0,0,0,1/(J*G);
-	cosserat_rod::K_se_inv << 1/(G*A),0,0,0,1/(G*A),0,0,0,1/(E*A);
+	ro = .0018034/2;						// outer radius m
+	ri = 0.00;								// inner radius mc
+	I = 0.25*M_PI*(pow(ro,4)-pow(ri,4));	//second moment of area
+	A = M_PI*(pow(ro,2)-pow(ri,2));			//area
+	J = 2*I;								//polar moment
+	E = 207*pow(10,9);						//Pa Youngs mod
+	G = 79.3*pow(10,9);						//Pa shear mod
+	K_bt_inv << 1/(E*I),0,0,0,1/(E*I),0,0,0,1/(J*G);
+	K_se_inv << 1/(G*A),0,0,0,1/(G*A),0,0,0,1/(E*A);
 }
-
-double cosserat_rod::ro = .0018034/2;					// outer radius m
-double cosserat_rod::ri = 0.00;							// inner radius mc
-double cosserat_rod::I = 0.25*M_PI*(pow(ro,4)-pow(ri,4));	//second moment of area
-double cosserat_rod::A = M_PI*(pow(ro,2)-pow(ri,2));		//area
-double cosserat_rod::J = 2*I;							//polar moment
-double cosserat_rod::E = 207*pow(10,9);					//Pa Youngs mod
-double cosserat_rod::G = 79.3*pow(10,9);					//Pa shear mod
-Matrix3d cosserat_rod::K_bt_inv;
-Matrix3d cosserat_rod::K_se_inv;

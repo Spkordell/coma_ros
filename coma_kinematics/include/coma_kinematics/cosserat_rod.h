@@ -15,29 +15,30 @@
 #include <boost/numeric/odeint.hpp>
 #include <Eigen/Dense>
 #include <math.h>
+#include <functional>
 
 typedef boost::array<double, 18> state_type;
 
 class cosserat_rod {
 public:
-    //physical parameters of the legs
-    static double ro;	// outer radius m
-    static double ri;	// inner radius mc
-    static double I;	//second moment of area
-    static double A;	//area
-    static double J;	//polar moment
-    static double E;	//Pa Youngs mod
-    static double G;	//Pa shear mod
-
-    static Eigen::Matrix3d K_bt_inv;
-    static Eigen::Matrix3d K_se_inv;
-
 	cosserat_rod();
 	void integrate();
 	/* The type of container used to hold the state vector */
 private:
-    static Eigen::Matrix3d hat(Eigen::Vector3d u);
-	static void write_deriv(const state_type &x, const double t);
-	static void deriv(const state_type &x, state_type &dxdt, double t);
+    Eigen::Matrix3d hat(Eigen::Vector3d u);
+	void write_deriv(const state_type &x, const double t);
+	void deriv(const state_type &x, state_type &dxdt, double t);
+
+    //physical parameters of the legs
+    double ro;	// outer radius m
+    double ri;	// inner radius mc
+    double I;	//second moment of area
+    double A;	//area
+    double J;	//polar moment
+    double E;	//Pa Youngs mod
+    double G;	//Pa shear mod
+    Eigen::Matrix3d K_bt_inv;
+    Eigen::Matrix3d K_se_inv;
+
 };
 #endif //COSSERAT_ROD_H_
