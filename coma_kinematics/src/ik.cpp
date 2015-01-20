@@ -18,7 +18,6 @@ using ceres::Problem;
 using ceres::Solver;
 using ceres::Solve;
 
-
 ik::ik() {
 	// a private handle for this ROS node (allows retrieval of relative parameters)
 	ros::NodeHandle private_nh("~");
@@ -30,40 +29,33 @@ ik::ik() {
 	ROS_INFO("COMA IK Solver Started");
 }
 
-
-
 //void ik::resp_cback(const std_msgs::Char::ConstPtr& resp) {}
 //void ik::publish_cmd() {}
 
+void ik::solvetest() {
+	// The variable to solve for with its initial value.
+	double initial_x = 5.0;
+	double x = initial_x;
 
-void ik::solvetest(int argc, char **argv) {
-  //google::InitGoogleLogging(argv[0]);
+	// Build the problem.
+	Problem problem;
 
-  // The variable to solve for with its initial value.
-  double initial_x = 5.0;
-  double x = initial_x;
+	// Set up the only cost function (also known as residual). This uses
+	// auto-differentiation to obtain the derivative (jacobian).
+	CostFunction* cost_function = new AutoDiffCostFunction<CostFunctor, 1, 1>(
+			new CostFunctor);
+	problem.AddResidualBlock(cost_function, NULL, &x);
 
-  // Build the problem.
-  Problem problem;
+	// Run the solver!
+	Solver::Options options;
+	options.linear_solver_type = ceres::DENSE_QR;
+	options.minimizer_progress_to_stdout = true;
+	Solver::Summary summary;
+	Solve(options, &problem, &summary);
 
-  // Set up the only cost function (also known as residual). This uses
-  // auto-differentiation to obtain the derivative (jacobian).
-  CostFunction* cost_function =
-      new AutoDiffCostFunction<CostFunctor, 1, 1>(new CostFunctor);
-  problem.AddResidualBlock(cost_function, NULL, &x);
-
-  // Run the solver!
-  Solver::Options options;
-  options.linear_solver_type = ceres::DENSE_QR;
-  options.minimizer_progress_to_stdout = true;
-  Solver::Summary summary;
-  Solve(options, &problem, &summary);
-
-  std::cout << summary.BriefReport() << "\n";
-  std::cout << "x : " << initial_x
-            << " -> " << x << "\n";
+	std::cout << summary.BriefReport() << "\n";
+	std::cout << "x : " << initial_x << " -> " << x << "\n";
 }
-
 
 //TODO: rename node "ik_server"
 
@@ -74,7 +66,10 @@ int main(int argc, char **argv) {
 	// initialize the joystick controller
 	ik solver;
 
-	solver.solvetest(argc, argv);
+	cosserat_rod rod;
+	rod.integrate();
+
+	solver.solvetest();
 
 	ros::spin();
 
@@ -83,8 +78,6 @@ int main(int argc, char **argv) {
 //		ros::spinOnce();
 //		loop_rate.sleep();
 //	}
-
-
 
 	return EXIT_SUCCESS;
 }

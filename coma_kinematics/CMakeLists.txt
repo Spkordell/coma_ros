@@ -4,8 +4,10 @@ project(coma_kinematics)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp)
+find_package(catkin REQUIRED COMPONENTS roscpp cmake_modules)
 find_package(Ceres REQUIRED)
+find_package(Eigen REQUIRED)
+
 
 ###################################################
 ## Declare things to be passed to other projects ##
@@ -27,11 +29,13 @@ include_directories(
   ${CERES_INCLUDES}
 )
 
-
+## Declare a cpp library
+add_library(coma_kinematics src/cosserat_rod.cpp)
+target_link_libraries(coma_kinematics ${catkin_LIBRARIES})
 
 ## Declare a cpp executable
-add_executable(coma_kinematics src/ik.cpp)
-target_link_libraries(coma_kinematics ${catkin_LIBRARIES} ${CERES_LIBRARIES})
+add_executable(ik src/ik.cpp)
+target_link_libraries(ik coma_kinematics ${catkin_LIBRARIES} ${CERES_LIBRARIES})
 
 
 
