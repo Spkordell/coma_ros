@@ -26,7 +26,6 @@ Eigen::Matrix3d cosserat_rod::hat(Eigen::Vector3d u) {
 
 
 void cosserat_rod::deriv(const state_type &x, state_type &dxdt, double t) {
-	cout << t <<endl;
 	//turn ODE input into named variables
 	//Vector3d p(x[0], x[1], x[2]);
 	Matrix3d R;  R << x[3], x[6], x[9],
@@ -65,17 +64,14 @@ void cosserat_rod::deriv(const state_type &x, state_type &dxdt, double t) {
 	dxdt[15] = m_dot(0);
 	dxdt[16] = m_dot(1);
 	dxdt[17] = m_dot(2);
-
 }
 
 void cosserat_rod::write_deriv(const state_type &x, const double t) {
-	/*
 	cout << t;
 	for(unsigned int i = 0; i < 18; i++) {
 		cout << '\t' << x[i];
 	}
-	cout <<endl;*/
-	//cout << t << '\t' << x[0] << '\t' << x[1] << '\t' << x[2] << endl;
+	cout <<endl;
 }
 
 void cosserat_rod::integrate() {
@@ -91,12 +87,11 @@ void cosserat_rod::integrate() {
 cosserat_rod::cosserat_rod() {
 	cosserat_rod::K_bt_inv << 1/(E*I),0,0,0,1/(E*I),0,0,0,1/(J*G);
 	cosserat_rod::K_se_inv << 1/(G*A),0,0,0,1/(G*A),0,0,0,1/(E*A);
-
 }
 
 double cosserat_rod::ro = .0018034/2;					// outer radius m
 double cosserat_rod::ri = 0.00;							// inner radius mc
-double cosserat_rod::I = 1/4*M_PI*(pow(ro,4)-pow(ri,4));	//second moment of area
+double cosserat_rod::I = 0.25*M_PI*(pow(ro,4)-pow(ri,4));	//second moment of area
 double cosserat_rod::A = M_PI*(pow(ro,2)-pow(ri,2));		//area
 double cosserat_rod::J = 2*I;							//polar moment
 double cosserat_rod::E = 207*pow(10,9);					//Pa Youngs mod

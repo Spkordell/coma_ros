@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
 
 	solver.solvetest();
 
-	ros::spin();
+	//ros::spin();
 
 //	ros::Rate loop_rate(500);  //rate at which to publish arm velocity commands
 //	while (ros::ok()) {
