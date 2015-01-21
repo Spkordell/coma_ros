@@ -21,14 +21,16 @@ typedef boost::array<double, 18> state_type;
 
 class cosserat_rod {
 public:
-	cosserat_rod();
-	void integrate();
+	cosserat_rod(Eigen::Matrix<double, 18, 1> init_state);
+	void integrate(double start, double end, double dt);
 	static Eigen::Matrix3d hat(Eigen::Vector3d u);
 	/* The type of container used to hold the state vector */
 private:
 
 	void write_deriv(const state_type &x, const double t);
 	void deriv(const state_type &x, state_type &dxdt, double t);
+
+	Eigen::Matrix<double, 18, 1> init_state;
 
 	//physical parameters of the legs
 	double ro;	// outer radius m
@@ -40,6 +42,8 @@ private:
 	double G;	//Pa shear mod
 	Eigen::Matrix3d K_bt_inv;
 	Eigen::Matrix3d K_se_inv;
+
+
 
 };
 #endif //COSSERAT_ROD_H_

@@ -13,6 +13,7 @@
 using namespace std;
 
 using ceres::AutoDiffCostFunction;
+using ceres::NumericDiffCostFunction;
 using ceres::CostFunction;
 using ceres::Problem;
 using ceres::Solver;
@@ -38,33 +39,36 @@ ik::ik() {
     double r_out = 0.06770; //radius of outer leg hole pattern
     double deg = 10; 		//separation in degrees between the hole pairs that are close
 
+
+    ikfunctor = new IKFunctor;
+
     //position of the leg constraints in the local frame at the bottom
-    p1_init = *(new Vector3d(r_in*cos(rad(0-deg)), r_in*sin(rad(0-deg)), 0));
-    p2_init = *(new Vector3d(r_in*cos(rad(0+deg)), r_in*sin(rad(0+deg)), 0));
-    p3_init = *(new Vector3d(r_in*cos(rad(120-deg)), r_in*sin(rad(120-deg)), 0));
-    p4_init = *(new Vector3d(r_in*cos(rad(120+deg)), r_in*sin(rad(120+deg)), 0));
-    p5_init = *(new Vector3d(r_in*cos(rad(240-deg)), r_in*sin(rad(240-deg)), 0));
-    p6_init = *(new Vector3d(r_in*cos(rad(240+deg)), r_in*sin(rad(240+deg)), 0));
-    p7_init = *(new Vector3d(r_out*cos(rad(60-deg)), r_out*sin(rad(60-deg)), 0));
-    p8_init = *(new Vector3d(r_out*cos(rad(60+deg)), r_out*sin(rad(60+deg)), 0));
-    p9_init = *(new Vector3d(r_out*cos(rad(180-deg)), r_out*sin(rad(180-deg)), 0));
-    p10_init = *(new Vector3d(r_out*cos(rad(180+deg)), r_out*sin(rad(180+deg)), 0));
-    p11_init = *(new Vector3d(r_out*cos(rad(300-deg)), r_out*sin(rad(300-deg)), 0));
-    p12_init = *(new Vector3d(r_out*cos(rad(300+deg)), r_out*sin(rad(300+deg)), 0));
+    ikfunctor->p1_init = *(new Vector3d(r_in*cos(rad(0-deg)), r_in*sin(rad(0-deg)), 0));
+    ikfunctor->p2_init = *(new Vector3d(r_in*cos(rad(0+deg)), r_in*sin(rad(0+deg)), 0));
+    ikfunctor->p3_init = *(new Vector3d(r_in*cos(rad(120-deg)), r_in*sin(rad(120-deg)), 0));
+    ikfunctor->p4_init = *(new Vector3d(r_in*cos(rad(120+deg)), r_in*sin(rad(120+deg)), 0));
+    ikfunctor->p5_init = *(new Vector3d(r_in*cos(rad(240-deg)), r_in*sin(rad(240-deg)), 0));
+    ikfunctor->p6_init = *(new Vector3d(r_in*cos(rad(240+deg)), r_in*sin(rad(240+deg)), 0));
+    ikfunctor->p7_init = *(new Vector3d(r_out*cos(rad(60-deg)), r_out*sin(rad(60-deg)), 0));
+    ikfunctor->p8_init = *(new Vector3d(r_out*cos(rad(60+deg)), r_out*sin(rad(60+deg)), 0));
+    ikfunctor->p9_init = *(new Vector3d(r_out*cos(rad(180-deg)), r_out*sin(rad(180-deg)), 0));
+    ikfunctor->p10_init = *(new Vector3d(r_out*cos(rad(180+deg)), r_out*sin(rad(180+deg)), 0));
+    ikfunctor->p11_init = *(new Vector3d(r_out*cos(rad(300-deg)), r_out*sin(rad(300-deg)), 0));
+    ikfunctor->p12_init = *(new Vector3d(r_out*cos(rad(300+deg)), r_out*sin(rad(300+deg)), 0));
 
     //position of the leg constraints in the local frame at the top
-    p6_final = *(new Vector3d(r_in*cos(rad(0-deg)), r_in*sin(rad(0-deg)), 0));
-    p1_final = *(new Vector3d(r_in*cos(rad(0+deg)), r_in*sin(rad(0+deg)), 0));
-    p2_final = *(new Vector3d(r_in*cos(rad(120-deg)), r_in*sin(rad(120-deg)), 0));
-    p3_final = *(new Vector3d(r_in*cos(rad(120+deg)), r_in*sin(rad(120+deg)), 0));
-    p4_final = *(new Vector3d(r_in*cos(rad(240-deg)), r_in*sin(rad(240-deg)), 0));
-    p5_final = *(new Vector3d(r_in*cos(rad(240+deg)), r_in*sin(rad(240+deg)), 0));
-    p12_final = *(new Vector3d(r_out*cos(rad(0-deg)), r_out*sin(rad(0-deg)), 0));
-    p7_final = *(new Vector3d(r_out*cos(rad(0+deg)), r_out*sin(rad(0+deg)), 0));
-    p8_final = *(new Vector3d(r_out*cos(rad(120-deg)), r_out*sin(rad(120-deg)), 0));
-    p9_final = *(new Vector3d(r_out*cos(rad(120+deg)), r_out*sin(rad(120+deg)), 0));
-    p10_final = *(new Vector3d(r_out*cos(rad(240-deg)), r_out*sin(rad(240-deg)), 0));
-    p11_final = *(new Vector3d(r_out*cos(rad(240+deg)), r_out*sin(rad(240+deg)), 0));
+    ikfunctor->p6_final = *(new Vector3d(r_in*cos(rad(0-deg)), r_in*sin(rad(0-deg)), 0));
+    ikfunctor->p1_final = *(new Vector3d(r_in*cos(rad(0+deg)), r_in*sin(rad(0+deg)), 0));
+    ikfunctor->p2_final = *(new Vector3d(r_in*cos(rad(120-deg)), r_in*sin(rad(120-deg)), 0));
+    ikfunctor->p3_final = *(new Vector3d(r_in*cos(rad(120+deg)), r_in*sin(rad(120+deg)), 0));
+    ikfunctor->p4_final = *(new Vector3d(r_in*cos(rad(240-deg)), r_in*sin(rad(240-deg)), 0));
+    ikfunctor->p5_final = *(new Vector3d(r_in*cos(rad(240+deg)), r_in*sin(rad(240+deg)), 0));
+    ikfunctor->p12_final = *(new Vector3d(r_out*cos(rad(0-deg)), r_out*sin(rad(0-deg)), 0));
+    ikfunctor->p7_final = *(new Vector3d(r_out*cos(rad(0+deg)), r_out*sin(rad(0+deg)), 0));
+    ikfunctor->p8_final = *(new Vector3d(r_out*cos(rad(120-deg)), r_out*sin(rad(120-deg)), 0));
+    ikfunctor->p9_final = *(new Vector3d(r_out*cos(rad(120+deg)), r_out*sin(rad(120+deg)), 0));
+    ikfunctor->p10_final = *(new Vector3d(r_out*cos(rad(240-deg)), r_out*sin(rad(240-deg)), 0));
+    ikfunctor->p11_final = *(new Vector3d(r_out*cos(rad(240+deg)), r_out*sin(rad(240+deg)), 0));
 
 	ROS_INFO("COMA IK Solver Started");
 }
@@ -99,11 +103,23 @@ void ik::solvetest() {
 
 void ik::solve() {
     //this matrix is the u matrix of unknowns described in the REACH paper.
-	boost::array<double, 7*12> guess_init;
-	std::fill(guess_init.begin(), guess_init.end(), 0);
-	for (unsigned int i = 7*12-1; i >= 6*12; i--) {
-		guess_init[i] = 0.12; //initialize leg lengths to 0.12 m
+	//boost::array<double, 7*12> guess_init;
+	//std::vector<double> guess_init(7*12);
+	double guess_init[GS];
+
+	for (unsigned int i = 0; i < GS-12; i++) {
+		guess_init[i]=0;
 	}
+	for (unsigned int i = GS-12; i < GS; i++) {
+		guess_init[i]=0.12; //initialize leg lengths to 0.12 m
+	}
+	/*
+	for (unsigned int i = 0; i < 7*12; i++) {
+		cout << guess_init[i] << '\t';
+	}
+	cout << endl;
+	 */
+
 
 	//set desired forces, moments, position, and rotation
     Vector3d F(0, 0, 0); //applied force at end effector
@@ -112,6 +128,27 @@ void ik::solve() {
     Eigen::MatrixExponential<Matrix3d> Rdm(Rd);
     Rdm.compute(Rd);
     Vector3d pd(0.0, 0.0, 0.6); //desired end effector position
+
+    //build the problem
+    Problem problem;
+
+	//set up the residual
+    CostFunction* cost_function =  new NumericDiffCostFunction<IKFunctor, ceres::CENTRAL, GS-6, GS>(ikfunctor);
+	problem.AddResidualBlock(cost_function, NULL, guess_init);
+
+	//run the solver
+	Solver::Options options;
+	options.linear_solver_type = ceres::DENSE_QR;
+	options.minimizer_progress_to_stdout = true;
+	Solver::Summary summary;
+	Solve(options, &problem, &summary);
+
+	std::cout << summary.BriefReport() << "\n";
+
+	for (unsigned int i = 0; i < 7*12; i++) {
+		cout << guess_init[i] << '\t';
+	}
+	cout << endl;
 
 
 }
@@ -124,10 +161,10 @@ int main(int argc, char **argv) {
 	// initialize the joystick controller
 	ik solver;
 
-	cosserat_rod rod;
-	rod.integrate();
+	//cosserat_rod rod;
+	//rod.integrate();
 
-	solver.solvetest();
+	solver.solvetest(); //todo, remove this function and the struct functor that goes along with it
 	solver.solve();
 
 	//ros::spin();

@@ -41,7 +41,7 @@ void cosserat_rod::deriv(const state_type &x, state_type &dxdt, double t) {
 	Vector3d n_dot(0, 0, 0);
 	Vector3d m_dot = -p_dot.cross(n);
 
-	//pack back into vector
+	//pack back into vector //todo: clean this
 	dxdt[0] = p_dot(0);
 	dxdt[1] = p_dot(1);
 	dxdt[2] = p_dot(2);
@@ -70,25 +70,30 @@ void cosserat_rod::write_deriv(const state_type &x, const double t) {
 	cout << endl;
 }
 
-void cosserat_rod::integrate() {
+void cosserat_rod::integrate(double start, double end, double dt) {
 	namespace pl = std::placeholders;
-	const double start = 0.0;
-	const double end = 20.0;
-	const double dt = 0.1;
+
 	typedef runge_kutta_dopri5<state_type> stepper_type;
 
-	state_type x = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
-			1.0, 1.0, 1.0, 1.0, 1.0, 1.0 }; // initial conditions
+	//todo: optimize this
+	state_type init_state_;
+	for (unsigned int i = 0; i < 18; i++) {
+		init_state_[i] = init_state[i];
+	}
+
+//	state_type x = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+//			1.0, 1.0, 1.0, 1.0, 1.0, 1.0 }; // initial conditions
 	//int start_s=clock();
 	integrate_const(make_dense_output < stepper_type > (1E-6, 1E-3),
-			std::bind(&cosserat_rod::deriv, *this, pl::_1, pl::_2, pl::_3), x,
+			std::bind(&cosserat_rod::deriv, *this, pl::_1, pl::_2, pl::_3), init_state_,
 			start, end, dt,
 			std::bind(&cosserat_rod::write_deriv, *this, pl::_1, pl::_2));
 	//int stop_s=clock();
 	//cout << "time: " << double( stop_s - start_s) / double(CLOCKS_PER_SEC)<< " seconds." << endl;
 }
 
-cosserat_rod::cosserat_rod() {
+cosserat_rod::cosserat_rod(Eigen::Matrix<double, 18, 1> init_state) {
+	this->init_state = init_state;
 	ro = .0018034 / 2;						// outer radius m
 	ri = 0.00;								// inner radius mc
 	I = 0.25 * M_PI * (pow(ro, 4) - pow(ri, 4));	//second moment of area
@@ -99,3 +104,4 @@ cosserat_rod::cosserat_rod() {
 	K_bt_inv << 1 / (E * I), 0, 0, 0, 1 / (E * I), 0, 0, 0, 1 / (J * G);
 	K_se_inv << 1 / (G * A), 0, 0, 0, 1 / (G * A), 0, 0, 0, 1 / (E * A);
 }
+
