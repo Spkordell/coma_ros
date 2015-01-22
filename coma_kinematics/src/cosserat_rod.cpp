@@ -22,6 +22,11 @@ Eigen::Matrix3d cosserat_rod::hat(Eigen::Vector3d u) {
 	return uhat;
 }
 
+Eigen::Vector3d cosserat_rod::vee(Eigen::Matrix3d uhat) {
+	Vector3d u(uhat(2,1), uhat(0,2), uhat(1,0));
+	return u;
+}
+
 void cosserat_rod::deriv(const state_type &x, state_type &dxdt, double t) {
 	//turn ODE input into named variables
 	//Vector3d p(x[0], x[1], x[2]);
@@ -70,7 +75,7 @@ void cosserat_rod::write_deriv(const state_type &x, const double t) {
 	cout << endl;
 }
 
-void cosserat_rod::integrate(double start, double end, double dt) {
+Eigen::Matrix<double, 18, 1> cosserat_rod::integrate(double start, double end, double dt) {
 	namespace pl = std::placeholders;
 
 	typedef runge_kutta_dopri5<state_type> stepper_type;
@@ -90,6 +95,13 @@ void cosserat_rod::integrate(double start, double end, double dt) {
 			std::bind(&cosserat_rod::write_deriv, *this, pl::_1, pl::_2));
 	//int stop_s=clock();
 	//cout << "time: " << double( stop_s - start_s) / double(CLOCKS_PER_SEC)<< " seconds." << endl;
+
+	//todo: optimize this
+	Eigen::Matrix<double, 18, 1> result;
+	for (unsigned int i = 0; i < 18; i++) {
+		result[i] = init_state_[i];
+	}
+	return result;
 }
 
 cosserat_rod::cosserat_rod(Eigen::Matrix<double, 18, 1> init_state) {

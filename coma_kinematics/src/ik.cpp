@@ -129,6 +129,11 @@ void ik::solve() {
     Rdm.compute(Rd);
     Vector3d pd(0.0, 0.0, 0.6); //desired end effector position
 
+    ikfunctor->F = F;
+    ikfunctor->L = L;
+    ikfunctor->Rd = Rd;
+    ikfunctor->pd = pd;
+
     //build the problem
     Problem problem;
 
