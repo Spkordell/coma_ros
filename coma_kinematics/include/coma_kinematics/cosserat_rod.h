@@ -22,7 +22,7 @@ typedef boost::array<double, 18> state_type; /* The type of container used to ho
 class cosserat_rod {
 public:
 	cosserat_rod(Eigen::Matrix<double, 18, 1> init_state);
-	Eigen::Matrix<double, 18, 1> integrate(double start, double end, double dt);
+	Eigen::Matrix<double, 18, 1> integrate(const double start, const double end, const double dt);
 	static Eigen::Matrix3d hat(Eigen::Vector3d u);
 	static Eigen::Vector3d vee(Eigen::Matrix3d uhat);
 	Eigen::Matrix<double, 18, 1> result;

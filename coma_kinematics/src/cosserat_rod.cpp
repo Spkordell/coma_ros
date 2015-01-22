@@ -68,15 +68,15 @@ void cosserat_rod::deriv(const state_type &x, state_type &dxdt, double t) {
 }
 
 void cosserat_rod::write_deriv(const state_type &x, const double t) {
-	cout << t;
-	for (unsigned int i = 0; i < 18; i++) {
-		cout << '\t' << x[i];
-	}
-	cout << endl;
+//	cout << t;
+//	for (unsigned int i = 0; i < 18; i++) {
+//		cout << '\t' << x[i];
+//	}
+//	cout << endl;
 }
 
-Eigen::Matrix<double, 18, 1> cosserat_rod::integrate(double start, double end,
-		double dt) {
+Eigen::Matrix<double, 18, 1> cosserat_rod::integrate(const double start,
+		const double end, const double dt) {
 	namespace pl = std::placeholders;
 
 	typedef runge_kutta_dopri5<state_type> stepper_type;
@@ -87,27 +87,23 @@ Eigen::Matrix<double, 18, 1> cosserat_rod::integrate(double start, double end,
 		init_state_[i] = init_state[i];
 	}
 
-	std::cout << "s:" << start << "\te:" << end << "\td:" << dt << std::endl;
-
-
-//	state_type x = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
-//			1.0, 1.0, 1.0, 1.0, 1.0, 1.0 }; // initial conditions
+	//std::cout << "s:" << start << "\te:" << end << "\td:" << dt << "\tinit:" << init_state.transpose() << std::endl;
 	//int start_s=clock();
 
-	 integrate_const(make_dense_output < stepper_type > (1E-6, 1E-3),
-	 std::bind(&cosserat_rod::deriv, *this, pl::_1, pl::_2, pl::_3), init_state_,
-	 start, end, dt,
-	 std::bind(&cosserat_rod::write_deriv, *this, pl::_1, pl::_2));
-//	integrate_const(make_dense_output < stepper_type > (1E-6, 1E-3),
-//			std::bind(&cosserat_rod::deriv, *this, pl::_1, pl::_2, pl::_3),
-//			init_state_, start, end, dt);
+	integrate_const(make_dense_output < stepper_type > (1E-6, 1E-3),
+			std::bind(&cosserat_rod::deriv, *this, pl::_1, pl::_2, pl::_3),
+			init_state_, start, end, dt,
+			std::bind(&cosserat_rod::write_deriv, *this, pl::_1, pl::_2));
+
 	//int stop_s=clock();
 	//cout << "time: " << double( stop_s - start_s) / double(CLOCKS_PER_SEC)<< " seconds." << endl;
-
 
 	for (unsigned int i = 0; i < 18; i++) {
 		result[i] = init_state_[i];
 	}
+
+	//std::cout << "result:"  << result.transpose() << std::endl << std::endl;
+
 	return result;
 }
 

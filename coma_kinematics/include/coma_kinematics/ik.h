@@ -20,6 +20,9 @@
 
 #define GS 7*12 //define the guess size
 
+#define use_multithreading
+//#define use_matrix_log
+
 struct CostFunctor {
 	template<typename T>
 	bool operator()(const T* const x, T* residual) const {
@@ -114,6 +117,7 @@ public:
 			cosserat_rod cr10(y10_init);
 			cosserat_rod cr11(y11_init);
 			cosserat_rod cr12(y12_init);
+#ifdef use_multithreading
 			boost::thread t7(boost::bind(&cosserat_rod::integrate, &cr7, 0, L7, L7 / 20));
 			boost::thread t8(boost::bind(&cosserat_rod::integrate, &cr8, 0, L8, L8 / 20));
 			boost::thread t9(boost::bind(&cosserat_rod::integrate, &cr9, 0, L9, L9 / 20));
@@ -132,13 +136,14 @@ public:
 			Vector18d y10 = cr10.result;
 			Vector18d y11 = cr11.result;
 			Vector18d y12 = cr12.result;
-//			Vector18d y7 = cr7.integrate(0, L7, L7 / 20);
-//			Vector18d y8 = cr8.integrate(0, L8, L8 / 20);
-//			Vector18d y9 = cr9.integrate(0, L9, L9 / 20);
-//			Vector18d y10 = cr10.integrate(0, L10, L10 / 20);
-//			Vector18d y11 = cr11.integrate(0, L11, L11 / 20);
-//			Vector18d y12 = cr12.integrate(0, L12, L12 / 20);
-
+#else
+			Vector18d y7 = cr7.integrate(0, L7, L7 / 20);
+			Vector18d y8 = cr8.integrate(0, L8, L8 / 20);
+			Vector18d y9 = cr9.integrate(0, L9, L9 / 20);
+			Vector18d y10 = cr10.integrate(0, L10, L10 / 20);
+			Vector18d y11 = cr11.integrate(0, L11, L11 / 20);
+			Vector18d y12 = cr12.integrate(0, L12, L12 / 20);
+#endif
 
 
 			//extract results from top link integration
@@ -283,6 +288,7 @@ public:
 			cosserat_rod cr4(y4_init);
 			cosserat_rod cr5(y5_init);
 			cosserat_rod cr6(y6_init);
+#ifdef use_multithreading
 			boost::thread t1(boost::bind(&cosserat_rod::integrate, &cr1, 0, L1, L1 / 20));
 			boost::thread t2(boost::bind(&cosserat_rod::integrate, &cr2, 0, L2, L2 / 20));
 			boost::thread t3(boost::bind(&cosserat_rod::integrate, &cr3, 0, L3, L3 / 20));
@@ -301,13 +307,14 @@ public:
 			Vector18d y4 = cr4.result;
 			Vector18d y5 = cr5.result;
 			Vector18d y6 = cr6.result;
-//			Vector18d y1 = cr1.integrate(0, L1, L1 / 20);
-//			Vector18d y2 = cr2.integrate(0, L2, L2 / 20);
-//			Vector18d y3 = cr3.integrate(0, L3, L3 / 20);
-//			Vector18d y4 = cr4.integrate(0, L4, L4 / 20);
-//			Vector18d y5 = cr5.integrate(0, L5, L5 / 20);
-//			Vector18d y6 = cr6.integrate(0, L6, L6 / 20);
-
+#else
+			Vector18d y1 = cr1.integrate(0, L1, L1 / 20);
+			Vector18d y2 = cr2.integrate(0, L2, L2 / 20);
+			Vector18d y3 = cr3.integrate(0, L3, L3 / 20);
+			Vector18d y4 = cr4.integrate(0, L4, L4 / 20);
+			Vector18d y5 = cr5.integrate(0, L5, L5 / 20);
+			Vector18d y6 = cr6.integrate(0, L6, L6 / 20);
+#endif
 
 			//extract results from bottom link integration
 			Vector3d p1_end(y1[0], y1[1], y1[2]);
@@ -376,6 +383,7 @@ public:
 
 
 			//force a common material orientation for all the distal rod ends
+#ifdef use_matrix_log
 			Vector3d res_R1(0.0, 0.0, 0.0);
 			Vector3d res_R2(0.0, 0.0, 0.0);
 			Vector3d res_R3(0.0, 0.0, 0.0);
@@ -401,6 +409,37 @@ public:
 			if (!(R10_end.transpose() * R7_end).isZero()) res_R10 = cosserat_rod::vee((R10_end.transpose() * R7_end).log());
 			if (!(R11_end.transpose() * R7_end).isZero()) res_R11 = cosserat_rod::vee((R11_end.transpose() * R7_end).log());
 			if (!(R12_end.transpose() * R7_end).isZero()) res_R12 = cosserat_rod::vee((R12_end.transpose() * R7_end).log());
+#else
+			Matrix<double, 2, 3> rodrigues;
+			rodrigues << 1, 0, 0, 0, 1, 0;
+			Matrix3d Rdt = Rd.transpose();
+			Vector3d res_R1;
+			Vector3d res_R2;
+			Vector3d res_R3;
+			Vector3d res_R4;
+			Vector3d res_R5;
+			Vector3d res_R6;
+			Vector3d res_R7;
+			Vector3d res_R8;
+			Vector3d res_R9;
+			Vector3d res_R10;
+			Vector3d res_R11;
+			Vector3d res_R12;
+			res_R1 << rodrigues*cosserat_rod::vee((R1_end.transpose()*Rd - R1_end*Rdt)), 0;
+			res_R2 << rodrigues*cosserat_rod::vee((R2_end.transpose()*Rd - R2_end*Rdt)), 0;
+			res_R3 << rodrigues*cosserat_rod::vee((R3_end.transpose()*Rd - R3_end*Rdt)), 0;
+			res_R4 << rodrigues*cosserat_rod::vee((R4_end.transpose()*Rd - R4_end*Rdt)), 0;
+			res_R5 << rodrigues*cosserat_rod::vee((R5_end.transpose()*Rd - R5_end*Rdt)), 0;
+			res_R6 << rodrigues*cosserat_rod::vee((R6_end.transpose()*Rd - R6_end*Rdt)), 0;
+			res_R7 << rodrigues*cosserat_rod::vee((R7_end.transpose()*R7_end - R7_end*R7_end.transpose())), 0;
+			res_R8 << rodrigues*cosserat_rod::vee((R8_end.transpose()*R7_end - R8_end*R7_end.transpose())), 0;
+			res_R9 << rodrigues*cosserat_rod::vee((R9_end.transpose()*R7_end - R9_end*R7_end.transpose())), 0;
+			res_R10 << rodrigues*cosserat_rod::vee((R10_end.transpose()*R7_end - R10_end*R7_end.transpose())), 0;
+			res_R11 << rodrigues*cosserat_rod::vee((R11_end.transpose()*R7_end - R11_end*R7_end.transpose())), 0;
+			res_R12 << rodrigues*cosserat_rod::vee((R12_end.transpose()*R7_end - R12_end*R7_end.transpose())), 0;
+#endif
+
+
 
 
 			double l_c = 0.01; //characteristic length converts rotation error to meters

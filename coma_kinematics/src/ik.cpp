@@ -134,7 +134,7 @@ void ik::solve() {
 		guess_init[i] = 0;
 	}
 	for (unsigned int i = GS - 12; i < GS; i++) {
-		guess_init[i] = 0.12; //initialize leg lengths to 0.12 m
+		guess_init[i] = 0.30; //initialize leg lengths to 0.30 m
 	}
 	/*
 	 for (unsigned int i = 0; i < 7*12; i++) {
@@ -173,7 +173,14 @@ void ik::solve() {
 
 	std::cout << summary.BriefReport() << "\n";
 
-	for (unsigned int i = 0; i < 7 * 12; i++) {
+	/*
+	 for (unsigned int i = 0; i < 7 * 12; i++) {
+	 cout << guess_init[i] << '\t';
+	 }
+	 cout << endl;
+	 */
+
+	for (unsigned int i = 6 * 12; i < 7 * 12; i++) {
 		cout << guess_init[i] << '\t';
 	}
 	cout << endl;
