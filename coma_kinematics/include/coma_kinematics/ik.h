@@ -13,6 +13,7 @@
 
 #include <ros/ros.h>
 #include <unsupported/Eigen/MatrixFunctions>
+#include <boost/thread.hpp>
 
 #include "ceres/ceres.h"
 #include "coma_kinematics/cosserat_rod.h"
@@ -108,17 +109,37 @@ public:
 
 			//perform integration on top link
 			cosserat_rod cr7(y7_init);
-			Vector18d y7 = cr7.integrate(0, L7, L7 / 20);
 			cosserat_rod cr8(y8_init);
-			Vector18d y8 = cr8.integrate(0, L8, L8 / 20);
 			cosserat_rod cr9(y9_init);
-			Vector18d y9 = cr9.integrate(0, L9, L9 / 20);
 			cosserat_rod cr10(y10_init);
-			Vector18d y10 = cr10.integrate(0, L10, L10 / 20);
 			cosserat_rod cr11(y11_init);
-			Vector18d y11 = cr11.integrate(0, L11, L11 / 20);
 			cosserat_rod cr12(y12_init);
-			Vector18d y12 = cr12.integrate(0, L12, L12 / 20);
+			boost::thread t7(boost::bind(&cosserat_rod::integrate, &cr7, 0, L7, L7 / 20));
+			boost::thread t8(boost::bind(&cosserat_rod::integrate, &cr8, 0, L8, L8 / 20));
+			boost::thread t9(boost::bind(&cosserat_rod::integrate, &cr9, 0, L9, L9 / 20));
+			boost::thread t10(boost::bind(&cosserat_rod::integrate, &cr10, 0, L10, L10 / 20));
+			boost::thread t11(boost::bind(&cosserat_rod::integrate, &cr11, 0, L11, L11 / 20));
+			boost::thread t12(boost::bind(&cosserat_rod::integrate, &cr12, 0, L12, L12 / 20));
+			t7.join();
+			t8.join();
+			t9.join();
+			t10.join();
+			t11.join();
+			t12.join();
+			Vector18d y7 = cr7.result;
+			Vector18d y8 = cr8.result;
+			Vector18d y9 = cr9.result;
+			Vector18d y10 = cr10.result;
+			Vector18d y11 = cr11.result;
+			Vector18d y12 = cr12.result;
+//			Vector18d y7 = cr7.integrate(0, L7, L7 / 20);
+//			Vector18d y8 = cr8.integrate(0, L8, L8 / 20);
+//			Vector18d y9 = cr9.integrate(0, L9, L9 / 20);
+//			Vector18d y10 = cr10.integrate(0, L10, L10 / 20);
+//			Vector18d y11 = cr11.integrate(0, L11, L11 / 20);
+//			Vector18d y12 = cr12.integrate(0, L12, L12 / 20);
+
+
 
 			//extract results from top link integration
 			Vector3d p7_end(y7[0], y7[1], y7[2]);
@@ -152,7 +173,7 @@ public:
 //			Vector3d m11_end(y11[15], y11[16], y11[17]);
 //			Vector3d m12_end(y12[15], y12[16], y12[17]);
 
-//extract values for bottom link
+			//extract values for bottom link
 			double theta1 = x[5];
 			double theta2 = x[11];
 			double theta3 = x[17];
@@ -257,17 +278,36 @@ public:
 
 			//perform integration on bottom link
 			cosserat_rod cr1(y1_init);
-			Vector18d y1 = cr1.integrate(0, L1, L1 / 20);
-			cosserat_rod cr2(y1_init);
-			Vector18d y2 = cr2.integrate(0, L2, L2 / 20);
-			cosserat_rod cr3(y1_init);
-			Vector18d y3 = cr3.integrate(0, L3, L3 / 20);
-			cosserat_rod cr4(y1_init);
-			Vector18d y4 = cr4.integrate(0, L4, L4 / 20);
-			cosserat_rod cr5(y1_init);
-			Vector18d y5 = cr5.integrate(0, L5, L5 / 20);
-			cosserat_rod cr6(y1_init);
-			Vector18d y6 = cr6.integrate(0, L6, L6 / 20);
+			cosserat_rod cr2(y2_init);
+			cosserat_rod cr3(y3_init);
+			cosserat_rod cr4(y4_init);
+			cosserat_rod cr5(y5_init);
+			cosserat_rod cr6(y6_init);
+			boost::thread t1(boost::bind(&cosserat_rod::integrate, &cr1, 0, L1, L1 / 20));
+			boost::thread t2(boost::bind(&cosserat_rod::integrate, &cr2, 0, L2, L2 / 20));
+			boost::thread t3(boost::bind(&cosserat_rod::integrate, &cr3, 0, L3, L3 / 20));
+			boost::thread t4(boost::bind(&cosserat_rod::integrate, &cr4, 0, L4, L4 / 20));
+			boost::thread t5(boost::bind(&cosserat_rod::integrate, &cr5, 0, L5, L5 / 20));
+			boost::thread t6(boost::bind(&cosserat_rod::integrate, &cr6, 0, L6, L6 / 20));
+			t1.join();
+			t2.join();
+			t3.join();
+			t4.join();
+			t5.join();
+			t6.join();
+			Vector18d y1 = cr1.result;
+			Vector18d y2 = cr2.result;
+			Vector18d y3 = cr3.result;
+			Vector18d y4 = cr4.result;
+			Vector18d y5 = cr5.result;
+			Vector18d y6 = cr6.result;
+//			Vector18d y1 = cr1.integrate(0, L1, L1 / 20);
+//			Vector18d y2 = cr2.integrate(0, L2, L2 / 20);
+//			Vector18d y3 = cr3.integrate(0, L3, L3 / 20);
+//			Vector18d y4 = cr4.integrate(0, L4, L4 / 20);
+//			Vector18d y5 = cr5.integrate(0, L5, L5 / 20);
+//			Vector18d y6 = cr6.integrate(0, L6, L6 / 20);
+
 
 			//extract results from bottom link integration
 			Vector3d p1_end(y1[0], y1[1], y1[2]);
@@ -276,6 +316,7 @@ public:
 			Vector3d p4_end(y4[0], y4[1], y4[2]);
 			Vector3d p5_end(y5[0], y5[1], y5[2]);
 			Vector3d p6_end(y6[0], y6[1], y6[2]);
+
 			Matrix3d R1_end;
 			Matrix3d R2_end;
 			Matrix3d R3_end;
@@ -333,41 +374,45 @@ public:
 			Vector3d res_p12 = p7_end - R7_end * (p7_final - p12_final)
 					- p12_end;
 
+
 			//force a common material orientation for all the distal rod ends
+			Vector3d res_R1(0.0, 0.0, 0.0);
+			Vector3d res_R2(0.0, 0.0, 0.0);
+			Vector3d res_R3(0.0, 0.0, 0.0);
+			Vector3d res_R4(0.0, 0.0, 0.0);
+			Vector3d res_R5(0.0, 0.0, 0.0);
+			Vector3d res_R6(0.0, 0.0, 0.0);
+			Vector3d res_R7(0.0, 0.0, 0.0);
+			Vector3d res_R8(0.0, 0.0, 0.0);
+			Vector3d res_R9(0.0, 0.0, 0.0);
+			Vector3d res_R10(0.0, 0.0, 0.0);
+			Vector3d res_R11(0.0, 0.0, 0.0);
+			Vector3d res_R12(0.0, 0.0, 0.0);
 			Matrix3d Rdt = Rd.transpose();
-			Vector3d res_R1 = cosserat_rod::vee((Rdt * R1_end).log());
-			Vector3d res_R2 = cosserat_rod::vee((Rdt * R2_end).log());
-			Vector3d res_R3 = cosserat_rod::vee((Rdt * R3_end).log());
-			Vector3d res_R4 = cosserat_rod::vee((Rdt * R4_end).log());
-			Vector3d res_R5 = cosserat_rod::vee((Rdt * R5_end).log());
-			Vector3d res_R6 = cosserat_rod::vee((Rdt * R6_end).log());
-			Vector3d res_R7 = cosserat_rod::vee(
-					(R7_end.transpose() * R7_end).log());
-			Vector3d res_R8 = cosserat_rod::vee(
-					(R8_end.transpose() * R7_end).log());
-			Vector3d res_R9 = cosserat_rod::vee(
-					(R9_end.transpose() * R7_end).log());
-			Vector3d res_R10 = cosserat_rod::vee(
-					(R10_end.transpose() * R7_end).log());
-			Vector3d res_R11 = cosserat_rod::vee(
-					(R11_end.transpose() * R7_end).log());
-			Vector3d res_R12 = cosserat_rod::vee(
-					(R12_end.transpose() * R7_end).log());
+			if (!(Rdt * R1_end).isZero()) res_R1 = cosserat_rod::vee((Rdt * R1_end).log());
+			if (!(Rdt * R2_end).isZero()) res_R2 = cosserat_rod::vee((Rdt * R2_end).log());
+			if (!(Rdt * R3_end).isZero()) res_R3 = cosserat_rod::vee((Rdt * R3_end).log());
+			if (!(Rdt * R4_end).isZero()) res_R4 = cosserat_rod::vee((Rdt * R4_end).log());
+			if (!(Rdt * R5_end).isZero()) res_R5 = cosserat_rod::vee((Rdt * R5_end).log());
+			if (!(Rdt * R6_end).isZero()) res_R6 = cosserat_rod::vee((Rdt * R6_end).log());
+			if (!(R7_end.transpose() * R7_end).isZero()) res_R7 = cosserat_rod::vee((R7_end.transpose() * R7_end).log());
+			if (!(R8_end.transpose() * R7_end).isZero()) res_R8 = cosserat_rod::vee((R8_end.transpose() * R7_end).log());
+			if (!(R9_end.transpose() * R7_end).isZero()) res_R9 = cosserat_rod::vee((R9_end.transpose() * R7_end).log());
+			if (!(R10_end.transpose() * R7_end).isZero()) res_R10 = cosserat_rod::vee((R10_end.transpose() * R7_end).log());
+			if (!(R11_end.transpose() * R7_end).isZero()) res_R11 = cosserat_rod::vee((R11_end.transpose() * R7_end).log());
+			if (!(R12_end.transpose() * R7_end).isZero()) res_R12 = cosserat_rod::vee((R12_end.transpose() * R7_end).log());
+
 
 			double l_c = 0.01; //characteristic length converts rotation error to meters
-			Matrix<double, GS-6, 1> res;
+			Matrix<double, GS - 6, 1> res;
 			res << res_eq_F_top, res_eq_L_top, res_p1, res_p2, res_p3, res_p4, res_p5, res_p6, res_p7, res_p8, res_p9, res_p10, res_p11, res_p12, res_R1
 					* l_c, res_R2 * l_c, res_R3 * l_c, res_R4 * l_c, res_R5
 					* l_c, res_R6 * l_c, res_R7 * l_c, res_R8 * l_c, res_R9
 					* l_c, res_R10 * l_c, res_R11 * l_c, res_R12 * l_c;
 
-			for (unsigned int i = 0; i < GS-6; i++) {
+			for (unsigned int i = 0; i < GS - 6; i++) {
 				residual[i] = res[i];
 			}
-			/*
-*/
-
-			//residual[0] = 10.0 - x[0];
 			return true;
 		}
 
