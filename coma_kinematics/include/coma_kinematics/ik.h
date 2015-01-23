@@ -23,14 +23,6 @@
 #define use_multithreading
 //#define use_matrix_log
 
-struct CostFunctor {
-	template<typename T>
-	bool operator()(const T* const x, T* residual) const {
-		residual[0] = T(10.0) - x[0];
-		return true;
-	}
-};
-
 class ik {
 public:
 	ik();
@@ -98,16 +90,16 @@ public:
 			Vector3d m11_init(x[63], x[64], 0.0);
 			Vector3d m12_init(x[69], x[70], 0.0);
 			Vector18d y7_init;
-			y7_init << p7_init, R7_init, n7_init, m7_init;
 			Vector18d y8_init;
-			y8_init << p8_init, R8_init, n8_init, m8_init;
 			Vector18d y9_init;
-			y9_init << p9_init, R9_init, n9_init, m9_init;
 			Vector18d y10_init;
-			y10_init << p10_init, R10_init, n10_init, m10_init;
 			Vector18d y11_init;
-			y11_init << p11_init, R11_init, n11_init, m11_init;
 			Vector18d y12_init;
+			y7_init << p7_init, R7_init, n7_init, m7_init;
+			y8_init << p8_init, R8_init, n8_init, m8_init;
+			y9_init << p9_init, R9_init, n9_init, m9_init;
+			y10_init << p10_init, R10_init, n10_init, m10_init;
+			y11_init << p11_init, R11_init, n11_init, m11_init;
 			y12_init << p12_init, R12_init, n12_init, m12_init;
 
 			//perform integration on top link

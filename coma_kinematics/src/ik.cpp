@@ -96,34 +96,6 @@ ik::ik() {
 	ROS_INFO("COMA IK Solver Started");
 }
 
-//void ik::resp_cback(const std_msgs::Char::ConstPtr& resp) {}
-//void ik::publish_cmd() {}
-
-void ik::solvetest() {
-	// The variable to solve for with its initial value.
-	double initial_x = 5.0;
-	double x = initial_x;
-
-	// Build the problem.
-	Problem problem;
-
-	// Set up the only cost function (also known as residual). This uses
-	// auto-differentiation to obtain the derivative (jacobian).
-	CostFunction* cost_function = new AutoDiffCostFunction<CostFunctor, 1, 1>(
-			new CostFunctor);
-	problem.AddResidualBlock(cost_function, NULL, &x);
-
-	// Run the solver!
-	Solver::Options options;
-	options.linear_solver_type = ceres::DENSE_QR;
-	options.minimizer_progress_to_stdout = true;
-	Solver::Summary summary;
-	Solve(options, &problem, &summary);
-
-	std::cout << summary.BriefReport() << "\n";
-	std::cout << "x : " << initial_x << " -> " << x << "\n";
-}
-
 void ik::solve() {
 	//this matrix is the u matrix of unknowns described in the REACH paper.
 	//boost::array<double, 7*12> guess_init;
@@ -134,7 +106,7 @@ void ik::solve() {
 		guess_init[i] = 0;
 	}
 	for (unsigned int i = GS - 12; i < GS; i++) {
-		guess_init[i] = 0.30; //initialize leg lengths to 0.30 m
+		guess_init[i] = 0.13; //initialize leg lengths to 0.30 m
 	}
 	/*
 	 for (unsigned int i = 0; i < 7*12; i++) {
@@ -168,6 +140,9 @@ void ik::solve() {
 	Solver::Options options;
 	options.linear_solver_type = ceres::DENSE_QR;
 	options.minimizer_progress_to_stdout = true;
+	options.max_num_iterations = 500;
+	options.parameter_tolerance = 1E-12;
+	options.function_tolerance = 1E-12;
 	Solver::Summary summary;
 	Solve(options, &problem, &summary);
 
@@ -181,9 +156,9 @@ void ik::solve() {
 	 */
 
 	for (unsigned int i = 6 * 12; i < 7 * 12; i++) {
-		cout << guess_init[i] << '\t';
+		cout << guess_init[i] << endl;
 	}
-	cout << endl;
+	//cout << endl;
 
 }
 
@@ -192,22 +167,11 @@ int main(int argc, char **argv) {
 	// initialize ROS and the node
 	ros::init(argc, argv, "ik");
 
-	// initialize the joystick controller
+	//initialize the solver
 	ik solver;
 
-	//cosserat_rod rod;
-	//rod.integrate();
-
-	solver.solvetest(); //todo, remove this function and the struct functor that goes along with it
+	//solve the problem
 	solver.solve();
-
-	//ros::spin();
-
-//	ros::Rate loop_rate(500);  //rate at which to publish arm velocity commands
-//	while (ros::ok()) {
-//		ros::spinOnce();
-//		loop_rate.sleep();
-//	}
 
 	return EXIT_SUCCESS;
 }
