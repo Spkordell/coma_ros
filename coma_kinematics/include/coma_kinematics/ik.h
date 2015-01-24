@@ -110,12 +110,24 @@ public:
 			cosserat_rod cr11(y11_init);
 			cosserat_rod cr12(y12_init);
 #ifdef use_multithreading
-			boost::thread t7(boost::bind(&cosserat_rod::integrate, &cr7, 0, L7, L7 / 20));
-			boost::thread t8(boost::bind(&cosserat_rod::integrate, &cr8, 0, L8, L8 / 20));
-			boost::thread t9(boost::bind(&cosserat_rod::integrate, &cr9, 0, L9, L9 / 20));
-			boost::thread t10(boost::bind(&cosserat_rod::integrate, &cr10, 0, L10, L10 / 20));
-			boost::thread t11(boost::bind(&cosserat_rod::integrate, &cr11, 0, L11, L11 / 20));
-			boost::thread t12(boost::bind(&cosserat_rod::integrate, &cr12, 0, L12, L12 / 20));
+			boost::thread t7(
+					boost::bind(&cosserat_rod::integrate, &cr7, 0, L7,
+							L7 / 20));
+			boost::thread t8(
+					boost::bind(&cosserat_rod::integrate, &cr8, 0, L8,
+							L8 / 20));
+			boost::thread t9(
+					boost::bind(&cosserat_rod::integrate, &cr9, 0, L9,
+							L9 / 20));
+			boost::thread t10(
+					boost::bind(&cosserat_rod::integrate, &cr10, 0, L10,
+							L10 / 20));
+			boost::thread t11(
+					boost::bind(&cosserat_rod::integrate, &cr11, 0, L11,
+							L11 / 20));
+			boost::thread t12(
+					boost::bind(&cosserat_rod::integrate, &cr12, 0, L12,
+							L12 / 20));
 			t7.join();
 			t8.join();
 			t9.join();
@@ -136,7 +148,6 @@ public:
 			Vector18d y11 = cr11.integrate(0, L11, L11 / 20);
 			Vector18d y12 = cr12.integrate(0, L12, L12 / 20);
 #endif
-
 
 			//extract results from top link integration
 			Vector3d p7_end(y7[0], y7[1], y7[2]);
@@ -170,19 +181,20 @@ public:
 //			Vector3d m11_end(y11[15], y11[16], y11[17]);
 //			Vector3d m12_end(y12[15], y12[16], y12[17]);
 
-			//extract values for bottom link
+//extract values for bottom link
 			double theta1 = x[5];
 			double theta2 = x[11];
 			double theta3 = x[17];
 			double theta4 = x[23];
 			double theta5 = x[29];
 			double theta6 = x[35];
-			Matrix3d R1_init_m;
-			Matrix3d R2_init_m;
-			Matrix3d R3_init_m;
-			Matrix3d R4_init_m;
-			Matrix3d R5_init_m;
-			Matrix3d R6_init_m;
+
+			Eigen::Matrix3d R1_init_m;
+			Eigen::Matrix3d R2_init_m;
+			Eigen::Matrix3d R3_init_m;
+			Eigen::Matrix3d R4_init_m;
+			Eigen::Matrix3d R5_init_m;
+			Eigen::Matrix3d R6_init_m;
 			R1_init_m << cos(theta1), -sin(theta1), 0.0, sin(theta1), cos(
 					theta1), 0.0, 0.0, 0.0, 1.0;
 			R2_init_m << cos(theta2), -sin(theta2), 0.0, sin(theta2), cos(
@@ -201,6 +213,12 @@ public:
 			R4_init_m = R4_init_m * R7_end;
 			R5_init_m = R5_init_m * R7_end;
 			R6_init_m = R6_init_m * R7_end;
+			const_cast<IKFunctor*>(this)->R1_init_s = R1_init_m;
+			const_cast<IKFunctor*>(this)->R2_init_s = R2_init_m;
+			const_cast<IKFunctor*>(this)->R3_init_s = R3_init_m;
+			const_cast<IKFunctor*>(this)->R4_init_s = R4_init_m;
+			const_cast<IKFunctor*>(this)->R5_init_s = R5_init_m;
+			const_cast<IKFunctor*>(this)->R6_init_s = R6_init_m;
 			Vector9d R1_init;
 			Vector9d R2_init;
 			Vector9d R3_init;
@@ -260,6 +278,12 @@ public:
 			p4_init_2 = T_mid * p4_init_2;
 			p5_init_2 = T_mid * p5_init_2;
 			p6_init_2 = T_mid * p6_init_2;
+			const_cast<IKFunctor*>(this)->p1_init_s = p1_init_2;
+			const_cast<IKFunctor*>(this)->p2_init_s = p2_init_2;
+			const_cast<IKFunctor*>(this)->p3_init_s = p3_init_2;
+			const_cast<IKFunctor*>(this)->p4_init_s = p4_init_2;
+			const_cast<IKFunctor*>(this)->p5_init_s = p5_init_2;
+			const_cast<IKFunctor*>(this)->p6_init_s = p6_init_2;
 			Vector18d y1_init;
 			Vector18d y2_init;
 			Vector18d y3_init;
@@ -281,12 +305,24 @@ public:
 			cosserat_rod cr5(y5_init);
 			cosserat_rod cr6(y6_init);
 #ifdef use_multithreading
-			boost::thread t1(boost::bind(&cosserat_rod::integrate, &cr1, 0, L1, L1 / 20));
-			boost::thread t2(boost::bind(&cosserat_rod::integrate, &cr2, 0, L2, L2 / 20));
-			boost::thread t3(boost::bind(&cosserat_rod::integrate, &cr3, 0, L3, L3 / 20));
-			boost::thread t4(boost::bind(&cosserat_rod::integrate, &cr4, 0, L4, L4 / 20));
-			boost::thread t5(boost::bind(&cosserat_rod::integrate, &cr5, 0, L5, L5 / 20));
-			boost::thread t6(boost::bind(&cosserat_rod::integrate, &cr6, 0, L6, L6 / 20));
+			boost::thread t1(
+					boost::bind(&cosserat_rod::integrate, &cr1, 0, L1,
+							L1 / 20));
+			boost::thread t2(
+					boost::bind(&cosserat_rod::integrate, &cr2, 0, L2,
+							L2 / 20));
+			boost::thread t3(
+					boost::bind(&cosserat_rod::integrate, &cr3, 0, L3,
+							L3 / 20));
+			boost::thread t4(
+					boost::bind(&cosserat_rod::integrate, &cr4, 0, L4,
+							L4 / 20));
+			boost::thread t5(
+					boost::bind(&cosserat_rod::integrate, &cr5, 0, L5,
+							L5 / 20));
+			boost::thread t6(
+					boost::bind(&cosserat_rod::integrate, &cr6, 0, L6,
+							L6 / 20));
 			t1.join();
 			t2.join();
 			t3.join();
@@ -373,7 +409,6 @@ public:
 			Vector3d res_p12 = p7_end - R7_end * (p7_final - p12_final)
 					- p12_end;
 
-
 			//force a common material orientation for all the distal rod ends
 #ifdef use_matrix_log
 			Vector3d res_R1(0.0, 0.0, 0.0);
@@ -417,22 +452,61 @@ public:
 			Vector3d res_R10;
 			Vector3d res_R11;
 			Vector3d res_R12;
-			res_R1 << rodrigues*cosserat_rod::vee((R1_end.transpose()*Rd - R1_end*Rdt)), 0;
-			res_R2 << rodrigues*cosserat_rod::vee((R2_end.transpose()*Rd - R2_end*Rdt)), 0;
-			res_R3 << rodrigues*cosserat_rod::vee((R3_end.transpose()*Rd - R3_end*Rdt)), 0;
-			res_R4 << rodrigues*cosserat_rod::vee((R4_end.transpose()*Rd - R4_end*Rdt)), 0;
-			res_R5 << rodrigues*cosserat_rod::vee((R5_end.transpose()*Rd - R5_end*Rdt)), 0;
-			res_R6 << rodrigues*cosserat_rod::vee((R6_end.transpose()*Rd - R6_end*Rdt)), 0;
-			res_R7 << rodrigues*cosserat_rod::vee((R7_end.transpose()*R7_end - R7_end*R7_end.transpose())), 0;
-			res_R8 << rodrigues*cosserat_rod::vee((R8_end.transpose()*R7_end - R8_end*R7_end.transpose())), 0;
-			res_R9 << rodrigues*cosserat_rod::vee((R9_end.transpose()*R7_end - R9_end*R7_end.transpose())), 0;
-			res_R10 << rodrigues*cosserat_rod::vee((R10_end.transpose()*R7_end - R10_end*R7_end.transpose())), 0;
-			res_R11 << rodrigues*cosserat_rod::vee((R11_end.transpose()*R7_end - R11_end*R7_end.transpose())), 0;
-			res_R12 << rodrigues*cosserat_rod::vee((R12_end.transpose()*R7_end - R12_end*R7_end.transpose())), 0;
+			res_R1
+					<< rodrigues
+							* cosserat_rod::vee(
+									(R1_end.transpose() * Rd - R1_end * Rdt)), 0;
+			res_R2
+					<< rodrigues
+							* cosserat_rod::vee(
+									(R2_end.transpose() * Rd - R2_end * Rdt)), 0;
+			res_R3
+					<< rodrigues
+							* cosserat_rod::vee(
+									(R3_end.transpose() * Rd - R3_end * Rdt)), 0;
+			res_R4
+					<< rodrigues
+							* cosserat_rod::vee(
+									(R4_end.transpose() * Rd - R4_end * Rdt)), 0;
+			res_R5
+					<< rodrigues
+							* cosserat_rod::vee(
+									(R5_end.transpose() * Rd - R5_end * Rdt)), 0;
+			res_R6
+					<< rodrigues
+							* cosserat_rod::vee(
+									(R6_end.transpose() * Rd - R6_end * Rdt)), 0;
+			res_R7
+					<< rodrigues
+							* cosserat_rod::vee(
+									(R7_end.transpose() * R7_end
+											- R7_end * R7_end.transpose())), 0;
+			res_R8
+					<< rodrigues
+							* cosserat_rod::vee(
+									(R8_end.transpose() * R7_end
+											- R8_end * R7_end.transpose())), 0;
+			res_R9
+					<< rodrigues
+							* cosserat_rod::vee(
+									(R9_end.transpose() * R7_end
+											- R9_end * R7_end.transpose())), 0;
+			res_R10
+					<< rodrigues
+							* cosserat_rod::vee(
+									(R10_end.transpose() * R7_end
+											- R10_end * R7_end.transpose())), 0;
+			res_R11
+					<< rodrigues
+							* cosserat_rod::vee(
+									(R11_end.transpose() * R7_end
+											- R11_end * R7_end.transpose())), 0;
+			res_R12
+					<< rodrigues
+							* cosserat_rod::vee(
+									(R12_end.transpose() * R7_end
+											- R12_end * R7_end.transpose())), 0;
 #endif
-
-
-
 
 			double l_c = 0.01; //characteristic length converts rotation error to meters
 			Matrix<double, GS - 6, 1> res;
@@ -480,12 +554,92 @@ public:
 		Eigen::Vector3d p9_final;
 		Eigen::Vector3d p10_final;
 		Eigen::Vector3d p11_final;
+
+		Eigen::Matrix3d R1_init_s;
+		Eigen::Matrix3d R2_init_s;
+		Eigen::Matrix3d R3_init_s;
+		Eigen::Matrix3d R4_init_s;
+		Eigen::Matrix3d R5_init_s;
+		Eigen::Matrix3d R6_init_s;
+
+		Eigen::Vector4d p1_init_s;
+		Eigen::Vector4d p2_init_s;
+		Eigen::Vector4d p3_init_s;
+		Eigen::Vector4d p4_init_s;
+		Eigen::Vector4d p5_init_s;
+		Eigen::Vector4d p6_init_s;
+	};
+
+	struct SingleIKFunctor {
+		bool operator()(const double* const x, double* residual) const {
+			using Eigen::Vector3d;
+			using Eigen::Vector4d;
+			using Eigen::RowVector4d;
+			using Eigen::Matrix;
+			using Eigen::Matrix3d;
+			using Eigen::Matrix4d;
+			typedef Matrix<double, 9, 1> Vector9d;
+			typedef Matrix<double, 18, 1> Vector18d;
+			using std::cout;
+			using std::endl;
+
+			double L = x[6];
+			double theta = x[5];
+			Vector9d R_init;
+			R_init << cos(theta), sin(theta), 0.0, -sin(theta), cos(theta), 0.0, 0.0, 0.0, 1.0;
+			Vector3d n_init(x[0], x[1], x[2]);
+			Vector3d m_init(x[3], x[4], 0);
+
+			Vector18d y_init;
+			y_init << p_init, R_init, n_init, m_init;
+
+			cosserat_rod cr(y_init);
+			Vector18d y = cr.integrate(0, L, L / 20);
+
+			Vector3d p_end(y[0], y[1], y[2]);
+			Matrix3d R_end;
+			R_end << y[3], y[6], y[9], y[4], y[7], y[10], y[5], y[8], y[11];
+			//Vector3d n_end(y[12], y[13], y[14]);
+			//Vector3d m_end(y[15], y[16], y[17]);
+
+			Vector3d res_p = p_final - p_end;
+//			Matrix3d R_final3x3;
+//			R_final3x3 << R_Final[0], R_Final[3], R_Final[6], R_Final[1], R_Final[4], R_Final[7], R_Final[2], R_Final[5], R_Final[8];
+
+#ifdef use_matrix_log
+			Vector3d res_R(0.0, 0.0, 0.0);
+			if (!(R_final.transpose() * R_end).isZero()) res_R = cosserat_rod::vee((R_final.transpose() * R_end).log());
+#else
+			Matrix<double, 2, 3> rodrigues;
+			rodrigues << 1, 0, 0, 0, 1, 0;
+			Vector3d res_R;
+			res_R
+					<< rodrigues
+							* cosserat_rod::vee(
+									(R_end.transpose() * R_final
+											- R_end * R_final.transpose())), 0;
+#endif
+
+			double l_c = 0.01; //characteristic length converts rotation error to meters
+			Matrix<double, 6, 1> res;
+			res << res_p, res_R * l_c;
+
+			for (unsigned int i = 0; i < 6; i++) {
+				residual[i] = res[i];
+			}
+
+			return true;
+		}
+		Eigen::Vector3d p_init;
+		Eigen::Vector3d p_final;
+		Eigen::Matrix3d R_final;
 	};
 
 private:
 	ros::NodeHandle node; /*!< a handle for this ROS node */
 
 	IKFunctor* ikfunctor;
+	SingleIKFunctor* singleikfunctor;
 
 //	ros::Publisher step_cmd_out;
 //	ros::Subscriber resp_in;

@@ -40,6 +40,7 @@ ik::ik() {
 	double deg = 10; //separation in degrees between the hole pairs that are close
 
 	ikfunctor = new IKFunctor;
+	singleikfunctor = new SingleIKFunctor;
 
 	//position of the leg constraints in the local frame at the bottom
 	ikfunctor->p1_init = *(new Vector3d(r_in * cos(rad(0 - deg)),
@@ -139,7 +140,7 @@ void ik::solve() {
 	//run the solver
 	Solver::Options options;
 	options.linear_solver_type = ceres::DENSE_QR;
-	options.minimizer_progress_to_stdout = true;
+	options.minimizer_progress_to_stdout = false;
 	options.max_num_iterations = 500;
 	options.parameter_tolerance = 1E-12;
 	options.function_tolerance = 1E-12;
@@ -148,17 +149,44 @@ void ik::solve() {
 
 	std::cout << summary.BriefReport() << "\n";
 
-	/*
-	 for (unsigned int i = 0; i < 7 * 12; i++) {
-	 cout << guess_init[i] << '\t';
-	 }
-	 cout << endl;
-	 */
+	///solve for the bottom lengths
+	Eigen::Matrix<double, 6, 1> bottom_lengths;
+
+	double single_guess_init[7];
+	Problem problem_single;
+	CostFunction* cost_function_single = new NumericDiffCostFunction<SingleIKFunctor,
+			ceres::CENTRAL, 6, 7>(singleikfunctor);
+	problem_single.AddResidualBlock(cost_function_single, NULL, single_guess_init);
+
+
+	Eigen::Vector3d p_init[6] = {ikfunctor->p1_init, ikfunctor->p2_init, ikfunctor->p3_init, ikfunctor->p4_init, ikfunctor->p5_init, ikfunctor->p6_init};
+	Eigen::Matrix3d R_final[6] = {ikfunctor->R1_init_s, ikfunctor->R2_init_s, ikfunctor->R3_init_s, ikfunctor->R4_init_s, ikfunctor->R5_init_s, ikfunctor->R6_init_s};
+	Eigen::Vector3d p_final[6] = {ikfunctor->p1_init_s.head<3>(), ikfunctor->p2_init_s.head<3>(), ikfunctor->p3_init_s.head<3>(), ikfunctor->p4_init_s.head<3>(), ikfunctor->p5_init_s.head<3>(), ikfunctor->p6_init_s.head<3>()};
+
+
+	for (unsigned int j; j < 6; j++) {
+		for (unsigned int i = 0; i < 7; i++) {
+			single_guess_init[i] = 0;
+		}
+		single_guess_init[6] = 0.3;
+		singleikfunctor->p_init = p_init[j];
+		singleikfunctor->R_final = R_final[j];
+		singleikfunctor->p_final = p_final[j];
+		Solve(options, &problem_single, &summary);
+		std::cout << summary.BriefReport() << "\n";
+		bottom_lengths[j] = single_guess_init[6];
+	}
+
+
+	//cout << bottom_lengths.transpose() << endl;
+
 
 	for (unsigned int i = 6 * 12; i < 7 * 12; i++) {
-		cout << guess_init[i] << endl;
+		//cout << guess_init[i] << endl;
+		cout << guess_init[i] + ((i < 78) ? bottom_lengths[i - 72] : 0) <<endl;
+		//cout << (i <  6 * 12 - 6 ? bottom_lengths[i - (7 * 12 - 6)]: 0 <<endl;
 	}
-	//cout << endl;
+
 
 }
 
