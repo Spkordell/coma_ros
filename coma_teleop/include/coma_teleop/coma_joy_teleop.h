@@ -15,6 +15,19 @@
 #include <ros/ros.h>
 #include <sensor_msgs/Joy.h>
 
+#define MIN_X_POSITION -0.3
+#define MIN_Y_POSITION -0.3
+#define MIN_Z_POSITION 0.0
+#define MIN_X_ROTATION -90.0
+#define MIN_Y_ROTATION -90.0
+#define MIN_Z_ROTATION -60.0
+
+#define MAX_X_POSITION 0.3
+#define MAX_Y_POSITION 0.3
+#define MAX_Z_POSITION 0.6
+#define MAX_X_ROTATION 90.0
+#define MAX_Y_ROTATION 90.0
+#define MAX_Z_ROTATION 60.0
 
 /*!
  * \class coma_joy_teleop
@@ -49,6 +62,24 @@ private:
 	//ros::Publisher angular_cmd; /*!< angular arm command topic */
 	//ros::Publisher cartesian_cmd; /*!< cartesian arm command topic */
 	ros::Subscriber joy_sub; /*!< the joy topic */
+
+	double x_pos;
+	double y_pos;
+	double z_pos;
+	double x_rot;
+	double y_rot;
+	double z_rot;
+
+	double x_pos_multiplier;
+	double y_pos_multiplier;
+	double z_pos_multiplier;
+	double x_rot_multiplier;
+	double y_rot_multiplier;
+	double z_rot_multiplier;
+
+	bool initLeftTrigger; /*!< flag for whether the left trigger is initialized */
+	bool initRightTrigger; /*!< flag for whether the right trigger is initialized */
+	bool calibrated; /*!< flag for whether the controller is calibrated */
 };
 
 /*!

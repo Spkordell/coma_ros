@@ -22,9 +22,86 @@ coma_joy_teleop::coma_joy_teleop() {
 	//cartesian_cmd = node.advertise < wpi_jaco_msgs::CartesianCommand > ("jaco_arm/cartesian_cmd", 10);
 	joy_sub = node.subscribe < sensor_msgs::Joy
 			> ("joy", 10, &coma_joy_teleop::joy_cback, this);
+
+	//initialize arm position variables
+	x_pos = 0;
+	y_pos = 0;
+	z_pos = 0.3;
+	x_rot = 0;
+	y_rot = 0;
+	z_rot = -60;
+
+	calibrated = false;
+	initLeftTrigger = false;
+	initRightTrigger = false;
+
+	x_pos_multiplier = 0.02;
+	y_pos_multiplier = 0.02;
+	z_pos_multiplier = 0.01;
+
+	x_rot_multiplier = 3.0;
+	y_rot_multiplier = 3.0;
+	z_rot_multiplier = 1.0;
+
 }
 
 void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
+	if (!calibrated) {
+		if (!initLeftTrigger && joy->axes.at(2) == 1.0)
+			initLeftTrigger = true;
+
+		if (!initRightTrigger && joy->axes.at(5) == 1.0)
+			initRightTrigger = true;
+
+		if (initLeftTrigger && initRightTrigger) {
+			calibrated = true;
+			ROS_INFO("Controller calibration complete!");
+		}
+	} else {
+
+		x_pos -=x_pos_multiplier*(joy->axes.at(3));
+		y_pos +=y_pos_multiplier*(joy->axes.at(4));
+		z_pos -= z_pos_multiplier*(1 - joy->axes.at(2));
+		z_pos += z_pos_multiplier*(1 - joy->axes.at(5));
+		x_rot -=x_rot_multiplier*(joy->axes.at(0));
+		y_rot +=y_rot_multiplier*(joy->axes.at(1));
+		z_rot -= z_rot_multiplier*(joy->buttons.at(4));
+		z_rot += z_rot_multiplier*(joy->buttons.at(5));
+
+		if (x_pos > MAX_X_POSITION) {
+			x_pos = MAX_X_POSITION;
+		} else if (x_pos < MIN_X_POSITION) {
+			x_pos = MIN_X_POSITION;
+		}
+		if (y_pos > MAX_Y_POSITION) {
+			y_pos = MAX_Y_POSITION;
+		} else if (y_pos < MIN_Y_POSITION) {
+			y_pos = MIN_Y_POSITION;
+		}
+		if (z_pos > MAX_Z_POSITION) {
+			z_pos = MAX_Z_POSITION;
+		} else if (z_pos < MIN_Z_POSITION) {
+			z_pos = MIN_Z_POSITION;
+		}
+
+		if (x_rot > MAX_X_ROTATION) {
+			x_rot = MAX_X_ROTATION;
+		} else if (x_rot < MIN_X_ROTATION) {
+			x_rot = MIN_X_ROTATION;
+		}
+		if (y_rot > MAX_Y_ROTATION) {
+			y_rot = MAX_Y_ROTATION;
+		} else if (y_rot < MIN_Y_ROTATION) {
+			y_rot = MIN_Y_ROTATION;
+		}
+		if (z_rot > MAX_Z_ROTATION) {
+			z_rot = MAX_Z_ROTATION;
+		} else if (z_rot < MIN_Z_ROTATION) {
+			z_rot = MIN_Z_ROTATION;
+		}
+
+		cout << x_pos << '\t' << y_pos << '\t' << z_pos << '\t' << x_rot << '\t' << y_rot << '\t' << z_rot << endl;
+	}
 }
 
 void coma_joy_teleop::publish_cmd() {
