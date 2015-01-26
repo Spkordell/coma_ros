@@ -11,12 +11,13 @@
 #ifndef IK_H_
 #define IK_H_
 
+#include <boost/thread.hpp>
 #include <ros/ros.h>
 #include <unsupported/Eigen/MatrixFunctions>
-#include <boost/thread.hpp>
 
 #include "ceres/ceres.h"
 #include "coma_kinematics/cosserat_rod.h"
+#include "coma_kinematics/solveIK.h"
 
 #define GS 7*12 //define the guess size
 
@@ -27,7 +28,8 @@ class ik {
 public:
 	ik();
 	void solvetest();
-	void solve();
+	void solve(Eigen::Vector3d pd, Eigen::Matrix3d Rd, double* leg_lengths);
+	static double rad(double degrees);
 
 	struct IKFunctor {
 		bool operator()(const double* const x, double* residual) const {
@@ -641,11 +643,13 @@ private:
 	IKFunctor* ikfunctor;
 	SingleIKFunctor* singleikfunctor;
 
-//	ros::Publisher step_cmd_out;
-//	ros::Subscriber resp_in;
-//	void resp_cback(const std_msgs::Char::ConstPtr& resp);
+	ros::ServiceServer solverService;
 
-	static double rad(double degrees);
+	double guess_init[GS];
+
+	bool solve_ik(coma_kinematics::solveIK::Request &req,
+			coma_kinematics::solveIK::Response &res);
+//	void resp_cback(const std_msgs::Char::ConstPtr& resp);
 };
 
 /*!

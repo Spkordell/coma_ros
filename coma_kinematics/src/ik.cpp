@@ -30,10 +30,6 @@ ik::ik() {
 	// a private handle for this ROS node (allows retrieval of relative parameters)
 	ros::NodeHandle private_nh("~");
 
-	// create the ROS topics
-	//step_cmd_out = node.advertise < coma_serial::teleop_command > ("/serial_node/step_cmd", 1000);
-	//resp_in = node.subscribe < std_msgs::Char > ("/serial_node/resp", 100, &ik::resp_cback, this);
-
 	//initialize system parameters
 	double r_in = 0.06126; 	//radius of inner leg hole pattern
 	double r_out = 0.06770; //radius of outer leg hole pattern
@@ -94,35 +90,42 @@ ik::ik() {
 	ikfunctor->p11_final = *(new Vector3d(r_out * cos(rad(240 + deg)),
 			r_out * sin(rad(240 + deg)), 0));
 
-	ROS_INFO("COMA IK Solver Started");
-}
-
-void ik::solve() {
-	//this matrix is the u matrix of unknowns described in the REACH paper.
-	//boost::array<double, 7*12> guess_init;
-	//std::vector<double> guess_init(7*12);
-	double guess_init[GS];
-
+	//initialize first guess
 	for (unsigned int i = 0; i < GS - 12; i++) {
 		guess_init[i] = 0;
 	}
 	for (unsigned int i = GS - 12; i < GS; i++) {
-		guess_init[i] = 0.13; //initialize leg lengths to 0.30 m
+		guess_init[i] = 0.15; //initialize leg lengths to 0.15 m
 	}
-	/*
-	 for (unsigned int i = 0; i < 7*12; i++) {
-	 cout << guess_init[i] << '\t';
-	 }
-	 cout << endl;
-	 */
 
+	// create the ROS service
+	solverService = node.advertiseService("solve_ik", &ik::solve_ik, this);
+
+	ROS_INFO("COMA IK Solver Server Started");
+}
+
+bool ik::solve_ik(coma_kinematics::solveIK::Request &req,
+		coma_kinematics::solveIK::Response &res) {
+	Vector3d pd(req.x_pos, req.y_pos, req.z_pos); //desired end effector position
+	Vector3d rot(ik::rad(req.x_rot), ik::rad(req.y_rot), ik::rad(req.z_rot));
+	Matrix3d Rd = cosserat_rod::hat(rot); //desired end effector orientation
+	Eigen::MatrixExponential < Matrix3d > Rdm(Rd);
+	Rdm.compute(Rd);
+	double leg_lengths[12];
+
+	solve(pd, Rd, leg_lengths);
+
+	for (unsigned int i = 0; i < 12; i++) {
+		res.leg_lengths[i] = leg_lengths[i];
+	}
+
+	return true;
+}
+
+void ik::solve(Vector3d pd, Matrix3d Rd, double* leg_lengths) {
 	//set desired forces, moments, position, and rotation
 	Vector3d F(0, 0, 0); //applied force at end effector
 	Vector3d L(0, 0, 0); //applied moment at end effector
-	Matrix3d Rd = cosserat_rod::hat(*(new Vector3d(rad(0), rad(0), rad(-60)))); //desired end effector orientation
-	Eigen::MatrixExponential < Matrix3d > Rdm(Rd);
-	Rdm.compute(Rd);
-	Vector3d pd(0.0, 0.0, 0.6); //desired end effector position
 
 	ikfunctor->F = F;
 	ikfunctor->L = L;
@@ -154,15 +157,21 @@ void ik::solve() {
 
 	double single_guess_init[7];
 	Problem problem_single;
-	CostFunction* cost_function_single = new NumericDiffCostFunction<SingleIKFunctor,
-			ceres::CENTRAL, 6, 7>(singleikfunctor);
-	problem_single.AddResidualBlock(cost_function_single, NULL, single_guess_init);
+	CostFunction* cost_function_single = new NumericDiffCostFunction<
+			SingleIKFunctor, ceres::CENTRAL, 6, 7>(singleikfunctor);
+	problem_single.AddResidualBlock(cost_function_single, NULL,
+			single_guess_init);
 
-
-	Eigen::Vector3d p_init[6] = {ikfunctor->p1_init, ikfunctor->p2_init, ikfunctor->p3_init, ikfunctor->p4_init, ikfunctor->p5_init, ikfunctor->p6_init};
-	Eigen::Matrix3d R_final[6] = {ikfunctor->R1_init_s, ikfunctor->R2_init_s, ikfunctor->R3_init_s, ikfunctor->R4_init_s, ikfunctor->R5_init_s, ikfunctor->R6_init_s};
-	Eigen::Vector3d p_final[6] = {ikfunctor->p1_init_s.head<3>(), ikfunctor->p2_init_s.head<3>(), ikfunctor->p3_init_s.head<3>(), ikfunctor->p4_init_s.head<3>(), ikfunctor->p5_init_s.head<3>(), ikfunctor->p6_init_s.head<3>()};
-
+	Eigen::Vector3d p_init[6] = { ikfunctor->p1_init, ikfunctor->p2_init,
+			ikfunctor->p3_init, ikfunctor->p4_init, ikfunctor->p5_init,
+			ikfunctor->p6_init };
+	Eigen::Matrix3d R_final[6] = { ikfunctor->R1_init_s, ikfunctor->R2_init_s,
+			ikfunctor->R3_init_s, ikfunctor->R4_init_s, ikfunctor->R5_init_s,
+			ikfunctor->R6_init_s };
+	Eigen::Vector3d p_final[6] = { ikfunctor->p1_init_s.head<3>(),
+			ikfunctor->p2_init_s.head<3>(), ikfunctor->p3_init_s.head<3>(),
+			ikfunctor->p4_init_s.head<3>(), ikfunctor->p5_init_s.head<3>(),
+			ikfunctor->p6_init_s.head<3>() };
 
 	for (unsigned int j; j < 6; j++) {
 		for (unsigned int i = 0; i < 7; i++) {
@@ -177,16 +186,13 @@ void ik::solve() {
 		bottom_lengths[j] = single_guess_init[6];
 	}
 
-
 	//cout << bottom_lengths.transpose() << endl;
 
-
 	for (unsigned int i = 6 * 12; i < 7 * 12; i++) {
-		//cout << guess_init[i] << endl;
-		cout << guess_init[i] + ((i < 78) ? bottom_lengths[i - 72] : 0) <<endl;
-		//cout << (i <  6 * 12 - 6 ? bottom_lengths[i - (7 * 12 - 6)]: 0 <<endl;
+		leg_lengths[i - 72] = guess_init[i]
+				+ ((i < 78) ? bottom_lengths[i - 72] : 0);
+		cout << leg_lengths[i - 72] << endl;
 	}
-
 
 }
 
@@ -198,8 +204,18 @@ int main(int argc, char **argv) {
 	//initialize the solver
 	ik solver;
 
-	//solve the problem
-	solver.solve();
+	//solve for the starting position
+	Matrix3d Rd = cosserat_rod::hat(
+			*(new Vector3d(ik::rad(0), ik::rad(0), ik::rad(-60)))); //desired end effector orientation
+	Eigen::MatrixExponential < Matrix3d > Rdm(Rd);
+	Rdm.compute(Rd);
+	Vector3d pd(0.0, 0.0, 0.3); //desired end effector position
+	double leg_lengths[12];
+
+	//solve the starting position
+	solver.solve(pd, Rd, leg_lengths);
+
+	ros::spin();
 
 	return EXIT_SUCCESS;
 }
