@@ -17,12 +17,6 @@ coma_joy_teleop::coma_joy_teleop() {
 	// a private handle for this ROS node (allows retrieval of relative parameters)
 	ros::NodeHandle private_nh("~");
 
-	// create the ROS topics
-	//angular_cmd = node.advertise < wpi_jaco_msgs::AngularCommand > ("jaco_arm/angular_cmd", 10);
-	//cartesian_cmd = node.advertise < wpi_jaco_msgs::CartesianCommand > ("jaco_arm/cartesian_cmd", 10);
-	joy_sub = node.subscribe < sensor_msgs::Joy
-			> ("joy", 10, &coma_joy_teleop::joy_cback, this);
-
 	//initialize arm position variables
 	x_pos = 0;
 	y_pos = 0;
@@ -43,6 +37,10 @@ coma_joy_teleop::coma_joy_teleop() {
 	y_rot_multiplier = 3.0;
 	z_rot_multiplier = 1.0;
 
+	// create the ROS topics
+	joy_sub = node.subscribe < sensor_msgs::Joy
+			> ("joy", 1, &coma_joy_teleop::joy_cback, this);
+	solverClient = node.serviceClient < coma_kinematics::solveIK > ("solve_ik");
 }
 
 void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
@@ -59,14 +57,14 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 		}
 	} else {
 
-		x_pos -=x_pos_multiplier*(joy->axes.at(3));
-		y_pos +=y_pos_multiplier*(joy->axes.at(4));
-		z_pos -= z_pos_multiplier*(1 - joy->axes.at(2));
-		z_pos += z_pos_multiplier*(1 - joy->axes.at(5));
-		x_rot -=x_rot_multiplier*(joy->axes.at(0));
-		y_rot +=y_rot_multiplier*(joy->axes.at(1));
-		z_rot -= z_rot_multiplier*(joy->buttons.at(4));
-		z_rot += z_rot_multiplier*(joy->buttons.at(5));
+		x_pos -= x_pos_multiplier * (joy->axes.at(3));
+		y_pos += y_pos_multiplier * (joy->axes.at(4));
+		z_pos -= z_pos_multiplier * (1 - joy->axes.at(2));
+		z_pos += z_pos_multiplier * (1 - joy->axes.at(5));
+		x_rot -= x_rot_multiplier * (joy->axes.at(0));
+		y_rot += y_rot_multiplier * (joy->axes.at(1));
+		z_rot -= z_rot_multiplier * (joy->buttons.at(4));
+		z_rot += z_rot_multiplier * (joy->buttons.at(5));
 
 		if (x_pos > MAX_X_POSITION) {
 			x_pos = MAX_X_POSITION;
@@ -100,7 +98,26 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 			z_rot = MIN_Z_ROTATION;
 		}
 
-		cout << x_pos << '\t' << y_pos << '\t' << z_pos << '\t' << x_rot << '\t' << y_rot << '\t' << z_rot << endl;
+		cout << x_pos << '\t' << y_pos << '\t' << z_pos << '\t' << x_rot << '\t'
+				<< y_rot << '\t' << z_rot << endl;
+
+		coma_kinematics::solveIK srv;
+		srv.request.x_pos = x_pos;
+		srv.request.y_pos = y_pos;
+		srv.request.z_pos = z_pos;
+		srv.request.x_rot = x_rot;
+		srv.request.y_rot = y_rot;
+		srv.request.z_rot = z_rot;
+
+		if (solverClient.call(srv)) {
+//			for (unsigned int i; i < 12; i++) {
+//				cout << srv.response.leg_lengths[i] << '\t';
+//			}
+//			cout << endl;
+		} else {
+			ROS_ERROR("Failed to call solver service");
+		}
+
 	}
 }
 
@@ -113,6 +130,8 @@ int main(int argc, char **argv) {
 
 	// initialize the joystick controller
 	coma_joy_teleop controller;
+
+	ros::Duration(3.0).sleep(); //short delay while other things initialize initializes
 
 	ros::Rate loop_rate(60);  //rate at which to publish arm velocity commands
 	while (ros::ok()) {

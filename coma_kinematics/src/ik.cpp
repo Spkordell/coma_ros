@@ -98,6 +98,20 @@ ik::ik() {
 		guess_init[i] = 0.15; //initialize leg lengths to 0.15 m
 	}
 
+	//initialize solver
+	cost_function = new NumericDiffCostFunction<IKFunctor, ceres::CENTRAL,
+			GS - 6, GS>(ikfunctor);
+	problem.AddResidualBlock(cost_function, NULL, guess_init);
+	cost_function_single = new NumericDiffCostFunction<SingleIKFunctor,
+			ceres::CENTRAL, 6, 7>(singleikfunctor);
+	problem_single.AddResidualBlock(cost_function_single, NULL,
+			single_guess_init);
+	options.linear_solver_type = ceres::DENSE_QR;
+	options.minimizer_progress_to_stdout = false;
+	options.max_num_iterations = 500;
+	options.parameter_tolerance = 1E-12;
+	options.function_tolerance = 1E-12;
+
 	// create the ROS service
 	solverService = node.advertiseService("solve_ik", &ik::solve_ik, this);
 
@@ -132,35 +146,13 @@ void ik::solve(Vector3d pd, Matrix3d Rd, double* leg_lengths) {
 	ikfunctor->Rd = Rd;
 	ikfunctor->pd = pd;
 
-	//build the problem
-	Problem problem;
-
-	//set up the residual
-	CostFunction* cost_function = new NumericDiffCostFunction<IKFunctor,
-			ceres::CENTRAL, GS - 6, GS>(ikfunctor);
-	problem.AddResidualBlock(cost_function, NULL, guess_init);
-
 	//run the solver
-	Solver::Options options;
-	options.linear_solver_type = ceres::DENSE_QR;
-	options.minimizer_progress_to_stdout = false;
-	options.max_num_iterations = 500;
-	options.parameter_tolerance = 1E-12;
-	options.function_tolerance = 1E-12;
-	Solver::Summary summary;
 	Solve(options, &problem, &summary);
 
-	std::cout << summary.BriefReport() << "\n";
+	//std::cout << summary.BriefReport() << "\n";
 
 	///solve for the bottom lengths
 	Eigen::Matrix<double, 6, 1> bottom_lengths;
-
-	double single_guess_init[7];
-	Problem problem_single;
-	CostFunction* cost_function_single = new NumericDiffCostFunction<
-			SingleIKFunctor, ceres::CENTRAL, 6, 7>(singleikfunctor);
-	problem_single.AddResidualBlock(cost_function_single, NULL,
-			single_guess_init);
 
 	Eigen::Vector3d p_init[6] = { ikfunctor->p1_init, ikfunctor->p2_init,
 			ikfunctor->p3_init, ikfunctor->p4_init, ikfunctor->p5_init,
@@ -182,7 +174,7 @@ void ik::solve(Vector3d pd, Matrix3d Rd, double* leg_lengths) {
 		singleikfunctor->R_final = R_final[j];
 		singleikfunctor->p_final = p_final[j];
 		Solve(options, &problem_single, &summary);
-		std::cout << summary.BriefReport() << "\n";
+		//std::cout << summary.BriefReport() << "\n";
 		bottom_lengths[j] = single_guess_init[6];
 	}
 
@@ -191,7 +183,7 @@ void ik::solve(Vector3d pd, Matrix3d Rd, double* leg_lengths) {
 	for (unsigned int i = 6 * 12; i < 7 * 12; i++) {
 		leg_lengths[i - 72] = guess_init[i]
 				+ ((i < 78) ? bottom_lengths[i - 72] : 0);
-		cout << leg_lengths[i - 72] << endl;
+		//cout << leg_lengths[i - 72] << endl;
 	}
 
 }
@@ -205,15 +197,15 @@ int main(int argc, char **argv) {
 	ik solver;
 
 	//solve for the starting position
-	Matrix3d Rd = cosserat_rod::hat(
-			*(new Vector3d(ik::rad(0), ik::rad(0), ik::rad(-60)))); //desired end effector orientation
-	Eigen::MatrixExponential < Matrix3d > Rdm(Rd);
-	Rdm.compute(Rd);
-	Vector3d pd(0.0, 0.0, 0.3); //desired end effector position
-	double leg_lengths[12];
-
-	//solve the starting position
-	solver.solve(pd, Rd, leg_lengths);
+//	Matrix3d Rd = cosserat_rod::hat(
+//			*(new Vector3d(ik::rad(0), ik::rad(0), ik::rad(-60)))); //desired end effector orientation
+//	Eigen::MatrixExponential < Matrix3d > Rdm(Rd);
+//	Rdm.compute(Rd);
+//	Vector3d pd(0.0, 0.0, 0.3); //desired end effector position
+//	double leg_lengths[12];
+//
+//	//solve the starting position
+//	solver.solve(pd, Rd, leg_lengths);
 
 	ros::spin();
 

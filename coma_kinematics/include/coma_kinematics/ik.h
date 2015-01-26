@@ -520,6 +520,7 @@ public:
 			for (unsigned int i = 0; i < GS - 6; i++) {
 				residual[i] = res[i];
 			}
+
 			return true;
 		}
 
@@ -642,14 +643,22 @@ private:
 
 	IKFunctor* ikfunctor;
 	SingleIKFunctor* singleikfunctor;
+	double guess_init[GS];
+	double single_guess_init[7];
+	ceres::Problem problem;
+	ceres::Problem problem_single;
+	ceres::CostFunction* cost_function;
+	ceres::CostFunction* cost_function_single;
+	ceres::Solver::Options options;
+	ceres::Solver::Summary summary;
 
 	ros::ServiceServer solverService;
 
-	double guess_init[GS];
+
 
 	bool solve_ik(coma_kinematics::solveIK::Request &req,
 			coma_kinematics::solveIK::Response &res);
-//	void resp_cback(const std_msgs::Char::ConstPtr& resp);
+
 };
 
 /*!

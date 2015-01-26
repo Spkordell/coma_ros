@@ -15,6 +15,8 @@
 #include <ros/ros.h>
 #include <sensor_msgs/Joy.h>
 
+#include "coma_kinematics/solveIK.h"
+
 #define MIN_X_POSITION -0.3
 #define MIN_Y_POSITION -0.3
 #define MIN_Z_POSITION 0.0
@@ -59,9 +61,8 @@ private:
 
 	ros::NodeHandle node; /*!< a handle for this ROS node */
 
-	//ros::Publisher angular_cmd; /*!< angular arm command topic */
-	//ros::Publisher cartesian_cmd; /*!< cartesian arm command topic */
 	ros::Subscriber joy_sub; /*!< the joy topic */
+	ros::ServiceClient solverClient;
 
 	double x_pos;
 	double y_pos;
