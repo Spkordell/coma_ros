@@ -28,6 +28,7 @@ coma_joy_teleop::coma_joy_teleop() {
 	calibrated = false;
 	initLeftTrigger = false;
 	initRightTrigger = false;
+	motion_response_received = true;
 
 	x_pos_multiplier = 0.02;
 	y_pos_multiplier = 0.02;
@@ -38,9 +39,23 @@ coma_joy_teleop::coma_joy_teleop() {
 	z_rot_multiplier = 1.0;
 
 	// create the ROS topics
+	motion_cmd_out = node.advertise < coma_serial::teleop_command
+			> ("/serial_node/step_cmd", 1000);
+	motion_resp_in =
+			node.subscribe < std_msgs::Char
+					> ("/serial_node/resp", 100, &coma_joy_teleop::motion_resp_cback, this);
 	joy_sub = node.subscribe < sensor_msgs::Joy
 			> ("joy", 1, &coma_joy_teleop::joy_cback, this);
 	solverClient = node.serviceClient < coma_kinematics::solveIK > ("solve_ik");
+
+	ROS_INFO("COMA Motion Demo Node Started");
+
+}
+
+void coma_joy_teleop::motion_resp_cback(const std_msgs::Char::ConstPtr& resp) {
+	if (resp->data == 'R') {
+		motion_response_received = true;
+	}
 }
 
 void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
@@ -55,8 +70,8 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 			calibrated = true;
 			ROS_INFO("Controller calibration complete!");
 		}
-	} else {
-
+	} else if (motion_response_received) { //only publish if the board is ready for another command
+		motion_response_received = false;
 		x_pos -= x_pos_multiplier * (joy->axes.at(3));
 		y_pos += y_pos_multiplier * (joy->axes.at(4));
 		z_pos -= z_pos_multiplier * (1 - joy->axes.at(2));
@@ -110,10 +125,17 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 		srv.request.z_rot = z_rot;
 
 		if (solverClient.call(srv)) {
-//			for (unsigned int i; i < 12; i++) {
-//				cout << srv.response.leg_lengths[i] << '\t';
-//			}
-//			cout << endl;
+			for (unsigned int leg; leg < 12; leg++) {
+				int steps = convert_length_to_step(leg,
+						srv.response.leg_lengths[leg]);
+				if (steps < 0) {
+					ROS_ERROR("MINIMUM LEG LENGTH REACHED");
+					return;
+				} else {
+					motion_cmd.stepper_counts[leg] = steps;
+				}
+			}
+			motion_cmd_out.publish(motion_cmd);
 		} else {
 			ROS_ERROR("Failed to call solver service");
 		}
@@ -121,7 +143,10 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 	}
 }
 
-void coma_joy_teleop::publish_cmd() {
+int coma_joy_teleop::convert_length_to_step(int leg, double length) {
+	static double homed_lengths[12] = { 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
+			0.1, 0.1, 0.1, 0.1 }; //todo: this needs to be the amount of leg remaining after homing for each rod
+	return (length - homed_lengths[leg]) * STEPS_PER_METER;
 }
 
 int main(int argc, char **argv) {
@@ -133,12 +158,7 @@ int main(int argc, char **argv) {
 
 	ros::Duration(3.0).sleep(); //short delay while other things initialize initializes
 
-	ros::Rate loop_rate(60);  //rate at which to publish arm velocity commands
-	while (ros::ok()) {
-		controller.publish_cmd();
-		ros::spinOnce();
-		loop_rate.sleep();
-	}
+	ros::spin();
 
 	return EXIT_SUCCESS;
 }

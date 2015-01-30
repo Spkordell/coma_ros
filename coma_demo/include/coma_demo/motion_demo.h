@@ -16,7 +16,6 @@
 
 #include "coma_serial/teleop_command.h"
 
-
 /*!
  * \class motion_demo
  * \brief Sends simple motion commands to coma for demonstration/testing purposes
