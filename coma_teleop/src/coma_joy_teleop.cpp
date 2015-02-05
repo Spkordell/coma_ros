@@ -62,6 +62,7 @@ void coma_joy_teleop::motion_resp_cback(const std_msgs::Char::ConstPtr& resp) {
 
 void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 	if (!calibrated) {
+		ROS_INFO("Calibrate the controller by pressing and releasing both triggers");
 		if (!initLeftTrigger && joy->axes.at(2) == 1.0)
 			initLeftTrigger = true;
 
@@ -127,6 +128,7 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 
 		if (solverClient.call(srv)) {
 			for (unsigned int leg; leg < 12; leg++) {
+				//cout << srv.response.leg_lengths[leg] << endl;
 				int steps = convert_length_to_step(leg, srv.response.leg_lengths[leg]);
 				if (steps < 0) {
 					ROS_ERROR("MINIMUM LEG LENGTH REACHED");

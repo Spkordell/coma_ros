@@ -70,6 +70,13 @@ ik::ik() {
 	for (unsigned int i = 0; i < GS - 12; i++) {
 		guess_init[i] = 0;
 	}
+	for (unsigned int rod = 0; rod < 6; rod++) {
+		for (unsigned int i = 0; i < 7; i++) {
+			single_guess_init[rod][i] = 0;
+		}
+		single_guess_init[rod][6] = 0.3;
+	}
+
 	for (unsigned int i = GS - 12; i < GS; i++) {
 		guess_init[i] = 0.15; //initialize leg lengths to 0.15 m
 	}
@@ -78,8 +85,12 @@ ik::ik() {
 	cost_function = new NumericDiffCostFunction<IKFunctor, ceres::CENTRAL,
 	GS - 6, GS>(ikfunctor);
 	problem.AddResidualBlock(cost_function, NULL, guess_init);
-	cost_function_single = new NumericDiffCostFunction<SingleIKFunctor, ceres::CENTRAL, 6, 7>(singleikfunctor);
-	problem_single.AddResidualBlock(cost_function_single, NULL, single_guess_init);
+
+	for (unsigned int rod = 0; rod < 6; rod++) {
+		cost_function_single[rod] = new NumericDiffCostFunction<SingleIKFunctor, ceres::CENTRAL, 6, 7>(singleikfunctor);
+		problem_single[rod].AddResidualBlock(cost_function_single[rod], NULL, single_guess_init[rod]);
+	}
+
 	options.linear_solver_type = ceres::DENSE_QR;
 	options.minimizer_progress_to_stdout = false;
 	options.max_num_iterations = 500;
@@ -133,17 +144,17 @@ void ik::solve(Vector3d pd, Matrix3d Rd, double* leg_lengths) {
 	Eigen::Vector3d p_final[6] = { ikfunctor->p1_init_s.head<3>(), ikfunctor->p2_init_s.head<3>(), ikfunctor->p3_init_s.head<3>(),
 			ikfunctor->p4_init_s.head<3>(), ikfunctor->p5_init_s.head<3>(), ikfunctor->p6_init_s.head<3>() };
 
-	for (unsigned int j; j < 6; j++) {
-		for (unsigned int i = 0; i < 7; i++) {
-			single_guess_init[i] = 0;
-		}
-		single_guess_init[6] = 0.3;
-		singleikfunctor->p_init = p_init[j];
-		singleikfunctor->R_final = R_final[j];
-		singleikfunctor->p_final = p_final[j];
-		Solve(options, &problem_single, &summary);
+	for (unsigned int rod; rod < 6; rod++) {
+//		for (unsigned int i = 0; i < 7; i++) {
+//			single_guess_init[i] = 0;
+//		}
+//		single_guess_init[6] = 0.3;
+		singleikfunctor->p_init = p_init[rod];
+		singleikfunctor->R_final = R_final[rod];
+		singleikfunctor->p_final = p_final[rod];
+		Solve(options, &(problem_single[rod]), &summary);
 		//std::cout << summary.BriefReport() << "\n";
-		bottom_lengths[j] = single_guess_init[6];
+		bottom_lengths[rod] = single_guess_init[rod][6];
 	}
 
 	//cout << bottom_lengths.transpose() << endl;

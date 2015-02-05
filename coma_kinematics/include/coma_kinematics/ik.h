@@ -549,11 +549,11 @@ private:
 	IKFunctor* ikfunctor;
 	SingleIKFunctor* singleikfunctor;
 	double guess_init[GS];
-	double single_guess_init[7];
+	double single_guess_init[6][7];
 	ceres::Problem problem;
-	ceres::Problem problem_single;
+	ceres::Problem problem_single[6];
 	ceres::CostFunction* cost_function;
-	ceres::CostFunction* cost_function_single;
+	ceres::CostFunction* cost_function_single[6];
 	ceres::Solver::Options options;
 	ceres::Solver::Summary summary;
 
