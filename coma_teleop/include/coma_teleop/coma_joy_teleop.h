@@ -89,6 +89,7 @@ private:
 	bool initLeftTrigger; /*!< flag for whether the left trigger is initialized */
 	bool initRightTrigger; /*!< flag for whether the right trigger is initialized */
 	bool calibrated; /*!< flag for whether the controller is calibrated */
+	bool send_motion_commands; /*!< if true, node will send motion commands to the manipulator */
 
 	coma_serial::teleop_command motion_cmd; /*!< stepper command */
 	bool motion_response_received;

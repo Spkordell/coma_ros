@@ -39,56 +39,32 @@ ik::ik() {
 	singleikfunctor = new SingleIKFunctor;
 
 	//position of the leg constraints in the local frame at the bottom
-	ikfunctor->p1_init = *(new Vector3d(r_in * cos(rad(0 - deg)),
-			r_in * sin(rad(0 - deg)), 0));
-	ikfunctor->p2_init = *(new Vector3d(r_in * cos(rad(0 + deg)),
-			r_in * sin(rad(0 + deg)), 0));
-	ikfunctor->p3_init = *(new Vector3d(r_in * cos(rad(120 - deg)),
-			r_in * sin(rad(120 - deg)), 0));
-	ikfunctor->p4_init = *(new Vector3d(r_in * cos(rad(120 + deg)),
-			r_in * sin(rad(120 + deg)), 0));
-	ikfunctor->p5_init = *(new Vector3d(r_in * cos(rad(240 - deg)),
-			r_in * sin(rad(240 - deg)), 0));
-	ikfunctor->p6_init = *(new Vector3d(r_in * cos(rad(240 + deg)),
-			r_in * sin(rad(240 + deg)), 0));
-	ikfunctor->p7_init = *(new Vector3d(r_out * cos(rad(60 - deg)),
-			r_out * sin(rad(60 - deg)), 0));
-	ikfunctor->p8_init = *(new Vector3d(r_out * cos(rad(60 + deg)),
-			r_out * sin(rad(60 + deg)), 0));
-	ikfunctor->p9_init = *(new Vector3d(r_out * cos(rad(180 - deg)),
-			r_out * sin(rad(180 - deg)), 0));
-	ikfunctor->p10_init = *(new Vector3d(r_out * cos(rad(180 + deg)),
-			r_out * sin(rad(180 + deg)), 0));
-	ikfunctor->p11_init = *(new Vector3d(r_out * cos(rad(300 - deg)),
-			r_out * sin(rad(300 - deg)), 0));
-	ikfunctor->p12_init = *(new Vector3d(r_out * cos(rad(300 + deg)),
-			r_out * sin(rad(300 + deg)), 0));
+	ikfunctor->p1_init = *(new Vector3d(r_in * cos(rad(0 - deg)), r_in * sin(rad(0 - deg)), 0));
+	ikfunctor->p2_init = *(new Vector3d(r_in * cos(rad(0 + deg)), r_in * sin(rad(0 + deg)), 0));
+	ikfunctor->p3_init = *(new Vector3d(r_in * cos(rad(120 - deg)), r_in * sin(rad(120 - deg)), 0));
+	ikfunctor->p4_init = *(new Vector3d(r_in * cos(rad(120 + deg)), r_in * sin(rad(120 + deg)), 0));
+	ikfunctor->p5_init = *(new Vector3d(r_in * cos(rad(240 - deg)), r_in * sin(rad(240 - deg)), 0));
+	ikfunctor->p6_init = *(new Vector3d(r_in * cos(rad(240 + deg)), r_in * sin(rad(240 + deg)), 0));
+	ikfunctor->p7_init = *(new Vector3d(r_out * cos(rad(60 - deg)), r_out * sin(rad(60 - deg)), 0));
+	ikfunctor->p8_init = *(new Vector3d(r_out * cos(rad(60 + deg)), r_out * sin(rad(60 + deg)), 0));
+	ikfunctor->p9_init = *(new Vector3d(r_out * cos(rad(180 - deg)), r_out * sin(rad(180 - deg)), 0));
+	ikfunctor->p10_init = *(new Vector3d(r_out * cos(rad(180 + deg)), r_out * sin(rad(180 + deg)), 0));
+	ikfunctor->p11_init = *(new Vector3d(r_out * cos(rad(300 - deg)), r_out * sin(rad(300 - deg)), 0));
+	ikfunctor->p12_init = *(new Vector3d(r_out * cos(rad(300 + deg)), r_out * sin(rad(300 + deg)), 0));
 
 	//position of the leg constraints in the local frame at the top
-	ikfunctor->p6_final = *(new Vector3d(r_in * cos(rad(0 - deg)),
-			r_in * sin(rad(0 - deg)), 0));
-	ikfunctor->p1_final = *(new Vector3d(r_in * cos(rad(0 + deg)),
-			r_in * sin(rad(0 + deg)), 0));
-	ikfunctor->p2_final = *(new Vector3d(r_in * cos(rad(120 - deg)),
-			r_in * sin(rad(120 - deg)), 0));
-	ikfunctor->p3_final = *(new Vector3d(r_in * cos(rad(120 + deg)),
-			r_in * sin(rad(120 + deg)), 0));
-	ikfunctor->p4_final = *(new Vector3d(r_in * cos(rad(240 - deg)),
-			r_in * sin(rad(240 - deg)), 0));
-	ikfunctor->p5_final = *(new Vector3d(r_in * cos(rad(240 + deg)),
-			r_in * sin(rad(240 + deg)), 0));
-	ikfunctor->p12_final = *(new Vector3d(r_out * cos(rad(0 - deg)),
-			r_out * sin(rad(0 - deg)), 0));
-	ikfunctor->p7_final = *(new Vector3d(r_out * cos(rad(0 + deg)),
-			r_out * sin(rad(0 + deg)), 0));
-	ikfunctor->p8_final = *(new Vector3d(r_out * cos(rad(120 - deg)),
-			r_out * sin(rad(120 - deg)), 0));
-	ikfunctor->p9_final = *(new Vector3d(r_out * cos(rad(120 + deg)),
-			r_out * sin(rad(120 + deg)), 0));
-	ikfunctor->p10_final = *(new Vector3d(r_out * cos(rad(240 - deg)),
-			r_out * sin(rad(240 - deg)), 0));
-	ikfunctor->p11_final = *(new Vector3d(r_out * cos(rad(240 + deg)),
-			r_out * sin(rad(240 + deg)), 0));
+	ikfunctor->p6_final = *(new Vector3d(r_in * cos(rad(0 - deg)), r_in * sin(rad(0 - deg)), 0));
+	ikfunctor->p1_final = *(new Vector3d(r_in * cos(rad(0 + deg)), r_in * sin(rad(0 + deg)), 0));
+	ikfunctor->p2_final = *(new Vector3d(r_in * cos(rad(120 - deg)), r_in * sin(rad(120 - deg)), 0));
+	ikfunctor->p3_final = *(new Vector3d(r_in * cos(rad(120 + deg)), r_in * sin(rad(120 + deg)), 0));
+	ikfunctor->p4_final = *(new Vector3d(r_in * cos(rad(240 - deg)), r_in * sin(rad(240 - deg)), 0));
+	ikfunctor->p5_final = *(new Vector3d(r_in * cos(rad(240 + deg)), r_in * sin(rad(240 + deg)), 0));
+	ikfunctor->p12_final = *(new Vector3d(r_out * cos(rad(0 - deg)), r_out * sin(rad(0 - deg)), 0));
+	ikfunctor->p7_final = *(new Vector3d(r_out * cos(rad(0 + deg)), r_out * sin(rad(0 + deg)), 0));
+	ikfunctor->p8_final = *(new Vector3d(r_out * cos(rad(120 - deg)), r_out * sin(rad(120 - deg)), 0));
+	ikfunctor->p9_final = *(new Vector3d(r_out * cos(rad(120 + deg)), r_out * sin(rad(120 + deg)), 0));
+	ikfunctor->p10_final = *(new Vector3d(r_out * cos(rad(240 - deg)), r_out * sin(rad(240 - deg)), 0));
+	ikfunctor->p11_final = *(new Vector3d(r_out * cos(rad(240 + deg)), r_out * sin(rad(240 + deg)), 0));
 
 	//initialize first guess
 	for (unsigned int i = 0; i < GS - 12; i++) {
@@ -100,12 +76,10 @@ ik::ik() {
 
 	//initialize solver
 	cost_function = new NumericDiffCostFunction<IKFunctor, ceres::CENTRAL,
-			GS - 6, GS>(ikfunctor);
+	GS - 6, GS>(ikfunctor);
 	problem.AddResidualBlock(cost_function, NULL, guess_init);
-	cost_function_single = new NumericDiffCostFunction<SingleIKFunctor,
-			ceres::CENTRAL, 6, 7>(singleikfunctor);
-	problem_single.AddResidualBlock(cost_function_single, NULL,
-			single_guess_init);
+	cost_function_single = new NumericDiffCostFunction<SingleIKFunctor, ceres::CENTRAL, 6, 7>(singleikfunctor);
+	problem_single.AddResidualBlock(cost_function_single, NULL, single_guess_init);
 	options.linear_solver_type = ceres::DENSE_QR;
 	options.minimizer_progress_to_stdout = false;
 	options.max_num_iterations = 500;
@@ -118,8 +92,7 @@ ik::ik() {
 	ROS_INFO("COMA IK Solver Server Started");
 }
 
-bool ik::solve_ik(coma_kinematics::solveIK::Request &req,
-		coma_kinematics::solveIK::Response &res) {
+bool ik::solve_ik(coma_kinematics::solveIK::Request &req, coma_kinematics::solveIK::Response &res) {
 	Vector3d pd(req.x_pos, req.y_pos, req.z_pos); //desired end effector position
 	Vector3d rot(ik::rad(req.x_rot), ik::rad(req.y_rot), ik::rad(req.z_rot));
 	Matrix3d Rd = cosserat_rod::hat(rot); //desired end effector orientation
@@ -154,16 +127,11 @@ void ik::solve(Vector3d pd, Matrix3d Rd, double* leg_lengths) {
 	///solve for the bottom lengths
 	Eigen::Matrix<double, 6, 1> bottom_lengths;
 
-	Eigen::Vector3d p_init[6] = { ikfunctor->p1_init, ikfunctor->p2_init,
-			ikfunctor->p3_init, ikfunctor->p4_init, ikfunctor->p5_init,
-			ikfunctor->p6_init };
-	Eigen::Matrix3d R_final[6] = { ikfunctor->R1_init_s, ikfunctor->R2_init_s,
-			ikfunctor->R3_init_s, ikfunctor->R4_init_s, ikfunctor->R5_init_s,
+	Eigen::Vector3d p_init[6] = { ikfunctor->p1_init, ikfunctor->p2_init, ikfunctor->p3_init, ikfunctor->p4_init, ikfunctor->p5_init, ikfunctor->p6_init };
+	Eigen::Matrix3d R_final[6] = { ikfunctor->R1_init_s, ikfunctor->R2_init_s, ikfunctor->R3_init_s, ikfunctor->R4_init_s, ikfunctor->R5_init_s,
 			ikfunctor->R6_init_s };
-	Eigen::Vector3d p_final[6] = { ikfunctor->p1_init_s.head<3>(),
-			ikfunctor->p2_init_s.head<3>(), ikfunctor->p3_init_s.head<3>(),
-			ikfunctor->p4_init_s.head<3>(), ikfunctor->p5_init_s.head<3>(),
-			ikfunctor->p6_init_s.head<3>() };
+	Eigen::Vector3d p_final[6] = { ikfunctor->p1_init_s.head<3>(), ikfunctor->p2_init_s.head<3>(), ikfunctor->p3_init_s.head<3>(),
+			ikfunctor->p4_init_s.head<3>(), ikfunctor->p5_init_s.head<3>(), ikfunctor->p6_init_s.head<3>() };
 
 	for (unsigned int j; j < 6; j++) {
 		for (unsigned int i = 0; i < 7; i++) {
@@ -181,8 +149,7 @@ void ik::solve(Vector3d pd, Matrix3d Rd, double* leg_lengths) {
 	//cout << bottom_lengths.transpose() << endl;
 
 	for (unsigned int i = 6 * 12; i < 7 * 12; i++) {
-		leg_lengths[i - 72] = guess_init[i]
-				+ ((i < 78) ? bottom_lengths[i - 72] : 0);
+		leg_lengths[i - 72] = guess_init[i] + ((i < 78) ? bottom_lengths[i - 72] : 0);
 		//cout << leg_lengths[i - 72] << endl;
 	}
 

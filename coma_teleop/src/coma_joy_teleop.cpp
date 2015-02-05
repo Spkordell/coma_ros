@@ -38,17 +38,19 @@ coma_joy_teleop::coma_joy_teleop() {
 	y_rot_multiplier = 3.0;
 	z_rot_multiplier = 1.0;
 
+	private_nh.param<bool>("send_motion_commands", send_motion_commands, true);
+
+
 	// create the ROS topics
-	motion_cmd_out = node.advertise < coma_serial::teleop_command
-			> ("/serial_node/step_cmd", 1000);
-	motion_resp_in =
-			node.subscribe < std_msgs::Char
-					> ("/serial_node/resp", 100, &coma_joy_teleop::motion_resp_cback, this);
-	joy_sub = node.subscribe < sensor_msgs::Joy
-			> ("joy", 1, &coma_joy_teleop::joy_cback, this);
+	if (send_motion_commands) {
+		motion_cmd_out = node.advertise < coma_serial::teleop_command > ("/serial_node/step_cmd", 1000);
+		motion_resp_in = node.subscribe < std_msgs::Char > ("/serial_node/resp", 100, &coma_joy_teleop::motion_resp_cback, this);
+	}
+	joy_sub = node.subscribe < sensor_msgs::Joy > ("joy", 1, &coma_joy_teleop::joy_cback, this);
 	solverClient = node.serviceClient < coma_kinematics::solveIK > ("solve_ik");
 
 	ROS_INFO("COMA Motion Demo Node Started");
+	ROS_INFO("Calibrate the controller by pressing and releasing both triggers");
 
 }
 
@@ -70,14 +72,14 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 			calibrated = true;
 			ROS_INFO("Controller calibration complete!");
 		}
-	} else if (motion_response_received) { //only publish if the board is ready for another command
+	} else if (motion_response_received || !send_motion_commands) { //only publish if the board is ready for another command
 		motion_response_received = false;
-		x_pos -= x_pos_multiplier * (joy->axes.at(3));
-		y_pos += y_pos_multiplier * (joy->axes.at(4));
+		x_pos -= x_pos_multiplier * (joy->axes.at(0));
+		y_pos += y_pos_multiplier * (joy->axes.at(1));
 		z_pos -= z_pos_multiplier * (1 - joy->axes.at(2));
 		z_pos += z_pos_multiplier * (1 - joy->axes.at(5));
-		x_rot -= x_rot_multiplier * (joy->axes.at(0));
-		y_rot += y_rot_multiplier * (joy->axes.at(1));
+		x_rot -= x_rot_multiplier * (joy->axes.at(3));
+		y_rot += y_rot_multiplier * (joy->axes.at(4));
 		z_rot -= z_rot_multiplier * (joy->buttons.at(4));
 		z_rot += z_rot_multiplier * (joy->buttons.at(5));
 
@@ -113,8 +115,7 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 			z_rot = MIN_Z_ROTATION;
 		}
 
-		cout << x_pos << '\t' << y_pos << '\t' << z_pos << '\t' << x_rot << '\t'
-				<< y_rot << '\t' << z_rot << endl;
+		cout << x_pos << '\t' << y_pos << '\t' << z_pos << '\t' << x_rot << '\t' << y_rot << '\t' << z_rot << endl;
 
 		coma_kinematics::solveIK srv;
 		srv.request.x_pos = x_pos;
@@ -126,16 +127,18 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 
 		if (solverClient.call(srv)) {
 			for (unsigned int leg; leg < 12; leg++) {
-				int steps = convert_length_to_step(leg,
-						srv.response.leg_lengths[leg]);
+				int steps = convert_length_to_step(leg, srv.response.leg_lengths[leg]);
 				if (steps < 0) {
 					ROS_ERROR("MINIMUM LEG LENGTH REACHED");
+					motion_response_received = true; //we haven't sent anything so reset the ready flag
 					return;
 				} else {
 					motion_cmd.stepper_counts[leg] = steps;
 				}
 			}
-			motion_cmd_out.publish(motion_cmd);
+			if (send_motion_commands) {
+				motion_cmd_out.publish(motion_cmd);
+			}
 		} else {
 			ROS_ERROR("Failed to call solver service");
 		}
@@ -144,8 +147,7 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 }
 
 int coma_joy_teleop::convert_length_to_step(int leg, double length) {
-	static double homed_lengths[12] = { 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
-			0.1, 0.1, 0.1, 0.1 }; //todo: this needs to be the amount of leg remaining after homing for each rod
+	static double homed_lengths[12] = { 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01 }; //todo: this needs to be the amount of leg remaining after homing for each rod
 	return (length - homed_lengths[leg]) * STEPS_PER_METER;
 }
 
