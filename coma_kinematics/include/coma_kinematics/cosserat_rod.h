@@ -224,45 +224,136 @@ template<typename M, int N> inline Jet<M, N> max(const double f, const Jet<M, N>
 	return (Jet<M, N>(f) > g) ? Jet<M, N>(f) : g;
 }
 
+//template<typename M, int N> inline operator int(const Jet<M, N>& g) {
+//	return 1;
+//}
+
+//template<typename M, int N> inline operator Jet<M, N>(const double a) {
+//  return Jet<M, N>(a);
+//}
+
+//template<typename M, int N> inline Jet<M, N> operator*(const Jet<M, N>& f, size_t g) {
+//	return f * ceres::Jet<M, N>(g);
+//}
+
 }
 
 template<typename T> class Toperations: public boost::numeric::odeint::default_operations {
 public:
-//	template<class Fac1 = T, class Fac2 = Fac1, class Fac3 = Fac2, class Fac4 = Fac3, class Fac5 = Fac4, class Fac6 = Fac5, class Fac7 = Fac6>
-//	struct scale_sum7 {
-//		const Fac1 m_alpha1;
-//		const Fac2 m_alpha2;
-//		const Fac3 m_alpha3;
-//		const Fac4 m_alpha4;
-//		const Fac5 m_alpha5;
-//		const Fac6 m_alpha6;
-//		const Fac7 m_alpha7;
-//
-//		scale_sum7(Fac1 alpha1, Fac2 alpha2, Fac3 alpha3, Fac4 alpha4, Fac5 alpha5, Fac6 alpha6, Fac7 alpha7) :
-//				m_alpha1(alpha1), m_alpha2(alpha2), m_alpha3(alpha3), m_alpha4(alpha4), m_alpha5(alpha5), m_alpha6(alpha6), m_alpha7(alpha7) {
-//		}
-//
-//		template<class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8>
-//		void operator()(T1 &t1, const T2 &t2, const T3 &t3, const T4 &t4, const T5 &t5, const T6 &t6, const T7 &t7, const T8 &t8) const {
-//			t1 = m_alpha1 * t2 + m_alpha2 * t3 + m_alpha3 * t4 + m_alpha4 * t5 + m_alpha5 * t6 + m_alpha6 * t7 + m_alpha7 * t8;
-//		}
-//
-//		typedef void result_type;
-//	};
+
+	template<class Fac1 = double, class Fac2 = Fac1>
+	struct scale_sum2 {
+		const double m_alpha1;
+		const Fac2 m_alpha2;
+		scale_sum2(double alpha1, Fac2 alpha2) :
+				m_alpha1(alpha1), m_alpha2(alpha2) {
+		}
+		template<class T1, class T2, class T3>
+		void operator()(T1 &t1, const T2 &t2, const T3 &t3) const {
+			t1 = m_alpha1 * t2 + m_alpha2 * t3;
+		}
+		typedef void result_type;
+	};
+	template<class Fac1 = double, class Fac2 = Fac1, class Fac3 = Fac2>
+	struct scale_sum3 {
+		const double m_alpha1;
+		const Fac2 m_alpha2;
+		const Fac3 m_alpha3;
+		scale_sum3(double alpha1, Fac2 alpha2, Fac3 alpha3) :
+				m_alpha1(alpha1), m_alpha2(alpha2), m_alpha3(alpha3) {
+		}
+		template<class T1, class T2, class T3, class T4>
+		void operator()(T1 &t1, const T2 &t2, const T3 &t3, const T4 &t4) const {
+			t1 = m_alpha1 * t2 + m_alpha2 * t3 + m_alpha3 * t4;
+		}
+		typedef void result_type;
+	};
+	template<class Fac1 = double, class Fac2 = Fac1, class Fac3 = Fac2, class Fac4 = Fac3>
+	struct scale_sum4 {
+		const double m_alpha1;
+		const Fac2 m_alpha2;
+		const Fac3 m_alpha3;
+		const Fac4 m_alpha4;
+		scale_sum4(double alpha1, Fac2 alpha2, Fac3 alpha3, Fac4 alpha4) :
+				m_alpha1(alpha1), m_alpha2(alpha2), m_alpha3(alpha3), m_alpha4(alpha4) {
+		}
+		template<class T1, class T2, class T3, class T4, class T5>
+		void operator()(T1 &t1, const T2 &t2, const T3 &t3, const T4 &t4, const T5 &t5) const {
+			t1 = m_alpha1 * t2 + m_alpha2 * t3 + m_alpha3 * t4 + m_alpha4 * t5;
+		}
+		typedef void result_type;
+	};
+
+	template<class Fac1 = double, class Fac2 = Fac1, class Fac3 = Fac2, class Fac4 = Fac3, class Fac5 = Fac4>
+	struct scale_sum5 {
+		const double m_alpha1;
+		const Fac2 m_alpha2;
+		const Fac3 m_alpha3;
+		const Fac4 m_alpha4;
+		const Fac5 m_alpha5;
+		scale_sum5(double alpha1, Fac2 alpha2, Fac3 alpha3, Fac4 alpha4, Fac5 alpha5) :
+				m_alpha1(alpha1), m_alpha2(alpha2), m_alpha3(alpha3), m_alpha4(alpha4), m_alpha5(alpha5) {
+		}
+		template<class T1, class T2, class T3, class T4, class T5, class T6>
+		void operator()(T1 &t1, const T2 &t2, const T3 &t3, const T4 &t4, const T5 &t5, const T6 &t6) const {
+			t1 = m_alpha1 * t2 + m_alpha2 * t3 + m_alpha3 * t4 + m_alpha4 * t5 + m_alpha5 * t6;
+		}
+		typedef void result_type;
+	};
+
+	template<class Fac1 = double, class Fac2 = Fac1, class Fac3 = Fac2, class Fac4 = Fac3, class Fac5 = Fac4, class Fac6 = Fac5>
+	struct scale_sum6 {
+		const Fac1 m_alpha1;
+		const Fac2 m_alpha2;
+		const Fac3 m_alpha3;
+		const Fac4 m_alpha4;
+		const Fac5 m_alpha5;
+		const Fac6 m_alpha6;
+
+
+		scale_sum6(Fac1 alpha1, Fac2 alpha2, Fac3 alpha3, Fac4 alpha4, Fac5 alpha5, Fac6 alpha6) :
+				m_alpha1(alpha1), m_alpha2(alpha2), m_alpha3(alpha3), m_alpha4(alpha4), m_alpha5(alpha5), m_alpha6(alpha6) {
+		}
+
+		template<class T1, class T2, class T3, class T4, class T5, class T6, class T7>
+		void operator()(T1 &t1, const T2 &t2, const T3 &t3, const T4 &t4, const T5 &t5, const T6 &t6, const T7 &t7) const {
+			t1 = m_alpha1 * t2 + m_alpha2 * t3 + m_alpha3 * t4 + m_alpha4 * t5 + m_alpha5 * t6 + m_alpha6 * t7;
+		}
+		typedef void result_type;
+	};
+
+	template<class Fac1 = double, class Fac2 = Fac1, class Fac3 = Fac2, class Fac4 = Fac3, class Fac5 = Fac4, class Fac6 = Fac5, class Fac7 = Fac6>
+	struct scale_sum7 {
+		const double m_alpha1;
+		const Fac2 m_alpha2;
+		const Fac3 m_alpha3;
+		const Fac4 m_alpha4;
+		const Fac5 m_alpha5;
+		const Fac6 m_alpha6;
+		const Fac7 m_alpha7;
+		scale_sum7(double alpha1, Fac2 alpha2, Fac3 alpha3, Fac4 alpha4, Fac5 alpha5, Fac6 alpha6, Fac7 alpha7) :
+				m_alpha1(alpha1), m_alpha2(alpha2), m_alpha3(alpha3), m_alpha4(alpha4), m_alpha5(alpha5), m_alpha6(alpha6), m_alpha7(alpha7) {
+		}
+		template<class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8>
+		void operator()(T1 &t1, const T2 &t2, const T3 &t3, const T4 &t4, const T5 &t5, const T6 &t6, const T7 &t7, const T8 &t8) const {
+			t1 = m_alpha1 * t2 + m_alpha2 * t3 + m_alpha3 * t4 + m_alpha4 * t5 + m_alpha5 * t6 + m_alpha6 * t7 + m_alpha7 * t8;
+		}
+		typedef void result_type;
+	};
 };
 
 template<typename T> Eigen::Matrix<T, 18, 1> cosserat_rod<T>::integrate(const T start, const T end, const T dt) {
 	namespace pl = std::placeholders;
 	namespace od = boost::numeric::odeint;
 
-//	typedef od::runge_kutta_dopri5<state_type> stepper_type;
+	//typedef od::runge_kutta_dopri5<state_type> stepper_type;
 
+	//typedef od::runge_kutta_dopri5<state_type, T, state_type, T, od::range_algebra, Toperations<T>> stepper_type;
 	typedef od::runge_kutta_dopri5<state_type, T, state_type, T, od::range_algebra, Toperations<T>> stepper_type;
 	//typedef od::runge_kutta_dopri5<state_type, T, state_type, T, od::array_algebra> stepper_type;
 
+	//typedef od::runge_kutta_dopri5<state_type, double, state_type, double, od::range_algebra> stepper_type;
 
-
-//	typedef od::runge_kutta_dopri5<state_type, double, state_type, double, od::range_algebra> stepper_type;
 	//typedef od::runge_kutta_dopri5<state_type, T, state_type, T, od::vector_space_algebra> stepper_type;
 //	typedef od::runge_kutta_dopri5<state_type,double,state_type,double,od::vector_space_algebra> stepper_type;
 
