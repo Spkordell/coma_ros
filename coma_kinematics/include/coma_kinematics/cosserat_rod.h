@@ -51,6 +51,12 @@ private:
 
 };
 
+template <typename T> Eigen::Matrix<T, 3, 3> cosserat_rod<T>::hat(Eigen::Matrix<T, 3, 1> u) {
+	Eigen::Matrix<T, 3, 3> uhat;
+	uhat << T(0), -u(2), u(1), u(2), T(0), -u(0), -u(1), u(0), T(0);
+	return uhat;
+}
+
 template<typename T> void cosserat_rod<T>::set_init_state(Eigen::Matrix<T, 18, 1> init_state) {
 	//this->init_state = Tstate<T>(init_state);
 	for (unsigned int i = 0; i < 18; i++) {
@@ -69,43 +75,52 @@ template<typename T> void cosserat_rod<T>::set_init_state(Eigen::Matrix<T, 18, 1
 }
 
 template<typename T> void cosserat_rod<T>::deriv(const state_type &x, state_type &dxdt, T t) {
+	using Eigen::Matrix;
+	typedef Matrix<T, 3, 3> Matrix3t;
+	typedef Matrix<T, 3, 1> Vector3t;
+
 	//turn ODE input into named variables
-	//Vector3d p(x[0], x[1], x[2]);
-//	Matrix3d R;
-//	R << x[3], x[6], x[9], x[4], x[7], x[10], x[5], x[8], x[11];
-//	Vector3d n(x[12], x[13], x[14]);
-//	Vector3d m(x[15], x[16], x[17]);
-//
-//	//compute kinematic variables from the internal force and moment using the linear constitutive law
-//	Vector3d v(0, 0, 1);
-//	v = K_se_inv * R.transpose() * n + v;
-//	Vector3d u = K_bt_inv * R.transpose() * m;
-//
-//	//compute state variable derivatives from cosserat rod equations
-//	Vector3d p_dot = R * v;
-//	Matrix3d R_dot = R * hat(u);
-//	Vector3d n_dot(0, 0, 0);
-//	Vector3d m_dot = -p_dot.cross(n);
-//
-//	//pack back into vector //todo: clean this
-//	dxdt[0] = p_dot(0);
-//	dxdt[1] = p_dot(1);
-//	dxdt[2] = p_dot(2);
-//	dxdt[3] = R_dot(0, 0);
-//	dxdt[4] = R_dot(1, 0);
-//	dxdt[5] = R_dot(2, 0);
-//	dxdt[6] = R_dot(0, 1);
-//	dxdt[7] = R_dot(1, 1);
-//	dxdt[8] = R_dot(2, 1);
-//	dxdt[9] = R_dot(0, 2);
-//	dxdt[10] = R_dot(1, 2);
-//	dxdt[11] = R_dot(1, 2);
-//	dxdt[12] = n_dot(0);
-//	dxdt[13] = n_dot(1);
-//	dxdt[14] = n_dot(2);
-//	dxdt[15] = m_dot(0);
-//	dxdt[16] = m_dot(1);
-//	dxdt[17] = m_dot(2);
+	Vector3t p;
+	p << x[0], x[1], x[2];
+	Matrix3t R;
+	R << x[3], x[6], x[9], x[4], x[7], x[10], x[5], x[8], x[11];
+	Vector3t n;
+	n << x[12], x[13], x[14];
+	Vector3t m;
+	m << x[15], x[16], x[17];
+
+	//compute kinematic variables from the internal force and moment using the linear constitutive law
+	Vector3t v;
+	v << T(0), T(0), T(1);
+	v = K_se_inv * R.transpose() * n + v;
+	Vector3t u = K_bt_inv * R.transpose() * m;
+
+	//compute state variable derivatives from cosserat rod equations
+	Vector3t p_dot = R * v;
+	Matrix3t R_dot = R * hat(u);
+	Vector3t n_dot;
+	n_dot << T(0), T(0), T(0);
+	Vector3t m_dot = -p_dot.cross(n);
+
+	//pack back into vector //todo: clean this
+	dxdt[0] = p_dot(0);
+	dxdt[1] = p_dot(1);
+	dxdt[2] = p_dot(2);
+	dxdt[3] = R_dot(0, 0);
+	dxdt[4] = R_dot(1, 0);
+	dxdt[5] = R_dot(2, 0);
+	dxdt[6] = R_dot(0, 1);
+	dxdt[7] = R_dot(1, 1);
+	dxdt[8] = R_dot(2, 1);
+	dxdt[9] = R_dot(0, 2);
+	dxdt[10] = R_dot(1, 2);
+	dxdt[11] = R_dot(1, 2);
+	dxdt[12] = n_dot(0);
+	dxdt[13] = n_dot(1);
+	dxdt[14] = n_dot(2);
+	dxdt[15] = m_dot(0);
+	dxdt[16] = m_dot(1);
+	dxdt[17] = m_dot(2);
 }
 
 template<typename T> void cosserat_rod<T>::write_deriv(const state_type &x, const T t) {

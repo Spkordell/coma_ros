@@ -45,32 +45,32 @@ ik::ik() {
 	singleikfunctor = new SingleIKFunctor;
 
 	//position of the leg constraints in the local frame at the bottom
-	ikfunctor->p1_init = *(new Vector3d(r_in * cos(rad(0 - deg)), r_in * sin(rad(0 - deg)), 0));
-	ikfunctor->p2_init = *(new Vector3d(r_in * cos(rad(0 + deg)), r_in * sin(rad(0 + deg)), 0));
-	ikfunctor->p3_init = *(new Vector3d(r_in * cos(rad(120 - deg)), r_in * sin(rad(120 - deg)), 0));
-	ikfunctor->p4_init = *(new Vector3d(r_in * cos(rad(120 + deg)), r_in * sin(rad(120 + deg)), 0));
-	ikfunctor->p5_init = *(new Vector3d(r_in * cos(rad(240 - deg)), r_in * sin(rad(240 - deg)), 0));
-	ikfunctor->p6_init = *(new Vector3d(r_in * cos(rad(240 + deg)), r_in * sin(rad(240 + deg)), 0));
-	ikfunctor->p7_init = *(new Vector3d(r_out * cos(rad(60 - deg)), r_out * sin(rad(60 - deg)), 0));
-	ikfunctor->p8_init = *(new Vector3d(r_out * cos(rad(60 + deg)), r_out * sin(rad(60 + deg)), 0));
-	ikfunctor->p9_init = *(new Vector3d(r_out * cos(rad(180 - deg)), r_out * sin(rad(180 - deg)), 0));
-	ikfunctor->p10_init = *(new Vector3d(r_out * cos(rad(180 + deg)), r_out * sin(rad(180 + deg)), 0));
-	ikfunctor->p11_init = *(new Vector3d(r_out * cos(rad(300 - deg)), r_out * sin(rad(300 - deg)), 0));
-	ikfunctor->p12_init = *(new Vector3d(r_out * cos(rad(300 + deg)), r_out * sin(rad(300 + deg)), 0));
+	ikfunctor->p1_init_ = *(new Vector3d(r_in * cos(rad(0 - deg)), r_in * sin(rad(0 - deg)), 0));
+	ikfunctor->p2_init_ = *(new Vector3d(r_in * cos(rad(0 + deg)), r_in * sin(rad(0 + deg)), 0));
+	ikfunctor->p3_init_ = *(new Vector3d(r_in * cos(rad(120 - deg)), r_in * sin(rad(120 - deg)), 0));
+	ikfunctor->p4_init_ = *(new Vector3d(r_in * cos(rad(120 + deg)), r_in * sin(rad(120 + deg)), 0));
+	ikfunctor->p5_init_ = *(new Vector3d(r_in * cos(rad(240 - deg)), r_in * sin(rad(240 - deg)), 0));
+	ikfunctor->p6_init_ = *(new Vector3d(r_in * cos(rad(240 + deg)), r_in * sin(rad(240 + deg)), 0));
+	ikfunctor->p7_init_ = *(new Vector3d(r_out * cos(rad(60 - deg)), r_out * sin(rad(60 - deg)), 0));
+	ikfunctor->p8_init_ = *(new Vector3d(r_out * cos(rad(60 + deg)), r_out * sin(rad(60 + deg)), 0));
+	ikfunctor->p9_init_ = *(new Vector3d(r_out * cos(rad(180 - deg)), r_out * sin(rad(180 - deg)), 0));
+	ikfunctor->p10_init_ = *(new Vector3d(r_out * cos(rad(180 + deg)), r_out * sin(rad(180 + deg)), 0));
+	ikfunctor->p11_init_ = *(new Vector3d(r_out * cos(rad(300 - deg)), r_out * sin(rad(300 - deg)), 0));
+	ikfunctor->p12_init_ = *(new Vector3d(r_out * cos(rad(300 + deg)), r_out * sin(rad(300 + deg)), 0));
 
 	//position of the leg constraints in the local frame at the top
-	ikfunctor->p6_final = *(new Vector3d(r_in * cos(rad(0 - deg)), r_in * sin(rad(0 - deg)), 0));
-	ikfunctor->p1_final = *(new Vector3d(r_in * cos(rad(0 + deg)), r_in * sin(rad(0 + deg)), 0));
-	ikfunctor->p2_final = *(new Vector3d(r_in * cos(rad(120 - deg)), r_in * sin(rad(120 - deg)), 0));
-	ikfunctor->p3_final = *(new Vector3d(r_in * cos(rad(120 + deg)), r_in * sin(rad(120 + deg)), 0));
-	ikfunctor->p4_final = *(new Vector3d(r_in * cos(rad(240 - deg)), r_in * sin(rad(240 - deg)), 0));
-	ikfunctor->p5_final = *(new Vector3d(r_in * cos(rad(240 + deg)), r_in * sin(rad(240 + deg)), 0));
-	ikfunctor->p12_final = *(new Vector3d(r_out * cos(rad(0 - deg)), r_out * sin(rad(0 - deg)), 0));
-	ikfunctor->p7_final = *(new Vector3d(r_out * cos(rad(0 + deg)), r_out * sin(rad(0 + deg)), 0));
-	ikfunctor->p8_final = *(new Vector3d(r_out * cos(rad(120 - deg)), r_out * sin(rad(120 - deg)), 0));
-	ikfunctor->p9_final = *(new Vector3d(r_out * cos(rad(120 + deg)), r_out * sin(rad(120 + deg)), 0));
-	ikfunctor->p10_final = *(new Vector3d(r_out * cos(rad(240 - deg)), r_out * sin(rad(240 - deg)), 0));
-	ikfunctor->p11_final = *(new Vector3d(r_out * cos(rad(240 + deg)), r_out * sin(rad(240 + deg)), 0));
+	ikfunctor->p6_final_ = *(new Vector3d(r_in * cos(rad(0 - deg)), r_in * sin(rad(0 - deg)), 0));
+	ikfunctor->p1_final_ = *(new Vector3d(r_in * cos(rad(0 + deg)), r_in * sin(rad(0 + deg)), 0));
+	ikfunctor->p2_final_ = *(new Vector3d(r_in * cos(rad(120 - deg)), r_in * sin(rad(120 - deg)), 0));
+	ikfunctor->p3_final_ = *(new Vector3d(r_in * cos(rad(120 + deg)), r_in * sin(rad(120 + deg)), 0));
+	ikfunctor->p4_final_ = *(new Vector3d(r_in * cos(rad(240 - deg)), r_in * sin(rad(240 - deg)), 0));
+	ikfunctor->p5_final_ = *(new Vector3d(r_in * cos(rad(240 + deg)), r_in * sin(rad(240 + deg)), 0));
+	ikfunctor->p12_final_ = *(new Vector3d(r_out * cos(rad(0 - deg)), r_out * sin(rad(0 - deg)), 0));
+	ikfunctor->p7_final_ = *(new Vector3d(r_out * cos(rad(0 + deg)), r_out * sin(rad(0 + deg)), 0));
+	ikfunctor->p8_final_ = *(new Vector3d(r_out * cos(rad(120 - deg)), r_out * sin(rad(120 - deg)), 0));
+	ikfunctor->p9_final_ = *(new Vector3d(r_out * cos(rad(120 + deg)), r_out * sin(rad(120 + deg)), 0));
+	ikfunctor->p10_final_ = *(new Vector3d(r_out * cos(rad(240 - deg)), r_out * sin(rad(240 - deg)), 0));
+	ikfunctor->p11_final_ = *(new Vector3d(r_out * cos(rad(240 + deg)), r_out * sin(rad(240 + deg)), 0));
 
 	//initialize first guess
 	for (unsigned int i = 0; i < GS - 12; i++) {
@@ -88,8 +88,7 @@ ik::ik() {
 	}
 
 	//initialize solver
-	cost_function = new NumericDiffCostFunction<IKFunctor, ceres::CENTRAL,
-	GS - 6, GS>(ikfunctor);
+	cost_function = new AutoDiffCostFunction<IKFunctor, GS - 6, GS>(ikfunctor);
 	problem.AddResidualBlock(cost_function, NULL, guess_init);
 
 	for (unsigned int rod = 0; rod < 6; rod++) {
@@ -132,10 +131,10 @@ void ik::solve(Vector3d pd, Matrix3d Rd, double* leg_lengths) {
 	Vector3d F(0, 0, 0); //applied force at end effector
 	Vector3d L(0, 0, 0); //applied moment at end effector
 
-	ikfunctor->F = F;
-	ikfunctor->L = L;
-	ikfunctor->Rd = Rd;
-	ikfunctor->pd = pd;
+	ikfunctor->F_ = F;
+	ikfunctor->L_ = L;
+	ikfunctor->Rd_ = Rd;
+	ikfunctor->pd_ = pd;
 
 	//run the solver
 	Solve(options, &problem, &summary);
@@ -145,10 +144,11 @@ void ik::solve(Vector3d pd, Matrix3d Rd, double* leg_lengths) {
 	///solve for the bottom lengths
 	Eigen::Matrix<double, 6, 1> bottom_lengths;
 
-	Eigen::Vector3d p_init[6] = { ikfunctor->p1_init, ikfunctor->p2_init, ikfunctor->p3_init, ikfunctor->p4_init, ikfunctor->p5_init, ikfunctor->p6_init };
-	Eigen::Matrix3d R_final[6] = { ikfunctor->R1_init_s, ikfunctor->R2_init_s, ikfunctor->R3_init_s, ikfunctor->R4_init_s, ikfunctor->R5_init_s,
-			ikfunctor->R6_init_s };
-	Eigen::Vector3d p_final[6] = { ikfunctor->p1_init_s.head<3>(), ikfunctor->p2_init_s.head<3>(), ikfunctor->p3_init_s.head<3>(),
+
+
+	Eigen::Vector3d p_init[6] = { ikfunctor->p1_init_, ikfunctor->p2_init_, ikfunctor->p3_init_, ikfunctor->p4_init_, ikfunctor->p5_init_, ikfunctor->p6_init_ };
+	auto R_final[6] = { ikfunctor->R1_init_s, ikfunctor->R2_init_s, ikfunctor->R3_init_s, ikfunctor->R4_init_s, ikfunctor->R5_init_s, ikfunctor->R6_init_s };
+	auto p_final[6] = { ikfunctor->p1_init_s.head<3>(), ikfunctor->p2_init_s.head<3>(), ikfunctor->p3_init_s.head<3>(),
 			ikfunctor->p4_init_s.head<3>(), ikfunctor->p5_init_s.head<3>(), ikfunctor->p6_init_s.head<3>() };
 
 	for (unsigned int rod; rod < 6; rod++) {
