@@ -13,110 +13,15 @@
 
 #include <boost/array.hpp>
 #include <boost/numeric/odeint.hpp>
-
-//#include </usr/include/boost/numeric/odeint/algebra/array_algebra.hpp>
-
 #include <Eigen/Dense>
 #include <math.h>
 #include <functional>
 
 #include "ceres/ceres.h"
 
-//template<typename T> class Tstate/*: boost::additive1<Tstate<T>, boost::additive2<Tstate<T>, double, boost::multiplicative2<Tstate<T>, double> > > */{
-//public:
-//public:
-//	Eigen::Matrix<T, 18, 1> state;
-//
-//	Tstate() {
-//	}
-//
-//	Tstate(const Eigen::Matrix<T, 18, 1> val) {
-//		state = val;
-//	}
-//
-//	Tstate& operator+=(const Tstate &p) {
-//		for (unsigned int i; i < 18; i++) {
-//			state[i] += p[i];
-//		}
-//		return *this;
-//	}
-//
-//	Tstate& operator*=(const T a) {
-//		for (unsigned int i; i < 18; i++) {
-//			state[i] *= a;
-//		}
-//		return *this;
-//	}
-//
-//	friend Tstate operator*(const T &a, const Tstate &b) {
-//		Tstate r;
-//		for (unsigned int i; i < 18; i++) {
-//			r.state[i] = a * b.state[i];
-//		}
-//		return r;
-//	}
-//
-//	friend Tstate operator+(const Tstate &a, const Tstate &b) {
-//		Tstate r;
-//		for (unsigned int i; i < 18; i++) {
-//			r.state[i] = a.state[i] + b.state[i];
-//		}
-//		return r;
-//	}
-//
-//	friend Tstate operator+(const T &a, const Tstate &b) {
-//		Tstate r;
-//		for (unsigned int i; i < 18; i++) {
-//			r.state[i] = a + b.state[i];
-//		}
-//		return r;
-//	}
-//
-//	// only required for steppers with error control
-//	friend Tstate operator/(const Tstate &p1, const Tstate &p2) {
-//		Tstate r;
-//		for (unsigned int i = 0; i < 18; i++) {
-//			r.state[i] = p1.state[i] / p2.state[i];
-//		}
-//		return r;
-//	}
-//
-//	T operator [](int i) const {
-//		return state[i];
-//	}
-//
-//	friend Tstate abs(const Tstate &p) {
-//		Tstate r;
-//		for (unsigned int i = 0; i < 18; i++) {
-//			r.state[i] = abs(p.state[i]);
-//		}
-//		return r;
-//	}
-//
-//};
-//
-//namespace boost {
-//namespace numeric {
-//namespace odeint {
-//// specialization of vector_space_reduce, only required for steppers with error control
-//template<typename T>
-//struct vector_space_reduce<Tstate<T> > {
-//	template<class Value, class Op>
-//	Value operator()(const Tstate<T> &p, Op op, Value init) {
-//		for (unsigned int i = 0; i < 18; i++) {
-//			init = op(init, p[i]);
-//		}
-//		return init;
-//	}
-//};
-//}
-//}
-//}
-
 template<typename T> class cosserat_rod {
 	typedef boost::array<T, 18> state_type; /* The type of container used to hold the state vector */
 	//typedef Eigen::Matrix<T, 18, 1> state_type; /* The type of container used to hold the state vector */
-	//typedef Tstate<T> state_type; /* The type of container used to hold the state vector */
 
 public:
 	void set_init_state(Eigen::Matrix<T, 18, 1> init_state);
@@ -210,7 +115,7 @@ template<typename T> void cosserat_rod<T>::write_deriv(const state_type &x, cons
 //	}
 //	cout << endl;
 }
-//
+
 namespace ceres {
 template<typename M, int N> inline bool operator>(const Jet<M, N>& f, int g) {
 	return f > ceres::Jet<M, N>(g);
@@ -223,18 +128,6 @@ template<typename M, int N> inline Jet<M, N> operator/(const Jet<M, N>& f, int g
 template<typename M, int N> inline Jet<M, N> max(const double f, const Jet<M, N>& g) {
 	return (Jet<M, N>(f) > g) ? Jet<M, N>(f) : g;
 }
-
-//template<typename M, int N> inline operator int(const Jet<M, N>& g) {
-//	return 1;
-//}
-
-//template<typename M, int N> inline operator Jet<M, N>(const double a) {
-//  return Jet<M, N>(a);
-//}
-
-//template<typename M, int N> inline Jet<M, N> operator*(const Jet<M, N>& f, size_t g) {
-//	return f * ceres::Jet<M, N>(g);
-//}
 
 }
 
@@ -309,8 +202,6 @@ public:
 		const Fac4 m_alpha4;
 		const Fac5 m_alpha5;
 		const Fac6 m_alpha6;
-
-
 		scale_sum6(Fac1 alpha1, Fac2 alpha2, Fac3 alpha3, Fac4 alpha4, Fac5 alpha5, Fac6 alpha6) :
 				m_alpha1(alpha1), m_alpha2(alpha2), m_alpha3(alpha3), m_alpha4(alpha4), m_alpha5(alpha5), m_alpha6(alpha6) {
 		}
@@ -347,52 +238,16 @@ template<typename T> Eigen::Matrix<T, 18, 1> cosserat_rod<T>::integrate(const T 
 	namespace od = boost::numeric::odeint;
 
 	//typedef od::runge_kutta_dopri5<state_type> stepper_type;
-
-	//typedef od::runge_kutta_dopri5<state_type, T, state_type, T, od::range_algebra, Toperations<T>> stepper_type;
 	typedef od::runge_kutta_dopri5<state_type, T, state_type, T, od::range_algebra, Toperations<T>> stepper_type;
-	//typedef od::runge_kutta_dopri5<state_type, T, state_type, T, od::array_algebra> stepper_type;
+	//typedef od::runge_kutta_dopri5<state_type, T, state_type, T, od::vector_space_algebra> stepper_type; //use if state type is Eigen
 
-	//typedef od::runge_kutta_dopri5<state_type, double, state_type, double, od::range_algebra> stepper_type;
-
-	//typedef od::runge_kutta_dopri5<state_type, T, state_type, T, od::vector_space_algebra> stepper_type;
-//	typedef od::runge_kutta_dopri5<state_type,double,state_type,double,od::vector_space_algebra> stepper_type;
-
-	//todo: optimize this
-//	state_type init_state_;
-//	for (unsigned int i = 0; i < 18; i++) {
-//		init_state_[i] = init_state[i];
-//	}
-
-	//std::cout << "s:" << start << "\te:" << end << "\td:" << dt << "\tinit:" << init_state.transpose() << std::endl;
-	//int start_s=clock();
-
-//	std::bind(&cosserat_rod::deriv, *this, pl::_1, pl::_2, pl::_3);
-//	std::bind(&cosserat_rod::write_deriv, *this, pl::_1, pl::_2);
-//	od::make_dense_output < stepper_type > (T(1E-6), T(1E-3));
 
 	od::integrate_const(od::make_dense_output < stepper_type > (T(1E-6), T(1E-3)), std::bind(&cosserat_rod::deriv, *this, pl::_1, pl::_2, pl::_3), init_state,
 			start, end, dt, std::bind(&cosserat_rod::write_deriv, *this, pl::_1, pl::_2));
 
-//	od::integrate_const(od::make_dense_output < stepper_type > (1E-6, 1E-3), std::bind(&cosserat_rod::deriv, *this, pl::_1, pl::_2, pl::_3), init_state, start, end,
-//			dt, std::bind(&cosserat_rod::write_deriv, *this, pl::_1, pl::_2));
-
-//		od::integrate_const(stepper_type(), std::bind(&cosserat_rod::deriv, *this, pl::_1, pl::_2, pl::_3), init_state, start, end,
-//				dt, std::bind(&cosserat_rod::write_deriv, *this, pl::_1, pl::_2));
-
-	//todo: parameterize number of steps
-//		od::integrate_n_steps(stepper_type() , std::bind(&cosserat_rod::deriv, *this, pl::_1, pl::_2, pl::_3), init_state, start, dt, 10 ,
-//		        std::bind(&cosserat_rod::write_deriv, *this, pl::_1, pl::_2));
-
-	//int stop_s=clock();
-	//cout << "time: " << double( stop_s - start_s) / double(CLOCKS_PER_SEC)<< " seconds." << endl;
-
-	//todo: can probably remove this since state type is now Eigen
 	for (unsigned int i = 0; i < 18; i++) {
-		//result[i] = init_state_[i];
 		result[i] = init_state[i];
 	}
-
-	//std::cout << "result:"  << result.transpose() << std::endl << std::endl;
 
 	return result;
 }
