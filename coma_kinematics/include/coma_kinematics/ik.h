@@ -31,9 +31,11 @@ public:
 	void solvetest();
 	void solve(Eigen::Vector3d pd, Eigen::Matrix3d Rd, double* leg_lengths);
 	static double rad(double degrees);
+	Eigen::Matrix<double , 3, 3> hat(Eigen::Matrix<double, 3, 1> u);
 
 	struct IKFunctor {
 		bool operator()(const double* const x, double* residual) const {
+			/*
 			using Eigen::Vector3d;
 			using Eigen::Vector4d;
 			using Eigen::RowVector4d;
@@ -430,6 +432,7 @@ public:
 				residual[i] = res[i];
 			}
 
+*/
 			return true;
 		}
 
@@ -482,60 +485,90 @@ public:
 		Eigen::Vector4d p6_init_s;
 	};
 
+	/*
+	 struct CostFunctor {
+	 template <typename T>
+	 bool operator()(const T* const x, T* residual) const {
+	 residual[0] = T(10.0) - x[0];
+	 return true;
+	 }
+	 };
+	 */
+
 	struct SingleIKFunctor {
-		bool operator()(const double* const x, double* residual) const {
-			using Eigen::Vector3d;
-			using Eigen::Vector4d;
-			using Eigen::RowVector4d;
+		template<typename T>
+		bool operator()(const T* const x, T* residual) const {
+//			using Eigen::Vector3d;
+//			using Eigen::Vector4d;
+//			using Eigen::RowVector4d;
+//			using Eigen::Matrix;
+//			using Eigen::Matrix3d;
+//			using Eigen::Matrix4d;
+//			typedef Matrix<double, 9, 1> Vector9d;
+//			typedef Matrix<double, 18, 1> Vector18d;
+
 			using Eigen::Matrix;
-			using Eigen::Matrix3d;
-			using Eigen::Matrix4d;
-			typedef Matrix<double, 9, 1> Vector9d;
-			typedef Matrix<double, 18, 1> Vector18d;
+			typedef Matrix<T, 3, 3> Matrix3t;
+			typedef Matrix<T, 4, 4> Matrix4t;
+			typedef Matrix<T, 3, 1> Vector3t;
+			typedef Matrix<T, 4, 1> Vector4t;
+			typedef Matrix<T, 1, 4> RowVector4t;
+			typedef Matrix<T, 9, 1> Vector9t;
+			typedef Matrix<T, 18, 1> Vector18t;
+
 			using std::cout;
 			using std::endl;
 
-			double L = x[6];
-			double theta = x[5];
-			Vector9d R_init;
-			R_init << cos(theta), sin(theta), 0.0, -sin(theta), cos(theta), 0.0, 0.0, 0.0, 1.0;
-			Vector3d n_init(x[0], x[1], x[2]);
-			Vector3d m_init(x[3], x[4], 0);
+			T L = x[6];
+			T theta = x[5];
+			Vector9t R_init;
+			R_init << cos(theta), sin(theta), T(0.0), -sin(theta), cos(theta), T(0.0), T(0.0), T(0.0), T(1.0);
+			Vector3t n_init;
+			n_init << x[0], x[1], x[2];
+			Vector3t m_init;
+			m_init << x[3], x[4], 0;
 
-			Vector18d y_init;
-			y_init << p_init, R_init, n_init, m_init;
+			Vector18t y_init;
 
-			cosserat_rod cr(y_init);
-			Vector18d y = cr.integrate(0, L, L / INTEGRATION_STEP_SIZE);
+			Vector3t p_init_t;
+			p_init_t << T(p_init[0]), T(p_init[1]), T(p_init[2]);
+			y_init << p_init_t, R_init, n_init, m_init;
 
-			Vector3d p_end(y[0], y[1], y[2]);
-			Matrix3d R_end;
+			cosserat_rod<T> cr;
+			cr.set_init_state(y_init);
+
+			Vector18t y = cr.integrate(T(0), L, L / T(INTEGRATION_STEP_SIZE));
+
+			/*
+			Vector3t p_end;
+			p_end << y[0], y[1], y[2];
+			Matrix3t R_end;
 			R_end << y[3], y[6], y[9], y[4], y[7], y[10], y[5], y[8], y[11];
 			//Vector3d n_end(y[12], y[13], y[14]);
 			//Vector3d m_end(y[15], y[16], y[17]);
 
-			Vector3d res_p = p_final - p_end;
+			Vector3t res_p = p_final - p_end;
 //			Matrix3d R_final3x3;
 //			R_final3x3 << R_Final[0], R_Final[3], R_Final[6], R_Final[1], R_Final[4], R_Final[7], R_Final[2], R_Final[5], R_Final[8];
 
 #ifdef use_matrix_log
-			Vector3d res_R(0.0, 0.0, 0.0);
+			Vector3t res_R(0.0, 0.0, 0.0);
 			if (!(R_final.transpose() * R_end).isZero()) res_R = cosserat_rod::vee((R_final.transpose() * R_end).log());
 #else
-			Matrix<double, 2, 3> rodrigues;
-			rodrigues << 1, 0, 0, 0, 1, 0;
-			Vector3d res_R;
+			Matrix<T, 2, 3> rodrigues;
+			rodrigues << T(1), T(0), T(0), T(0), T(1), T(0);
+			Vector3t res_R;
 			res_R << rodrigues * cosserat_rod::vee((R_end.transpose() * R_final - R_end * R_final.transpose())), 0;
 #endif
 
-			double l_c = 0.01; //characteristic length converts rotation error to meters
-			Matrix<double, 6, 1> res;
+			T l_c = 0.01; //characteristic length converts rotation error to meters
+			Matrix<T, 6, 1> res;
 			res << res_p, res_R * l_c;
 
 			for (unsigned int i = 0; i < 6; i++) {
 				residual[i] = res[i];
 			}
-
+*/
 			return true;
 		}
 		Eigen::Vector3d p_init;

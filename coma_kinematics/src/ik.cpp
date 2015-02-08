@@ -26,6 +26,12 @@ double ik::rad(double degrees) {
 	return degrees * (M_PI / 180.0);
 }
 
+Eigen::Matrix<double , 3, 3> ik::hat(Eigen::Matrix<double, 3, 1> u) {
+	Eigen::Matrix<double, 3, 3> uhat;
+	uhat << 0, -u(2), u(1), u(2), 0, -u(0), -u(1), u(0), 0;
+	return uhat;
+}
+
 ik::ik() {
 	// a private handle for this ROS node (allows retrieval of relative parameters)
 	ros::NodeHandle private_nh("~");
@@ -87,7 +93,7 @@ ik::ik() {
 	problem.AddResidualBlock(cost_function, NULL, guess_init);
 
 	for (unsigned int rod = 0; rod < 6; rod++) {
-		cost_function_single[rod] = new NumericDiffCostFunction<SingleIKFunctor, ceres::CENTRAL, 6, 7>(singleikfunctor);
+		cost_function_single[rod] = new AutoDiffCostFunction<SingleIKFunctor, 6, 7>(singleikfunctor);
 		problem_single[rod].AddResidualBlock(cost_function_single[rod], NULL, single_guess_init[rod]);
 	}
 
@@ -103,10 +109,11 @@ ik::ik() {
 	ROS_INFO("COMA IK Solver Server Started");
 }
 
+
 bool ik::solve_ik(coma_kinematics::solveIK::Request &req, coma_kinematics::solveIK::Response &res) {
 	Vector3d pd(req.x_pos, req.y_pos, req.z_pos); //desired end effector position
 	Vector3d rot(ik::rad(req.x_rot), ik::rad(req.y_rot), ik::rad(req.z_rot));
-	Matrix3d Rd = cosserat_rod::hat(rot); //desired end effector orientation
+	Matrix3d Rd = ik::hat(rot); //desired end effector orientation
 	Eigen::MatrixExponential < Matrix3d > Rdm(Rd);
 	Rdm.compute(Rd);
 	double leg_lengths[12];
