@@ -33,17 +33,17 @@ public:
 	static double rad(double degrees);
 	Eigen::Matrix<double, 3, 3> hat(Eigen::Matrix<double, 3, 1> u);
 
-	template<typename T> inline Eigen::Matrix<T, 3, 3> M3DtoT(Eigen::Matrix<double, 3, 3> a) {
+	template<typename T> inline static Eigen::Matrix<T, 3, 3> M3DtoT(Eigen::Matrix<double, 3, 3> a) {
 		Eigen::Matrix<T, 3, 3> b;
 		b << T(a[0]), T(a[1]), T(a[2]), T(a[3]), T(a[4]), T(a[5]), T(a[6]), T(a[7]), T(a[8]);
 		return b;
 	}
-	template<typename T> inline Eigen::Matrix<T, 3, 1> V3DtoT(Eigen::Matrix<double, 3, 1> a) {
+	template<typename T> inline static Eigen::Matrix<T, 3, 1> V3DtoT(Eigen::Matrix<double, 3, 1> a) {
 		Eigen::Matrix<T, 3, 1> b;
 		b << T(a[0]), T(a[1]), T(a[2]);
 		return b;
 	}
-	template<typename T> inline Eigen::Matrix<T, 4, 1> V4DtoT(Eigen::Matrix<double, 4, 1> a) {
+	template<typename T> inline static Eigen::Matrix<T, 4, 1> V4DtoT(Eigen::Matrix<double, 4, 1> a) {
 		Eigen::Matrix<T, 4, 1> b;
 		b << T(a[0]), T(a[1]), T(a[2]), T(a[3]);
 		return b;
@@ -335,15 +335,15 @@ public:
 			m6_init << x[33], x[34], T(0);
 
 			//centroid of all the bottom segment leg ends
-			Vector3t p_cb = (p7_end + p8_end + p9_end + p10_end + p11_end + p12_end) / 6;
+			Vector3t p_cb = (p7_end + p8_end + p9_end + p10_end + p11_end + p12_end) / T(6);
 
 			//transformation from base to mid_plate
 			Matrix4t T_mid;
-			T_mid.block<3, 3>(0, 0) = R7_end;
-			T_mid.block<3, 1>(0, 3) = p_cb;
+			T_mid.block(0, 0, 3, 3) = R7_end;
+			T_mid.block(0, 3, 3, 1) = p_cb;
 			RowVector4t zzzo;
 			zzzo << T(0), T(0), T(0), T(1);
-			T_mid.block<1, 4>(3, 0) = zzzo;
+			T_mid.block(3, 0, 1, 4) = zzzo;
 			Vector4t p1_init_2;
 			Vector4t p2_init_2;
 			Vector4t p3_init_2;
@@ -374,12 +374,12 @@ public:
 			Vector18t y4_init;
 			Vector18t y5_init;
 			Vector18t y6_init;
-			y1_init << p1_init_2.head<3>(), R1_init, n1_init, m1_init;
-			y2_init << p2_init_2.head<3>(), R2_init, n2_init, m2_init;
-			y3_init << p3_init_2.head<3>(), R3_init, n3_init, m3_init;
-			y4_init << p4_init_2.head<3>(), R4_init, n4_init, m4_init;
-			y5_init << p5_init_2.head<3>(), R5_init, n5_init, m5_init;
-			y6_init << p6_init_2.head<3>(), R6_init, n6_init, m6_init;
+			y1_init << p1_init_2.head(3), R1_init, n1_init, m1_init;
+			y2_init << p2_init_2.head(3), R2_init, n2_init, m2_init;
+			y3_init << p3_init_2.head(3), R3_init, n3_init, m3_init;
+			y4_init << p4_init_2.head(3), R4_init, n4_init, m4_init;
+			y5_init << p5_init_2.head(3), R5_init, n5_init, m5_init;
+			y6_init << p6_init_2.head(3), R6_init, n6_init, m6_init;
 
 			//perform integration on bottom link
 			cosserat_rod<T> cr1;
@@ -473,7 +473,7 @@ public:
 			m6_end << y6[15], y6[16], y6[17];
 
 			//centroid of all top segment leg ends
-			Vector3t p_ct = (p1_end + p2_end + p3_end + p4_end + p5_end + p6_end) / 6;
+			Vector3t p_ct = (p1_end + p2_end + p3_end + p4_end + p5_end + p6_end) / T(6);
 
 			//residual of equilibrium conditions
 			Vector3t res_eq_F_top = (n1_end + n2_end + n3_end + n4_end + n5_end + n6_end) - F;
@@ -629,6 +629,10 @@ public:
 			using std::cout;
 			using std::endl;
 
+			Vector3t p_init = V3DtoT<T>(p_init_);
+			Vector3t p_final = V3DtoT<T>(p_final_);
+			Matrix3t R_final = M3DtoT<T>(R_final_);
+
 			T L = x[6];
 			T theta = x[5];
 			Vector9t R_init;
@@ -639,10 +643,7 @@ public:
 			m_init << x[3], x[4], 0;
 
 			Vector18t y_init;
-
-			Vector3t p_init_t;
-			p_init_t << T(p_init[0]), T(p_init[1]), T(p_init[2]);
-			y_init << p_init_t, R_init, n_init, m_init;
+			y_init << p_init, R_init, n_init, m_init;
 
 			cosserat_rod<T> cr;
 			cr.set_init_state(y_init);
@@ -664,9 +665,9 @@ public:
 			Matrix<T, 2, 3> rodrigues;
 			rodrigues << T(1), T(0), T(0), T(0), T(1), T(0);
 			Vector3t res_R;
-			res_R << rodrigues * cosserat_rod<T>::vee((R_end.transpose() * R_final - R_end * R_final.transpose())), 0;
+			res_R << rodrigues * cosserat_rod<T>::vee((R_end.transpose() * R_final - R_end * R_final.transpose())), T(0);
 #endif
-			T l_c = 0.01; //characteristic length converts rotation error to meters
+			T l_c = T(0.01); //characteristic length converts rotation error to meters
 			Matrix<T, 6, 1> res;
 			res << res_p, res_R * l_c;
 			for (unsigned int i = 0; i < 6; i++) {
@@ -675,11 +676,9 @@ public:
 
 			return true;
 		}
-		Eigen::Vector3d p_init;
-//		Eigen::Vector3d p_final;
-//		Eigen::Matrix3d R_final;
-		auto p_final;
-		auto R_final;
+		Eigen::Vector3d p_init_;
+		Eigen::Vector3d p_final_;
+		Eigen::Matrix3d R_final_;
 	};
 
 private:
