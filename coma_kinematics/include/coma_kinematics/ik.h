@@ -25,6 +25,10 @@
 #define use_multithreading
 //#define use_matrix_log
 
+template<typename T> struct identity {
+	typedef T type;
+};
+
 class ik {
 public:
 	ik();
@@ -35,7 +39,7 @@ public:
 
 	template<typename T> inline static Eigen::Matrix<T, 3, 3> M3DtoT(Eigen::Matrix<double, 3, 3> a) {
 		Eigen::Matrix<T, 3, 3> b;
-		b << T(a[0]), T(a[1]), T(a[2]), T(a[3]), T(a[4]), T(a[5]), T(a[6]), T(a[7]), T(a[8]);
+		b << T(a(0, 0)), T(a(0, 1)), T(a(0, 2)), T(a(1, 0)), T(a(1, 1)), T(a(1, 2)), T(a(2, 0)), T(a(2, 1)), T(a(2, 2));
 		return b;
 	}
 	template<typename T> inline static Eigen::Matrix<T, 3, 1> V3DtoT(Eigen::Matrix<double, 3, 1> a) {
@@ -285,283 +289,289 @@ public:
 			R4_init_m = R4_init_m * R7_end;
 			R5_init_m = R5_init_m * R7_end;
 			R6_init_m = R6_init_m * R7_end;
-			const_cast<IKFunctor*>(this)->R1_init_s = R1_init_m;
-			const_cast<IKFunctor*>(this)->R2_init_s = R2_init_m;
-			const_cast<IKFunctor*>(this)->R3_init_s = R3_init_m;
-			const_cast<IKFunctor*>(this)->R4_init_s = R4_init_m;
-			const_cast<IKFunctor*>(this)->R5_init_s = R5_init_m;
-			const_cast<IKFunctor*>(this)->R6_init_s = R6_init_m;
-			Vector9t R1_init;
-			Vector9t R2_init;
-			Vector9t R3_init;
-			Vector9t R4_init;
-			Vector9t R5_init;
-			Vector9t R6_init;
-			R1_init << R1_init_m(0, 0), R1_init_m(1, 0), R1_init_m(2, 0), R1_init_m(0, 1), R1_init_m(1, 1), R1_init_m(2, 1), R1_init_m(0, 2), R1_init_m(1, 2), R1_init_m(
-					2, 2);
-			R2_init << R2_init_m(0, 0), R2_init_m(1, 0), R2_init_m(2, 0), R2_init_m(0, 1), R2_init_m(1, 1), R2_init_m(2, 1), R2_init_m(0, 2), R2_init_m(1, 2), R2_init_m(
-					2, 2);
-			R3_init << R3_init_m(0, 0), R3_init_m(1, 0), R3_init_m(2, 0), R3_init_m(0, 1), R3_init_m(1, 1), R3_init_m(2, 1), R3_init_m(0, 2), R3_init_m(1, 2), R3_init_m(
-					2, 2);
-			R4_init << R4_init_m(0, 0), R4_init_m(1, 0), R4_init_m(2, 0), R4_init_m(0, 1), R4_init_m(1, 1), R4_init_m(2, 1), R4_init_m(0, 2), R4_init_m(1, 2), R4_init_m(
-					2, 2);
-			R5_init << R5_init_m(0, 0), R5_init_m(1, 0), R5_init_m(2, 0), R5_init_m(0, 1), R5_init_m(1, 1), R5_init_m(2, 1), R5_init_m(0, 2), R5_init_m(1, 2), R5_init_m(
-					2, 2);
-			R6_init << R6_init_m(0, 0), R6_init_m(1, 0), R6_init_m(2, 0), R6_init_m(0, 1), R6_init_m(1, 1), R6_init_m(2, 1), R6_init_m(0, 2), R6_init_m(1, 2), R6_init_m(
-					2, 2);
-			Vector3t n1_init;
-			Vector3t n2_init;
-			Vector3t n3_init;
-			Vector3t n4_init;
-			Vector3t n5_init;
-			Vector3t n6_init;
-			Vector3t m1_init;
-			Vector3t m2_init;
-			Vector3t m3_init;
-			Vector3t m4_init;
-			Vector3t m5_init;
-			Vector3t m6_init;
-			n1_init << x[0], x[1], x[2];
-			n2_init << x[6], x[7], x[8];
-			n3_init << x[12], x[13], x[14];
-			n4_init << x[18], x[19], x[20];
-			n5_init << x[24], x[25], x[26];
-			n6_init << x[30], x[31], x[32];
-			m1_init << x[3], x[4], T(0);
-			m2_init << x[9], x[10], T(0);
-			m3_init << x[15], x[16], T(0);
-			m4_init << x[21], x[22], T(0);
-			m5_init << x[27], x[28], T(0);
-			m6_init << x[33], x[34], T(0);
 
-			//centroid of all the bottom segment leg ends
-			Vector3t p_cb = (p7_end + p8_end + p9_end + p10_end + p11_end + p12_end) / T(6);
+			StoreRinit<T>()(this, R1_init_m, identity<T>());
 
-			//transformation from base to mid_plate
-			Matrix4t T_mid;
-			T_mid.block(0, 0, 3, 3) = R7_end;
-			T_mid.block(0, 3, 3, 1) = p_cb;
-			RowVector4t zzzo;
-			zzzo << T(0), T(0), T(0), T(1);
-			T_mid.block(3, 0, 1, 4) = zzzo;
-			Vector4t p1_init_2;
-			Vector4t p2_init_2;
-			Vector4t p3_init_2;
-			Vector4t p4_init_2;
-			Vector4t p5_init_2;
-			Vector4t p6_init_2;
-			p1_init_2 << p1_init(0), p1_init(1), p1_init(2), T(1);
-			p2_init_2 << p2_init(0), p2_init(1), p2_init(2), T(1);
-			p3_init_2 << p3_init(0), p3_init(1), p3_init(2), T(1);
-			p4_init_2 << p4_init(0), p4_init(1), p4_init(2), T(1);
-			p5_init_2 << p5_init(0), p5_init(1), p5_init(2), T(1);
-			p6_init_2 << p6_init(0), p6_init(1), p6_init(2), T(1);
-			p1_init_2 = T_mid * p1_init_2;
-			p2_init_2 = T_mid * p2_init_2;
-			p3_init_2 = T_mid * p3_init_2;
-			p4_init_2 = T_mid * p4_init_2;
-			p5_init_2 = T_mid * p5_init_2;
-			p6_init_2 = T_mid * p6_init_2;
-			const_cast<IKFunctor*>(this)->p1_init_s = p1_init_2;
-			const_cast<IKFunctor*>(this)->p2_init_s = p2_init_2;
-			const_cast<IKFunctor*>(this)->p3_init_s = p3_init_2;
-			const_cast<IKFunctor*>(this)->p4_init_s = p4_init_2;
-			const_cast<IKFunctor*>(this)->p5_init_s = p5_init_2;
-			const_cast<IKFunctor*>(this)->p6_init_s = p6_init_2;
-			Vector18t y1_init;
-			Vector18t y2_init;
-			Vector18t y3_init;
-			Vector18t y4_init;
-			Vector18t y5_init;
-			Vector18t y6_init;
-			y1_init << p1_init_2.head(3), R1_init, n1_init, m1_init;
-			y2_init << p2_init_2.head(3), R2_init, n2_init, m2_init;
-			y3_init << p3_init_2.head(3), R3_init, n3_init, m3_init;
-			y4_init << p4_init_2.head(3), R4_init, n4_init, m4_init;
-			y5_init << p5_init_2.head(3), R5_init, n5_init, m5_init;
-			y6_init << p6_init_2.head(3), R6_init, n6_init, m6_init;
+//		    if (std::is_same<T, double>::value) {
+//				const_cast<IKFunctor*>(this)->R1_init_s = R1_init_m;
+//				const_cast<IKFunctor*>(this)->R2_init_s = R2_init_m;
+//				const_cast<IKFunctor*>(this)->R3_init_s = R3_init_m;
+//				const_cast<IKFunctor*>(this)->R4_init_s = R4_init_m;
+//				const_cast<IKFunctor*>(this)->R5_init_s = R5_init_m;
+//				const_cast<IKFunctor*>(this)->R6_init_s = R6_init_m;
+//		    }
+			/*
+			 Vector9t R1_init;
+			 Vector9t R2_init;
+			 Vector9t R3_init;
+			 Vector9t R4_init;
+			 Vector9t R5_init;
+			 Vector9t R6_init;
+			 R1_init << R1_init_m(0, 0), R1_init_m(1, 0), R1_init_m(2, 0), R1_init_m(0, 1), R1_init_m(1, 1), R1_init_m(2, 1), R1_init_m(0, 2), R1_init_m(1, 2), R1_init_m(
+			 2, 2);
+			 R2_init << R2_init_m(0, 0), R2_init_m(1, 0), R2_init_m(2, 0), R2_init_m(0, 1), R2_init_m(1, 1), R2_init_m(2, 1), R2_init_m(0, 2), R2_init_m(1, 2), R2_init_m(
+			 2, 2);
+			 R3_init << R3_init_m(0, 0), R3_init_m(1, 0), R3_init_m(2, 0), R3_init_m(0, 1), R3_init_m(1, 1), R3_init_m(2, 1), R3_init_m(0, 2), R3_init_m(1, 2), R3_init_m(
+			 2, 2);
+			 R4_init << R4_init_m(0, 0), R4_init_m(1, 0), R4_init_m(2, 0), R4_init_m(0, 1), R4_init_m(1, 1), R4_init_m(2, 1), R4_init_m(0, 2), R4_init_m(1, 2), R4_init_m(
+			 2, 2);
+			 R5_init << R5_init_m(0, 0), R5_init_m(1, 0), R5_init_m(2, 0), R5_init_m(0, 1), R5_init_m(1, 1), R5_init_m(2, 1), R5_init_m(0, 2), R5_init_m(1, 2), R5_init_m(
+			 2, 2);
+			 R6_init << R6_init_m(0, 0), R6_init_m(1, 0), R6_init_m(2, 0), R6_init_m(0, 1), R6_init_m(1, 1), R6_init_m(2, 1), R6_init_m(0, 2), R6_init_m(1, 2), R6_init_m(
+			 2, 2);
+			 Vector3t n1_init;
+			 Vector3t n2_init;
+			 Vector3t n3_init;
+			 Vector3t n4_init;
+			 Vector3t n5_init;
+			 Vector3t n6_init;
+			 Vector3t m1_init;
+			 Vector3t m2_init;
+			 Vector3t m3_init;
+			 Vector3t m4_init;
+			 Vector3t m5_init;
+			 Vector3t m6_init;
+			 n1_init << x[0], x[1], x[2];
+			 n2_init << x[6], x[7], x[8];
+			 n3_init << x[12], x[13], x[14];
+			 n4_init << x[18], x[19], x[20];
+			 n5_init << x[24], x[25], x[26];
+			 n6_init << x[30], x[31], x[32];
+			 m1_init << x[3], x[4], T(0);
+			 m2_init << x[9], x[10], T(0);
+			 m3_init << x[15], x[16], T(0);
+			 m4_init << x[21], x[22], T(0);
+			 m5_init << x[27], x[28], T(0);
+			 m6_init << x[33], x[34], T(0);
 
-			//perform integration on bottom link
-			cosserat_rod<T> cr1;
-			cosserat_rod<T> cr2;
-			cosserat_rod<T> cr3;
-			cosserat_rod<T> cr4;
-			cosserat_rod<T> cr5;
-			cosserat_rod<T> cr6;
-			cr1.set_init_state(y1_init);
-			cr2.set_init_state(y2_init);
-			cr3.set_init_state(y3_init);
-			cr4.set_init_state(y4_init);
-			cr5.set_init_state(y5_init);
-			cr6.set_init_state(y6_init);
-#ifdef use_multithreading
-			boost::thread t1(boost::bind(&cosserat_rod<T>::integrate, &cr1, T(0), L1, L1 / T(INTEGRATION_STEP_SIZE)));
-			boost::thread t2(boost::bind(&cosserat_rod<T>::integrate, &cr2, T(0), L2, L2 / T(INTEGRATION_STEP_SIZE)));
-			boost::thread t3(boost::bind(&cosserat_rod<T>::integrate, &cr3, T(0), L3, L3 / T(INTEGRATION_STEP_SIZE)));
-			boost::thread t4(boost::bind(&cosserat_rod<T>::integrate, &cr4, T(0), L4, L4 / T(INTEGRATION_STEP_SIZE)));
-			boost::thread t5(boost::bind(&cosserat_rod<T>::integrate, &cr5, T(0), L5, L5 / T(INTEGRATION_STEP_SIZE)));
-			boost::thread t6(boost::bind(&cosserat_rod<T>::integrate, &cr6, T(0), L6, L6 / T(INTEGRATION_STEP_SIZE)));
-			t1.join();
-			t2.join();
-			t3.join();
-			t4.join();
-			t5.join();
-			t6.join();
-			Vector18t y1 = cr1.result;
-			Vector18t y2 = cr2.result;
-			Vector18t y3 = cr3.result;
-			Vector18t y4 = cr4.result;
-			Vector18t y5 = cr5.result;
-			Vector18t y6 = cr6.result;
-#else
-			Vector18t y1 = cr1.integrate(0, L1, L1 / INTEGRATION_STEP_SIZE);
-			Vector18t y2 = cr2.integrate(0, L2, L2 / INTEGRATION_STEP_SIZE);
-			Vector18t y3 = cr3.integrate(0, L3, L3 / INTEGRATION_STEP_SIZE);
-			Vector18t y4 = cr4.integrate(0, L4, L4 / INTEGRATION_STEP_SIZE);
-			Vector18t y5 = cr5.integrate(0, L5, L5 / INTEGRATION_STEP_SIZE);
-			Vector18t y6 = cr6.integrate(0, L6, L6 / INTEGRATION_STEP_SIZE);
-#endif
+			 //centroid of all the bottom segment leg ends
+			 Vector3t p_cb = (p7_end + p8_end + p9_end + p10_end + p11_end + p12_end) / T(6);
 
-			//extract results from bottom link integration
-			Vector3t p1_end;
-			Vector3t p2_end;
-			Vector3t p3_end;
-			Vector3t p4_end;
-			Vector3t p5_end;
-			Vector3t p6_end;
-			p1_end << y1[0], y1[1], y1[2];
-			p2_end << y2[0], y2[1], y2[2];
-			p3_end << y3[0], y3[1], y3[2];
-			p4_end << y4[0], y4[1], y4[2];
-			p5_end << y5[0], y5[1], y5[2];
-			p6_end << y6[0], y6[1], y6[2];
-			Matrix3t R1_end;
-			Matrix3t R2_end;
-			Matrix3t R3_end;
-			Matrix3t R4_end;
-			Matrix3t R5_end;
-			Matrix3t R6_end;
-			R1_end << y1[3], y1[6], y1[9], y1[4], y1[7], y1[10], y1[5], y1[8], y1[11];
-			R2_end << y2[3], y2[6], y2[9], y2[4], y2[7], y2[10], y2[5], y2[8], y2[11];
-			R3_end << y3[3], y3[6], y3[9], y3[4], y3[7], y3[10], y3[5], y3[8], y3[11];
-			R4_end << y4[3], y4[6], y4[9], y4[4], y4[7], y4[10], y4[5], y4[8], y4[11];
-			R5_end << y5[3], y5[6], y5[9], y5[4], y5[7], y5[10], y5[5], y5[8], y5[11];
-			R6_end << y6[3], y6[6], y6[9], y6[4], y6[7], y6[10], y6[5], y6[8], y6[11];
-			Vector3t n1_end;
-			Vector3t n2_end;
-			Vector3t n3_end;
-			Vector3t n4_end;
-			Vector3t n5_end;
-			Vector3t n6_end;
-			Vector3t m1_end;
-			Vector3t m2_end;
-			Vector3t m3_end;
-			Vector3t m4_end;
-			Vector3t m5_end;
-			Vector3t m6_end;
-			n1_end << y1[12], y1[13], y1[14];
-			n2_end << y2[12], y2[13], y2[14];
-			n3_end << y3[12], y3[13], y3[14];
-			n4_end << y4[12], y4[13], y4[14];
-			n5_end << y5[12], y5[13], y5[14];
-			n6_end << y6[12], y6[13], y6[14];
-			m1_end << y1[15], y1[16], y1[17];
-			m2_end << y2[15], y2[16], y2[17];
-			m3_end << y3[15], y3[16], y3[17];
-			m4_end << y4[15], y4[16], y4[17];
-			m5_end << y5[15], y5[16], y5[17];
-			m6_end << y6[15], y6[16], y6[17];
+			 //transformation from base to mid_plate
+			 Matrix4t T_mid;
+			 T_mid.block(0, 0, 3, 3) = R7_end;
+			 T_mid.block(0, 3, 3, 1) = p_cb;
+			 RowVector4t zzzo;
+			 zzzo << T(0), T(0), T(0), T(1);
+			 T_mid.block(3, 0, 1, 4) = zzzo;
+			 Vector4t p1_init_2;
+			 Vector4t p2_init_2;
+			 Vector4t p3_init_2;
+			 Vector4t p4_init_2;
+			 Vector4t p5_init_2;
+			 Vector4t p6_init_2;
+			 p1_init_2 << p1_init(0), p1_init(1), p1_init(2), T(1);
+			 p2_init_2 << p2_init(0), p2_init(1), p2_init(2), T(1);
+			 p3_init_2 << p3_init(0), p3_init(1), p3_init(2), T(1);
+			 p4_init_2 << p4_init(0), p4_init(1), p4_init(2), T(1);
+			 p5_init_2 << p5_init(0), p5_init(1), p5_init(2), T(1);
+			 p6_init_2 << p6_init(0), p6_init(1), p6_init(2), T(1);
+			 p1_init_2 = T_mid * p1_init_2;
+			 p2_init_2 = T_mid * p2_init_2;
+			 p3_init_2 = T_mid * p3_init_2;
+			 p4_init_2 = T_mid * p4_init_2;
+			 p5_init_2 = T_mid * p5_init_2;
+			 p6_init_2 = T_mid * p6_init_2;
+			 const_cast<IKFunctor*>(this)->p1_init_s = p1_init_2;
+			 const_cast<IKFunctor*>(this)->p2_init_s = p2_init_2;
+			 const_cast<IKFunctor*>(this)->p3_init_s = p3_init_2;
+			 const_cast<IKFunctor*>(this)->p4_init_s = p4_init_2;
+			 const_cast<IKFunctor*>(this)->p5_init_s = p5_init_2;
+			 const_cast<IKFunctor*>(this)->p6_init_s = p6_init_2;
+			 Vector18t y1_init;
+			 Vector18t y2_init;
+			 Vector18t y3_init;
+			 Vector18t y4_init;
+			 Vector18t y5_init;
+			 Vector18t y6_init;
+			 y1_init << p1_init_2.head(3), R1_init, n1_init, m1_init;
+			 y2_init << p2_init_2.head(3), R2_init, n2_init, m2_init;
+			 y3_init << p3_init_2.head(3), R3_init, n3_init, m3_init;
+			 y4_init << p4_init_2.head(3), R4_init, n4_init, m4_init;
+			 y5_init << p5_init_2.head(3), R5_init, n5_init, m5_init;
+			 y6_init << p6_init_2.head(3), R6_init, n6_init, m6_init;
 
-			//centroid of all top segment leg ends
-			Vector3t p_ct = (p1_end + p2_end + p3_end + p4_end + p5_end + p6_end) / T(6);
+			 //perform integration on bottom link
+			 cosserat_rod<T> cr1;
+			 cosserat_rod<T> cr2;
+			 cosserat_rod<T> cr3;
+			 cosserat_rod<T> cr4;
+			 cosserat_rod<T> cr5;
+			 cosserat_rod<T> cr6;
+			 cr1.set_init_state(y1_init);
+			 cr2.set_init_state(y2_init);
+			 cr3.set_init_state(y3_init);
+			 cr4.set_init_state(y4_init);
+			 cr5.set_init_state(y5_init);
+			 cr6.set_init_state(y6_init);
+			 #ifdef use_multithreading
+			 boost::thread t1(boost::bind(&cosserat_rod<T>::integrate, &cr1, T(0), L1, L1 / T(INTEGRATION_STEP_SIZE)));
+			 boost::thread t2(boost::bind(&cosserat_rod<T>::integrate, &cr2, T(0), L2, L2 / T(INTEGRATION_STEP_SIZE)));
+			 boost::thread t3(boost::bind(&cosserat_rod<T>::integrate, &cr3, T(0), L3, L3 / T(INTEGRATION_STEP_SIZE)));
+			 boost::thread t4(boost::bind(&cosserat_rod<T>::integrate, &cr4, T(0), L4, L4 / T(INTEGRATION_STEP_SIZE)));
+			 boost::thread t5(boost::bind(&cosserat_rod<T>::integrate, &cr5, T(0), L5, L5 / T(INTEGRATION_STEP_SIZE)));
+			 boost::thread t6(boost::bind(&cosserat_rod<T>::integrate, &cr6, T(0), L6, L6 / T(INTEGRATION_STEP_SIZE)));
+			 t1.join();
+			 t2.join();
+			 t3.join();
+			 t4.join();
+			 t5.join();
+			 t6.join();
+			 Vector18t y1 = cr1.result;
+			 Vector18t y2 = cr2.result;
+			 Vector18t y3 = cr3.result;
+			 Vector18t y4 = cr4.result;
+			 Vector18t y5 = cr5.result;
+			 Vector18t y6 = cr6.result;
+			 #else
+			 Vector18t y1 = cr1.integrate(0, L1, L1 / INTEGRATION_STEP_SIZE);
+			 Vector18t y2 = cr2.integrate(0, L2, L2 / INTEGRATION_STEP_SIZE);
+			 Vector18t y3 = cr3.integrate(0, L3, L3 / INTEGRATION_STEP_SIZE);
+			 Vector18t y4 = cr4.integrate(0, L4, L4 / INTEGRATION_STEP_SIZE);
+			 Vector18t y5 = cr5.integrate(0, L5, L5 / INTEGRATION_STEP_SIZE);
+			 Vector18t y6 = cr6.integrate(0, L6, L6 / INTEGRATION_STEP_SIZE);
+			 #endif
 
-			//residual of equilibrium conditions
-			Vector3t res_eq_F_top = (n1_end + n2_end + n3_end + n4_end + n5_end + n6_end) - F;
-			Vector3t res_eq_L_top = (cosserat_rod<T>::hat(p1_end - p_ct) * n1_end + cosserat_rod<T>::hat(p2_end - p_ct) * n2_end
-					+ cosserat_rod<T>::hat(p3_end - p_ct) * n3_end + cosserat_rod<T>::hat(p4_end - p_ct) * n4_end + cosserat_rod<T>::hat(p5_end - p_ct) * n5_end
-					+ cosserat_rod<T>::hat(p6_end - p_ct) * n6_end + m1_end + m2_end + m3_end + m4_end + m5_end + m6_end) - L;
+			 //extract results from bottom link integration
+			 Vector3t p1_end;
+			 Vector3t p2_end;
+			 Vector3t p3_end;
+			 Vector3t p4_end;
+			 Vector3t p5_end;
+			 Vector3t p6_end;
+			 p1_end << y1[0], y1[1], y1[2];
+			 p2_end << y2[0], y2[1], y2[2];
+			 p3_end << y3[0], y3[1], y3[2];
+			 p4_end << y4[0], y4[1], y4[2];
+			 p5_end << y5[0], y5[1], y5[2];
+			 p6_end << y6[0], y6[1], y6[2];
+			 Matrix3t R1_end;
+			 Matrix3t R2_end;
+			 Matrix3t R3_end;
+			 Matrix3t R4_end;
+			 Matrix3t R5_end;
+			 Matrix3t R6_end;
+			 R1_end << y1[3], y1[6], y1[9], y1[4], y1[7], y1[10], y1[5], y1[8], y1[11];
+			 R2_end << y2[3], y2[6], y2[9], y2[4], y2[7], y2[10], y2[5], y2[8], y2[11];
+			 R3_end << y3[3], y3[6], y3[9], y3[4], y3[7], y3[10], y3[5], y3[8], y3[11];
+			 R4_end << y4[3], y4[6], y4[9], y4[4], y4[7], y4[10], y4[5], y4[8], y4[11];
+			 R5_end << y5[3], y5[6], y5[9], y5[4], y5[7], y5[10], y5[5], y5[8], y5[11];
+			 R6_end << y6[3], y6[6], y6[9], y6[4], y6[7], y6[10], y6[5], y6[8], y6[11];
+			 Vector3t n1_end;
+			 Vector3t n2_end;
+			 Vector3t n3_end;
+			 Vector3t n4_end;
+			 Vector3t n5_end;
+			 Vector3t n6_end;
+			 Vector3t m1_end;
+			 Vector3t m2_end;
+			 Vector3t m3_end;
+			 Vector3t m4_end;
+			 Vector3t m5_end;
+			 Vector3t m6_end;
+			 n1_end << y1[12], y1[13], y1[14];
+			 n2_end << y2[12], y2[13], y2[14];
+			 n3_end << y3[12], y3[13], y3[14];
+			 n4_end << y4[12], y4[13], y4[14];
+			 n5_end << y5[12], y5[13], y5[14];
+			 n6_end << y6[12], y6[13], y6[14];
+			 m1_end << y1[15], y1[16], y1[17];
+			 m2_end << y2[15], y2[16], y2[17];
+			 m3_end << y3[15], y3[16], y3[17];
+			 m4_end << y4[15], y4[16], y4[17];
+			 m5_end << y5[15], y5[16], y5[17];
+			 m6_end << y6[15], y6[16], y6[17];
 
-			//These are analogous to loop closure equations because they are only satisfied when the positions of the rod ends have the same relative positions as the connection pattern in the top plate
-			Vector3t res_p1 = pd + Rd * p1_final - p1_end;
-			Vector3t res_p2 = pd + Rd * p2_final - p2_end;
-			Vector3t res_p3 = pd + Rd * p3_final - p3_end;
-			Vector3t res_p4 = pd + Rd * p4_final - p4_end;
-			Vector3t res_p5 = pd + Rd * p5_final - p5_end;
-			Vector3t res_p6 = pd + Rd * p6_final - p6_end;
-			Vector3t res_p7 = p7_end - R7_end * (p7_final - p7_final) - p7_end;
-			Vector3t res_p8 = p7_end - R7_end * (p7_final - p8_final) - p8_end;
-			Vector3t res_p9 = p7_end - R7_end * (p7_final - p9_final) - p9_end;
-			Vector3t res_p10 = p7_end - R7_end * (p7_final - p10_final) - p10_end;
-			Vector3t res_p11 = p7_end - R7_end * (p7_final - p11_final) - p11_end;
-			Vector3t res_p12 = p7_end - R7_end * (p7_final - p12_final) - p12_end;
+			 //centroid of all top segment leg ends
+			 Vector3t p_ct = (p1_end + p2_end + p3_end + p4_end + p5_end + p6_end) / T(6);
 
-			//force a common material orientation for all the distal rod ends
-#ifdef use_matrix_log
-			Vector3t res_R1(0.0, 0.0, 0.0);
-			Vector3t res_R2(0.0, 0.0, 0.0);
-			Vector3t res_R3(0.0, 0.0, 0.0);
-			Vector3t res_R4(0.0, 0.0, 0.0);
-			Vector3t res_R5(0.0, 0.0, 0.0);
-			Vector3t res_R6(0.0, 0.0, 0.0);
-			Vector3t res_R7(0.0, 0.0, 0.0);
-			Vector3t res_R8(0.0, 0.0, 0.0);
-			Vector3t res_R9(0.0, 0.0, 0.0);
-			Vector3t res_R10(0.0, 0.0, 0.0);
-			Vector3t res_R11(0.0, 0.0, 0.0);
-			Vector3t res_R12(0.0, 0.0, 0.0);
-			Matrix3d Rdt = Rd.transpose();
-			if (!(Rdt * R1_end).isZero()) res_R1 = cosserat_rod::vee((Rdt * R1_end).log());
-			if (!(Rdt * R2_end).isZero()) res_R2 = cosserat_rod::vee((Rdt * R2_end).log());
-			if (!(Rdt * R3_end).isZero()) res_R3 = cosserat_rod::vee((Rdt * R3_end).log());
-			if (!(Rdt * R4_end).isZero()) res_R4 = cosserat_rod::vee((Rdt * R4_end).log());
-			if (!(Rdt * R5_end).isZero()) res_R5 = cosserat_rod::vee((Rdt * R5_end).log());
-			if (!(Rdt * R6_end).isZero()) res_R6 = cosserat_rod::vee((Rdt * R6_end).log());
-			if (!(R7_end.transpose() * R7_end).isZero()) res_R7 = cosserat_rod::vee((R7_end.transpose() * R7_end).log());
-			if (!(R8_end.transpose() * R7_end).isZero()) res_R8 = cosserat_rod::vee((R8_end.transpose() * R7_end).log());
-			if (!(R9_end.transpose() * R7_end).isZero()) res_R9 = cosserat_rod::vee((R9_end.transpose() * R7_end).log());
-			if (!(R10_end.transpose() * R7_end).isZero()) res_R10 = cosserat_rod::vee((R10_end.transpose() * R7_end).log());
-			if (!(R11_end.transpose() * R7_end).isZero()) res_R11 = cosserat_rod::vee((R11_end.transpose() * R7_end).log());
-			if (!(R12_end.transpose() * R7_end).isZero()) res_R12 = cosserat_rod::vee((R12_end.transpose() * R7_end).log());
-#else
-			Matrix<T, 2, 3> rodrigues;
-			rodrigues << T(1), T(0), T(0), T(0), T(1), T(0);
-			Matrix3t Rdt = Rd.transpose();
-			Vector3t res_R1;
-			Vector3t res_R2;
-			Vector3t res_R3;
-			Vector3t res_R4;
-			Vector3t res_R5;
-			Vector3t res_R6;
-			Vector3t res_R7;
-			Vector3t res_R8;
-			Vector3t res_R9;
-			Vector3t res_R10;
-			Vector3t res_R11;
-			Vector3t res_R12;
-			res_R1 << rodrigues * cosserat_rod<T>::vee((R1_end.transpose() * Rd - R1_end * Rdt)), T(0);
-			res_R2 << rodrigues * cosserat_rod<T>::vee((R2_end.transpose() * Rd - R2_end * Rdt)), T(0);
-			res_R3 << rodrigues * cosserat_rod<T>::vee((R3_end.transpose() * Rd - R3_end * Rdt)), T(0);
-			res_R4 << rodrigues * cosserat_rod<T>::vee((R4_end.transpose() * Rd - R4_end * Rdt)), T(0);
-			res_R5 << rodrigues * cosserat_rod<T>::vee((R5_end.transpose() * Rd - R5_end * Rdt)), T(0);
-			res_R6 << rodrigues * cosserat_rod<T>::vee((R6_end.transpose() * Rd - R6_end * Rdt)), T(0);
-			res_R7 << rodrigues * cosserat_rod<T>::vee((R7_end.transpose() * R7_end - R7_end * R7_end.transpose())), T(0);
-			res_R8 << rodrigues * cosserat_rod<T>::vee((R8_end.transpose() * R7_end - R8_end * R7_end.transpose())), T(0);
-			res_R9 << rodrigues * cosserat_rod<T>::vee((R9_end.transpose() * R7_end - R9_end * R7_end.transpose())), T(0);
-			res_R10 << rodrigues * cosserat_rod<T>::vee((R10_end.transpose() * R7_end - R10_end * R7_end.transpose())), T(0);
-			res_R11 << rodrigues * cosserat_rod<T>::vee((R11_end.transpose() * R7_end - R11_end * R7_end.transpose())), T(0);
-			res_R12 << rodrigues * cosserat_rod<T>::vee((R12_end.transpose() * R7_end - R12_end * R7_end.transpose())), T(0);
-#endif
+			 //residual of equilibrium conditions
+			 Vector3t res_eq_F_top = (n1_end + n2_end + n3_end + n4_end + n5_end + n6_end) - F;
+			 Vector3t res_eq_L_top = (cosserat_rod<T>::hat(p1_end - p_ct) * n1_end + cosserat_rod<T>::hat(p2_end - p_ct) * n2_end
+			 + cosserat_rod<T>::hat(p3_end - p_ct) * n3_end + cosserat_rod<T>::hat(p4_end - p_ct) * n4_end + cosserat_rod<T>::hat(p5_end - p_ct) * n5_end
+			 + cosserat_rod<T>::hat(p6_end - p_ct) * n6_end + m1_end + m2_end + m3_end + m4_end + m5_end + m6_end) - L;
 
-			T l_c = T(0.01); //characteristic length converts rotation error to meters
-			Matrix<T, GS - 6, 1> res;
-			res << res_eq_F_top, res_eq_L_top, res_p1, res_p2, res_p3, res_p4, res_p5, res_p6, res_p7, res_p8, res_p9, res_p10, res_p11, res_p12, res_R1 * l_c, res_R2
-					* l_c, res_R3 * l_c, res_R4 * l_c, res_R5 * l_c, res_R6 * l_c, res_R7 * l_c, res_R8 * l_c, res_R9 * l_c, res_R10 * l_c, res_R11 * l_c, res_R12
-					* l_c;
+			 //These are analogous to loop closure equations because they are only satisfied when the positions of the rod ends have the same relative positions as the connection pattern in the top plate
+			 Vector3t res_p1 = pd + Rd * p1_final - p1_end;
+			 Vector3t res_p2 = pd + Rd * p2_final - p2_end;
+			 Vector3t res_p3 = pd + Rd * p3_final - p3_end;
+			 Vector3t res_p4 = pd + Rd * p4_final - p4_end;
+			 Vector3t res_p5 = pd + Rd * p5_final - p5_end;
+			 Vector3t res_p6 = pd + Rd * p6_final - p6_end;
+			 Vector3t res_p7 = p7_end - R7_end * (p7_final - p7_final) - p7_end;
+			 Vector3t res_p8 = p7_end - R7_end * (p7_final - p8_final) - p8_end;
+			 Vector3t res_p9 = p7_end - R7_end * (p7_final - p9_final) - p9_end;
+			 Vector3t res_p10 = p7_end - R7_end * (p7_final - p10_final) - p10_end;
+			 Vector3t res_p11 = p7_end - R7_end * (p7_final - p11_final) - p11_end;
+			 Vector3t res_p12 = p7_end - R7_end * (p7_final - p12_final) - p12_end;
 
-			for (unsigned int i = 0; i < GS - 6; i++) {
-				residual[i] = res[i];
-			}
+			 //force a common material orientation for all the distal rod ends
+			 #ifdef use_matrix_log
+			 Vector3t res_R1(0.0, 0.0, 0.0);
+			 Vector3t res_R2(0.0, 0.0, 0.0);
+			 Vector3t res_R3(0.0, 0.0, 0.0);
+			 Vector3t res_R4(0.0, 0.0, 0.0);
+			 Vector3t res_R5(0.0, 0.0, 0.0);
+			 Vector3t res_R6(0.0, 0.0, 0.0);
+			 Vector3t res_R7(0.0, 0.0, 0.0);
+			 Vector3t res_R8(0.0, 0.0, 0.0);
+			 Vector3t res_R9(0.0, 0.0, 0.0);
+			 Vector3t res_R10(0.0, 0.0, 0.0);
+			 Vector3t res_R11(0.0, 0.0, 0.0);
+			 Vector3t res_R12(0.0, 0.0, 0.0);
+			 Matrix3d Rdt = Rd.transpose();
+			 if (!(Rdt * R1_end).isZero()) res_R1 = cosserat_rod::vee((Rdt * R1_end).log());
+			 if (!(Rdt * R2_end).isZero()) res_R2 = cosserat_rod::vee((Rdt * R2_end).log());
+			 if (!(Rdt * R3_end).isZero()) res_R3 = cosserat_rod::vee((Rdt * R3_end).log());
+			 if (!(Rdt * R4_end).isZero()) res_R4 = cosserat_rod::vee((Rdt * R4_end).log());
+			 if (!(Rdt * R5_end).isZero()) res_R5 = cosserat_rod::vee((Rdt * R5_end).log());
+			 if (!(Rdt * R6_end).isZero()) res_R6 = cosserat_rod::vee((Rdt * R6_end).log());
+			 if (!(R7_end.transpose() * R7_end).isZero()) res_R7 = cosserat_rod::vee((R7_end.transpose() * R7_end).log());
+			 if (!(R8_end.transpose() * R7_end).isZero()) res_R8 = cosserat_rod::vee((R8_end.transpose() * R7_end).log());
+			 if (!(R9_end.transpose() * R7_end).isZero()) res_R9 = cosserat_rod::vee((R9_end.transpose() * R7_end).log());
+			 if (!(R10_end.transpose() * R7_end).isZero()) res_R10 = cosserat_rod::vee((R10_end.transpose() * R7_end).log());
+			 if (!(R11_end.transpose() * R7_end).isZero()) res_R11 = cosserat_rod::vee((R11_end.transpose() * R7_end).log());
+			 if (!(R12_end.transpose() * R7_end).isZero()) res_R12 = cosserat_rod::vee((R12_end.transpose() * R7_end).log());
+			 #else
+			 Matrix<T, 2, 3> rodrigues;
+			 rodrigues << T(1), T(0), T(0), T(0), T(1), T(0);
+			 Matrix3t Rdt = Rd.transpose();
+			 Vector3t res_R1;
+			 Vector3t res_R2;
+			 Vector3t res_R3;
+			 Vector3t res_R4;
+			 Vector3t res_R5;
+			 Vector3t res_R6;
+			 Vector3t res_R7;
+			 Vector3t res_R8;
+			 Vector3t res_R9;
+			 Vector3t res_R10;
+			 Vector3t res_R11;
+			 Vector3t res_R12;
+			 res_R1 << rodrigues * cosserat_rod<T>::vee((R1_end.transpose() * Rd - R1_end * Rdt)), T(0);
+			 res_R2 << rodrigues * cosserat_rod<T>::vee((R2_end.transpose() * Rd - R2_end * Rdt)), T(0);
+			 res_R3 << rodrigues * cosserat_rod<T>::vee((R3_end.transpose() * Rd - R3_end * Rdt)), T(0);
+			 res_R4 << rodrigues * cosserat_rod<T>::vee((R4_end.transpose() * Rd - R4_end * Rdt)), T(0);
+			 res_R5 << rodrigues * cosserat_rod<T>::vee((R5_end.transpose() * Rd - R5_end * Rdt)), T(0);
+			 res_R6 << rodrigues * cosserat_rod<T>::vee((R6_end.transpose() * Rd - R6_end * Rdt)), T(0);
+			 res_R7 << rodrigues * cosserat_rod<T>::vee((R7_end.transpose() * R7_end - R7_end * R7_end.transpose())), T(0);
+			 res_R8 << rodrigues * cosserat_rod<T>::vee((R8_end.transpose() * R7_end - R8_end * R7_end.transpose())), T(0);
+			 res_R9 << rodrigues * cosserat_rod<T>::vee((R9_end.transpose() * R7_end - R9_end * R7_end.transpose())), T(0);
+			 res_R10 << rodrigues * cosserat_rod<T>::vee((R10_end.transpose() * R7_end - R10_end * R7_end.transpose())), T(0);
+			 res_R11 << rodrigues * cosserat_rod<T>::vee((R11_end.transpose() * R7_end - R11_end * R7_end.transpose())), T(0);
+			 res_R12 << rodrigues * cosserat_rod<T>::vee((R12_end.transpose() * R7_end - R12_end * R7_end.transpose())), T(0);
+			 #endif
 
+			 T l_c = T(0.01); //characteristic length converts rotation error to meters
+			 Matrix<T, GS - 6, 1> res;
+			 res << res_eq_F_top, res_eq_L_top, res_p1, res_p2, res_p3, res_p4, res_p5, res_p6, res_p7, res_p8, res_p9, res_p10, res_p11, res_p12, res_R1 * l_c, res_R2
+			 * l_c, res_R3 * l_c, res_R4 * l_c, res_R5 * l_c, res_R6 * l_c, res_R7 * l_c, res_R8 * l_c, res_R9 * l_c, res_R10 * l_c, res_R11 * l_c, res_R12
+			 * l_c;
+
+			 for (unsigned int i = 0; i < GS - 6; i++) {
+			 residual[i] = res[i];
+			 }
+			 */
 			return true;
 		}
 
@@ -612,11 +622,32 @@ public:
 		Eigen::Vector4d p4_init_s;
 		Eigen::Vector4d p5_init_s;
 		Eigen::Vector4d p6_init_s;
+
+	private:
+//		template<typename T> void StoreRinit(identity<T>) const {
+//
+//		}
+//
+//		void StoreRinit(identity<double>) const {
+//			//const_cast<IKFunctor*>(this)->R1_init_s = R1_init_m;
+//		}
+
+		template<typename T> struct StoreRinit {
+			template<typename TP> void operator()(const IKFunctor* const parent, Eigen::Matrix<T, 3, 3> R1_init_m, identity<TP>) const {
+
+			}
+
+			void operator()(const IKFunctor* const parent, Eigen::Matrix<T, 3, 3> R1_init_m, identity<double>) const {
+				const_cast<IKFunctor*>(parent)->R1_init_s = R1_init_m;
+			}
+		};
+
 	};
 
 	struct SingleIKFunctor {
 		template<typename T>
 		bool operator()(const T* const x, T* residual) const {
+
 			using Eigen::Matrix;
 			typedef Matrix<T, 3, 3> Matrix3t;
 			typedef Matrix<T, 4, 4> Matrix4t;

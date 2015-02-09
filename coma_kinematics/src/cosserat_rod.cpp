@@ -13,17 +13,3 @@
 
 using namespace std;
 using namespace boost::numeric::odeint;
-
-
-
-template <typename T> Eigen::Matrix<T, 3, 1> cosserat_rod<T>::vee(Eigen::Matrix<T, 3, 3> uhat) {
-	Eigen::Matrix<T, 3, 1> u;
-	u << uhat(2, 1), uhat(0, 2), uhat(1, 0);
-	return u;
-}
-
-
-
-
-
-

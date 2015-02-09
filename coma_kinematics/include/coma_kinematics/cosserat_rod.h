@@ -57,6 +57,12 @@ template <typename T> Eigen::Matrix<T, 3, 3> cosserat_rod<T>::hat(Eigen::Matrix<
 	return uhat;
 }
 
+template <typename T> Eigen::Matrix<T, 3, 1> cosserat_rod<T>::vee(Eigen::Matrix<T, 3, 3> uhat) {
+	Eigen::Matrix<T, 3, 1> u;
+	u << uhat(2, 1), uhat(0, 2), uhat(1, 0);
+	return u;
+}
+
 template<typename T> void cosserat_rod<T>::set_init_state(Eigen::Matrix<T, 18, 1> init_state) {
 	//this->init_state = Tstate<T>(init_state);
 	for (unsigned int i = 0; i < 18; i++) {
