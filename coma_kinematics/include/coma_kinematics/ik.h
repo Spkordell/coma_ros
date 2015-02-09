@@ -184,6 +184,9 @@ public:
 			y11_init << p11_init, R11_init, n11_init, m11_init;
 			y12_init << p12_init, R12_init, n12_init, m12_init;
 
+
+
+
 			//perform integration on top link
 			cosserat_rod<T> cr7;
 			cosserat_rod<T> cr8;
@@ -210,12 +213,16 @@ public:
 			t10.join();
 			t11.join();
 			t12.join();
+
 			Vector18t y7 = cr7.result;
 			Vector18t y8 = cr8.result;
 			Vector18t y9 = cr9.result;
 			Vector18t y10 = cr10.result;
 			Vector18t y11 = cr11.result;
 			Vector18t y12 = cr12.result;
+
+
+
 #else
 			Vector18t y7 = cr7.integrate(0, L7, L7 / INTEGRATION_STEP_SIZE);
 			Vector18t y8 = cr8.integrate(0, L8, L8 / INTEGRATION_STEP_SIZE);

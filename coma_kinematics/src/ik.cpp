@@ -110,6 +110,9 @@ ik::ik() {
 
 
 bool ik::solve_ik(coma_kinematics::solveIK::Request &req, coma_kinematics::solveIK::Response &res) {
+
+
+
 	Vector3d pd(req.x_pos, req.y_pos, req.z_pos); //desired end effector position
 	Vector3d rot(ik::rad(req.x_rot), ik::rad(req.y_rot), ik::rad(req.z_rot));
 	Matrix3d Rd = ik::hat(rot); //desired end effector orientation
@@ -143,7 +146,7 @@ void ik::solve(Vector3d pd, Matrix3d Rd, double* leg_lengths) {
 	//run the solver
 	Solve(options, &problem, &summary);
 
-	std::cout << summary.BriefReport() << "\n";
+	//std::cout << summary.BriefReport() << "\n";
 
 	///solve for the bottom lengths
 	Eigen::Matrix<double, 6, 1> bottom_lengths;

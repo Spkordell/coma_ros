@@ -51,13 +51,13 @@ private:
 
 };
 
-template <typename T> Eigen::Matrix<T, 3, 3> cosserat_rod<T>::hat(Eigen::Matrix<T, 3, 1> u) {
+template<typename T> Eigen::Matrix<T, 3, 3> cosserat_rod<T>::hat(Eigen::Matrix<T, 3, 1> u) {
 	Eigen::Matrix<T, 3, 3> uhat;
 	uhat << T(0), -u(2), u(1), u(2), T(0), -u(0), -u(1), u(0), T(0);
 	return uhat;
 }
 
-template <typename T> Eigen::Matrix<T, 3, 1> cosserat_rod<T>::vee(Eigen::Matrix<T, 3, 3> uhat) {
+template<typename T> Eigen::Matrix<T, 3, 1> cosserat_rod<T>::vee(Eigen::Matrix<T, 3, 3> uhat) {
 	Eigen::Matrix<T, 3, 1> u;
 	u << uhat(2, 1), uhat(0, 2), uhat(1, 0);
 	return u;
@@ -150,6 +150,20 @@ template<typename M, int N> inline Jet<M, N> max(const double f, const Jet<M, N>
 	return (Jet<M, N>(f) > g) ? Jet<M, N>(f) : g;
 }
 
+}
+
+//todo, generalize these, for values other than 84 and 7
+//todo, may want to extend from numeric_limits<T> intead and only change the epsilon and is_specialized values.
+//need to set the numeric limits of the jet types since odeint uses it
+namespace std {
+template<>
+class numeric_limits<ceres::Jet<double, 84>> : public numeric_limits<double> {
+};
+}
+namespace std {
+template<>
+class numeric_limits<ceres::Jet<double, 7>> : public numeric_limits<double> {
+};
 }
 
 template<typename T> class Toperations: public boost::numeric::odeint::default_operations {
@@ -261,7 +275,6 @@ template<typename T> Eigen::Matrix<T, 18, 1> cosserat_rod<T>::integrate(const T 
 	//typedef od::runge_kutta_dopri5<state_type> stepper_type;
 	typedef od::runge_kutta_dopri5<state_type, T, state_type, T, od::range_algebra, Toperations<T>> stepper_type;
 	//typedef od::runge_kutta_dopri5<state_type, T, state_type, T, od::vector_space_algebra> stepper_type; //use if state type is Eigen
-
 
 	od::integrate_const(od::make_dense_output < stepper_type > (T(1E-6), T(1E-3)), std::bind(&cosserat_rod::deriv, *this, pl::_1, pl::_2, pl::_3), init_state,
 			start, end, dt, std::bind(&cosserat_rod::write_deriv, *this, pl::_1, pl::_2));
