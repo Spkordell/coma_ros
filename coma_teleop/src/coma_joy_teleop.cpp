@@ -24,6 +24,12 @@ coma_joy_teleop::coma_joy_teleop() {
 	x_rot = 0;
 	y_rot = 0;
 	z_rot = -60;
+	old_x_pos = 0;
+	old_y_pos = 0;
+	old_z_pos = 0;
+	old_x_rot = 0;
+	old_y_rot = 0;
+	old_z_rot = 0;
 
 	calibrated = false;
 	initLeftTrigger = false;
@@ -39,7 +45,6 @@ coma_joy_teleop::coma_joy_teleop() {
 	z_rot_multiplier = 1.0;
 
 	private_nh.param<bool>("send_motion_commands", send_motion_commands, true);
-
 
 	// create the ROS topics
 	if (send_motion_commands) {
@@ -116,35 +121,42 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 			z_rot = MIN_Z_ROTATION;
 		}
 
-		cout << x_pos << '\t' << y_pos << '\t' << z_pos << '\t' << x_rot << '\t' << y_rot << '\t' << z_rot << endl;
+		if (x_pos != old_x_pos || y_pos != old_y_pos || z_pos != old_z_pos || x_rot != old_x_rot || y_rot != old_y_rot || z_rot != old_z_rot) {
+			cout << x_pos << '\t' << y_pos << '\t' << z_pos << '\t' << x_rot << '\t' << y_rot << '\t' << z_rot << endl;
+			old_x_pos = x_pos;
+			old_y_pos = y_pos;
+			old_z_pos = z_pos;
+			old_x_rot = x_rot;
+			old_y_rot = y_rot;
+			old_z_rot = z_rot;
 
-		coma_kinematics::solveIK srv;
-		srv.request.x_pos = x_pos;
-		srv.request.y_pos = y_pos;
-		srv.request.z_pos = z_pos;
-		srv.request.x_rot = x_rot;
-		srv.request.y_rot = y_rot;
-		srv.request.z_rot = z_rot;
+			coma_kinematics::solveIK srv;
+			srv.request.x_pos = x_pos;
+			srv.request.y_pos = y_pos;
+			srv.request.z_pos = z_pos;
+			srv.request.x_rot = x_rot;
+			srv.request.y_rot = y_rot;
+			srv.request.z_rot = z_rot;
 
-		if (solverClient.call(srv)) {
-			for (unsigned int leg; leg < 12; leg++) {
-				//cout << srv.response.leg_lengths[leg] << endl;
-				int steps = convert_length_to_step(leg, srv.response.leg_lengths[leg]);
-				if (steps < 0) {
-					ROS_ERROR("MINIMUM LEG LENGTH REACHED");
-					motion_response_received = true; //we haven't sent anything so reset the ready flag
-					return;
-				} else {
-					motion_cmd.stepper_counts[leg] = steps;
+			if (solverClient.call(srv)) {
+				for (unsigned int leg; leg < 12; leg++) {
+					//cout << srv.response.leg_lengths[leg] << endl;
+					int steps = convert_length_to_step(leg, srv.response.leg_lengths[leg]);
+					if (steps < 0) {
+						ROS_ERROR("MINIMUM LEG LENGTH REACHED");
+						motion_response_received = true; //we haven't sent anything so reset the ready flag
+						return;
+					} else {
+						motion_cmd.stepper_counts[leg] = steps;
+					}
 				}
+				if (send_motion_commands) {
+					motion_cmd_out.publish(motion_cmd);
+				}
+			} else {
+				ROS_ERROR("Failed to call solver service");
 			}
-			if (send_motion_commands) {
-				motion_cmd_out.publish(motion_cmd);
-			}
-		} else {
-			ROS_ERROR("Failed to call solver service");
 		}
-
 	}
 }
 

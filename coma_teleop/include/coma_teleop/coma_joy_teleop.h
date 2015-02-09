@@ -78,6 +78,12 @@ private:
 	double x_rot;
 	double y_rot;
 	double z_rot;
+	double old_x_pos;
+	double old_y_pos;
+	double old_z_pos;
+	double old_x_rot;
+	double old_y_rot;
+	double old_z_rot;
 
 	double x_pos_multiplier;
 	double y_pos_multiplier;
