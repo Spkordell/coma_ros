@@ -28,7 +28,7 @@ include_directories(
 ## Declare a cpp executable
 add_executable(coma_joy_teleop src/coma_joy_teleop.cpp)
 target_link_libraries(coma_joy_teleop ${catkin_LIBRARIES})
-
+add_dependencies(coma_joy_teleop coma_teleop_generate_messages_cpp)
 
 #############
 ## Install ##

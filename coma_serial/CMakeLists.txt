@@ -4,7 +4,7 @@ project(coma_serial)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED roscpp std_msgs message_generation)
+find_package(catkin REQUIRED roscpp std_msgs message_generation genmsg)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -64,21 +64,11 @@ include_directories(
 )
 
 
-
-## Declare a cpp library
-# add_library(coma_serial
-#   src/${PROJECT_NAME}/coma_serial.cpp
-# )
-
 ## Declare a cpp executable
 add_executable(serial_node src/serial_node.cpp)
-
-## Add cmake target dependencies of the executable/library
-## as an example, message headers may need to be generated before nodes
-# add_dependencies(coma_serial_node coma_serial_generate_messages_cpp)
-
 ## Specify libraries to link a library or executable target against
 target_link_libraries(serial_node ${catkin_LIBRARIES})
+add_dependencies(serial_node coma_serial_generate_messages_cpp)
 
 #############
 ## Install ##

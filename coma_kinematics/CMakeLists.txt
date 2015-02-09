@@ -58,7 +58,7 @@ target_link_libraries(coma_kinematics ${catkin_LIBRARIES})
 ## Declare a cpp executable
 add_executable(ik src/ik.cpp)
 target_link_libraries(ik coma_kinematics ${catkin_LIBRARIES} ${CERES_LIBRARIES})
-
+add_dependencies(ik coma_kinematics_generate_messages_cpp)
 
 
 
