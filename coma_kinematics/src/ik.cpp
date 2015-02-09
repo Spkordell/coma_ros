@@ -143,37 +143,35 @@ void ik::solve(Vector3d pd, Matrix3d Rd, double* leg_lengths) {
 	//run the solver
 	Solve(options, &problem, &summary);
 
-	//std::cout << summary.BriefReport() << "\n";
+	std::cout << summary.BriefReport() << "\n";
 
 	///solve for the bottom lengths
-//	Eigen::Matrix<double, 6, 1> bottom_lengths;
-//
-//	Eigen::Vector3d p_init[6] = { ikfunctor->p1_init_, ikfunctor->p2_init_, ikfunctor->p3_init_, ikfunctor->p4_init_, ikfunctor->p5_init_, ikfunctor->p6_init_ };
-//	Eigen::Matrix3d R_final[6] = { ikfunctor->R1_init_s, ikfunctor->R2_init_s, ikfunctor->R3_init_s, ikfunctor->R4_init_s, ikfunctor->R5_init_s, ikfunctor->R6_init_s };
-//	Eigen::Vector3d p_final[6] = { ikfunctor->p1_init_s.head(3), ikfunctor->p2_init_s.head(3), ikfunctor->p3_init_s.head(3),
-//			ikfunctor->p4_init_s.head(3), ikfunctor->p5_init_s.head(3), ikfunctor->p6_init_s.head(3) };
-//
-//
-//
-//	for (unsigned int rod; rod < 6; rod++) {
-////		for (unsigned int i = 0; i < 7; i++) {
-////			single_guess_init[i] = 0;
-////		}
-////		single_guess_init[6] = 0.3;
-//		singleikfunctor->p_init_ = p_init[rod];
-//		singleikfunctor->R_final_ = R_final[rod];
-//		singleikfunctor->p_final_ = p_final[rod];
-//		Solve(options, &(problem_single[rod]), &summary);
-//		//std::cout << summary.BriefReport() << "\n";
-//		bottom_lengths[rod] = single_guess_init[rod][6];
-//	}
-//
-//	//cout << bottom_lengths.transpose() << endl;
-//
-//	for (unsigned int i = 6 * 12; i < 7 * 12; i++) {
-//		leg_lengths[i - 72] = guess_init[i] + ((i < 78) ? bottom_lengths[i - 72] : 0);
-//		//cout << leg_lengths[i - 72] << endl;
-//	}
+	Eigen::Matrix<double, 6, 1> bottom_lengths;
+
+	Eigen::Vector3d p_init[6] = { ikfunctor->p1_init_, ikfunctor->p2_init_, ikfunctor->p3_init_, ikfunctor->p4_init_, ikfunctor->p5_init_, ikfunctor->p6_init_ };
+	Eigen::Matrix3d R_final[6] = { ikfunctor->R1_init_s, ikfunctor->R2_init_s, ikfunctor->R3_init_s, ikfunctor->R4_init_s, ikfunctor->R5_init_s, ikfunctor->R6_init_s };
+	Eigen::Vector3d p_final[6] = { ikfunctor->p1_init_s.head(3), ikfunctor->p2_init_s.head(3), ikfunctor->p3_init_s.head(3),
+			ikfunctor->p4_init_s.head(3), ikfunctor->p5_init_s.head(3), ikfunctor->p6_init_s.head(3) };
+
+	for (unsigned int rod; rod < 6; rod++) {
+//		for (unsigned int i = 0; i < 7; i++) {
+//			single_guess_init[i] = 0;
+//		}
+//		single_guess_init[6] = 0.3;
+		singleikfunctor->p_init_ = p_init[rod];
+		singleikfunctor->R_final_ = R_final[rod];
+		singleikfunctor->p_final_ = p_final[rod];
+		Solve(options, &(problem_single[rod]), &summary);
+		//std::cout << summary.BriefReport() << "\n";
+		bottom_lengths[rod] = single_guess_init[rod][6];
+	}
+
+	//cout << bottom_lengths.transpose() << endl;
+
+	for (unsigned int i = 6 * 12; i < 7 * 12; i++) {
+		leg_lengths[i - 72] = guess_init[i] + ((i < 78) ? bottom_lengths[i - 72] : 0);
+		//cout << leg_lengths[i - 72] << endl;
+	}
 
 }
 
