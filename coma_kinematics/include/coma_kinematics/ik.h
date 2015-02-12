@@ -19,21 +19,18 @@
 #include "coma_kinematics/cosserat_rod.h"
 #include "coma_kinematics/solveIK.h"
 
-
 #define INCLUDE_WRIST 		//if defined, model will include a 2DOF wrist
 #define USE_MULTITHREADING 	//if defined, model will perform rod integrations in multiple threads
 //#define USE_MATRIX_LOG 	//if defined, alignment residuals will be calculated using matrix logarithms instead of rodrigues' formula
 
 #ifdef INCLUDE_WRIST
-	#define GS 7*12+2
-	#define DIST_TO_FLEX_JOINT 0.001
-	#define DIST_TO_GRIPPER 0.001
+#define GS 7*12+2
+#define DIST_TO_FLEX_JOINT 0.001
+#define DIST_TO_GRIPPER 0.001
 #else
-	#define GS 7*12 //define the guess size
+#define GS 7*12 //define the guess size
 #endif
 #define INTEGRATION_STEP_SIZE 10
-
-
 
 template<typename T> struct identity {
 	typedef T type;
@@ -129,8 +126,8 @@ public:
 
 #ifdef INCLUDE_WRIST
 			//extract wrist angles
-			T wrist_roll = x[GS-13];
-			T wrist_flex = x[GS-14];
+			T wrist_roll = x[GS - 13];
+			T wrist_flex = x[GS - 14];
 #endif
 			//extract leg lengths from guess
 			T L1 = x[GS - 12];
@@ -511,29 +508,35 @@ public:
 					+ cosserat_rod<T>::hat(p3_end - p_ct) * n3_end + cosserat_rod<T>::hat(p4_end - p_ct) * n4_end + cosserat_rod<T>::hat(p5_end - p_ct) * n5_end
 					+ cosserat_rod<T>::hat(p6_end - p_ct) * n6_end + m1_end + m2_end + m3_end + m4_end + m5_end + m6_end) - L;
 
-
 #ifdef INCLUDE_WRIST
 			Matrix4t T_rotation_flex; //Transformation from the rotation joint to the flex joint
 			Matrix4t T_flex_gripper; //Transformation from the flex joint to the gripper
-			T_rotation_flex << cos(wrist_roll), -sin(wrist_roll), T(0), T(0), sin(wrist_roll), cos(wrist_roll), T(0), T(0), T(0), T(0), T(0), T(DIST_TO_FLEX_JOINT), T(0), T(0), T(0), T(1);
-			T_flex_gripper << T(1), T(0), T(0), T(0), T(0), cos(wrist_flex), -sin(wrist_flex), T(0), T(0), sin(wrist_flex), cos(wrist_flex), T(DIST_TO_GRIPPER), T(0), T(0), T(0), T(1);
+			T_rotation_flex << cos(wrist_roll), -sin(wrist_roll), T(0), T(0), sin(wrist_roll), cos(wrist_roll), T(0), T(0), T(0), T(0), T(1), T(
+					DIST_TO_FLEX_JOINT), T(0), T(0), T(0), T(1);
+			T_flex_gripper << T(1), T(0), T(0), T(0), T(0), cos(wrist_flex), -sin(wrist_flex), T(0), T(0), sin(wrist_flex), cos(wrist_flex), T(DIST_TO_GRIPPER), T(
+					0), T(0), T(0), T(1);
+
 			Matrix4t T_rotation_gripper = T_flex_gripper * T_rotation_flex;  //Transformation from the rotation joint to the gripper
+
+			//invert the T_rotation_gripper matrix;
+			Matrix4t T_gripper_rotation = T_rotation_gripper;
+			T_gripper_rotation.block(0, 0, 3, 3) = T_rotation_gripper.block(0, 0, 3, 3).transpose();
+			T_gripper_rotation.block(0, 3, 3, 1) = -T_gripper_rotation.block(0, 0, 3, 3) * T_rotation_gripper.block(0, 3, 3, 1);
 
 			Vector4t pdEEt;
 			pdEEt << pd, T(1);
-			Vector3t pdEE = (T_rotation_gripper.transpose()*pdEEt).head(3);
+			Vector3t pdEE = (T_gripper_rotation * pdEEt).head(3);
 
-			Matrix4t RdEEt = Matrix<T,4,4>::Zero();
+			Matrix4t RdEEt = Matrix<T, 4, 4>::Zero();
 			RdEEt.block(0, 0, 3, 3) = Rd;
-			RdEEt(3,3) = T(1);
-			Matrix3t RdEE = (T_rotation_gripper.transpose()*RdEEt).block(0,0,3,3);
+			RdEEt(3, 3) = T(1);
+			Matrix3t RdEE = (T_gripper_rotation * RdEEt).block(0, 0, 3, 3);
 
 
 #else
 			Vector3t pdEE = pd;
 			Matrix3t RdEE = Rd;
 #endif
-
 
 			//These are analogous to loop closure equations because they are only satisfied when the positions of the rod ends have the same relative positions as the connection pattern in the top plate
 			Vector3t res_p1 = pdEE + RdEE * p1_final - p1_end;
