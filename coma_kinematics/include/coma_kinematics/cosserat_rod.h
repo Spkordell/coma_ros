@@ -18,6 +18,7 @@
 #include <functional>
 
 #include "ceres/ceres.h"
+#include "coma_kinematics/defines.h"
 
 template<typename T> class cosserat_rod {
 	typedef boost::array<T, 18> state_type; /* The type of container used to hold the state vector */
@@ -158,12 +159,12 @@ template<typename M, int N> inline Jet<M, N> max(const double f, const Jet<M, N>
 //need to set the numeric limits of the jet types since odeint uses it
 namespace std {
 template<>
-class numeric_limits<ceres::Jet<double, 86>> : public numeric_limits<double> {
+class numeric_limits<ceres::Jet<double, GS>> : public numeric_limits<double> {
 };
 }
 namespace std {
 template<>
-class numeric_limits<ceres::Jet<double, 7>> : public numeric_limits<double> {
+class numeric_limits<ceres::Jet<double, SGS>> : public numeric_limits<double> {
 };
 }
 

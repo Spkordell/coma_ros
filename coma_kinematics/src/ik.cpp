@@ -169,14 +169,13 @@ void ik::solve(Vector3d pd, Matrix3d Rd, double* leg_lengths) {
 	for (unsigned int rod = 0; rod < 12; rod++) {
 		leg_lengths[rod] = guess_init[(6 * 12 + 2) + rod] + ((rod < 6) ? bottom_lengths[rod] : 0);
 	}
+	std::cout << "rot: " << deg(guess_init[GS-13]) << std::endl;
+	std::cout << "flex: " << deg(guess_init[GS-14]) << std::endl;
 #else
 	for (unsigned int rod = 0; rod < 12; rod++) {
 		leg_lengths[rod] = guess_init[(6 * 12) + rod] + ((rod < 6) ? bottom_lengths[rod] : 0);
 	}
 #endif
-
-	std::cout << "rot: " << deg(guess_init[GS-13]) << std::endl;
-	std::cout << "flex: " << deg(guess_init[GS-14]) << std::endl;
 
 }
 
