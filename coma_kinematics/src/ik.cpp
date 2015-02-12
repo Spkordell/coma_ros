@@ -26,7 +26,7 @@ double ik::rad(double degrees) {
 	return degrees * (M_PI / 180.0);
 }
 
-Eigen::Matrix<double , 3, 3> ik::hat(Eigen::Matrix<double, 3, 1> u) {
+Eigen::Matrix<double, 3, 3> ik::hat(Eigen::Matrix<double, 3, 1> u) {
 	Eigen::Matrix<double, 3, 3> uhat;
 	uhat << 0, -u(2), u(1), u(2), 0, -u(0), -u(1), u(0), 0;
 	return uhat;
@@ -76,15 +76,14 @@ ik::ik() {
 	for (unsigned int i = 0; i < GS - 12; i++) {
 		guess_init[i] = 0;
 	}
+	for (unsigned int i = GS - 12; i < GS; i++) {
+		guess_init[i] = 0.15; //initialize leg lengths to 0.15 m
+	}
 	for (unsigned int rod = 0; rod < 6; rod++) {
 		for (unsigned int i = 0; i < 7; i++) {
 			single_guess_init[rod][i] = 0;
 		}
 		single_guess_init[rod][6] = 0.3;
-	}
-
-	for (unsigned int i = GS - 12; i < GS; i++) {
-		guess_init[i] = 0.15; //initialize leg lengths to 0.15 m
 	}
 
 	//initialize solver
@@ -108,11 +107,7 @@ ik::ik() {
 	ROS_INFO("COMA IK Solver Server Started");
 }
 
-
 bool ik::solve_ik(coma_kinematics::solveIK::Request &req, coma_kinematics::solveIK::Response &res) {
-
-
-
 	Vector3d pd(req.x_pos, req.y_pos, req.z_pos); //desired end effector position
 	Vector3d rot(ik::rad(req.x_rot), ik::rad(req.y_rot), ik::rad(req.z_rot));
 	Matrix3d Rd = ik::hat(rot); //desired end effector orientation
@@ -152,15 +147,12 @@ void ik::solve(Vector3d pd, Matrix3d Rd, double* leg_lengths) {
 	Eigen::Matrix<double, 6, 1> bottom_lengths;
 
 	Eigen::Vector3d p_init[6] = { ikfunctor->p1_init_, ikfunctor->p2_init_, ikfunctor->p3_init_, ikfunctor->p4_init_, ikfunctor->p5_init_, ikfunctor->p6_init_ };
-	Eigen::Matrix3d R_final[6] = { ikfunctor->R1_init_s, ikfunctor->R2_init_s, ikfunctor->R3_init_s, ikfunctor->R4_init_s, ikfunctor->R5_init_s, ikfunctor->R6_init_s };
-	Eigen::Vector3d p_final[6] = { ikfunctor->p1_init_s.head(3), ikfunctor->p2_init_s.head(3), ikfunctor->p3_init_s.head(3),
-			ikfunctor->p4_init_s.head(3), ikfunctor->p5_init_s.head(3), ikfunctor->p6_init_s.head(3) };
+	Eigen::Matrix3d R_final[6] = { ikfunctor->R1_init_s, ikfunctor->R2_init_s, ikfunctor->R3_init_s, ikfunctor->R4_init_s, ikfunctor->R5_init_s,
+			ikfunctor->R6_init_s };
+	Eigen::Vector3d p_final[6] = { ikfunctor->p1_init_s.head(3), ikfunctor->p2_init_s.head(3), ikfunctor->p3_init_s.head(3), ikfunctor->p4_init_s.head(3),
+			ikfunctor->p5_init_s.head(3), ikfunctor->p6_init_s.head(3) };
 
-	for (unsigned int rod; rod < 6; rod++) {
-//		for (unsigned int i = 0; i < 7; i++) {
-//			single_guess_init[i] = 0;
-//		}
-//		single_guess_init[6] = 0.3;
+	for (unsigned int rod = 0; rod < 6; rod++) {
 		singleikfunctor->p_init_ = p_init[rod];
 		singleikfunctor->R_final_ = R_final[rod];
 		singleikfunctor->p_final_ = p_final[rod];
@@ -169,12 +161,15 @@ void ik::solve(Vector3d pd, Matrix3d Rd, double* leg_lengths) {
 		bottom_lengths[rod] = single_guess_init[rod][6];
 	}
 
-	//cout << bottom_lengths.transpose() << endl;
-
-	for (unsigned int i = 6 * 12; i < 7 * 12; i++) {
-		leg_lengths[i - 72] = guess_init[i] + ((i < 78) ? bottom_lengths[i - 72] : 0);
-		//cout << leg_lengths[i - 72] << endl;
+#ifdef INCLUDE_WRIST
+	for (unsigned int rod = 0; rod < 12; rod++) {
+		leg_lengths[rod] = guess_init[(6 * 12 + 2) + rod] + ((rod < 6) ? bottom_lengths[rod] : 0);
 	}
+#else
+	for (unsigned int rod = 0; rod < 12; rod++) {
+		leg_lengths[rod] = guess_init[(6 * 12) + rod] + ((rod < 6) ? bottom_lengths[rod] : 0);
+	}
+#endif
 
 }
 
@@ -196,7 +191,6 @@ int main(int argc, char **argv) {
 //
 //	//solve the starting position
 //	solver.solve(pd, Rd, leg_lengths);
-
 
 	ros::spin();
 

@@ -20,11 +20,18 @@
 #include "coma_kinematics/solveIK.h"
 
 
-#define GS 7*12 //define the guess size
+#define INCLUDE_WRIST 		//if defined, model will include a 2DOF wrist
+#define USE_MULTITHREADING 	//if defined, model will perform rod integrations in multiple threads
+//#define USE_MATRIX_LOG 	//if defined, alignment residuals will be calculated using matrix logarithms instead of rodrigues' formula
+
+#ifdef INCLUDE_WRIST
+	#define GS 7*12+2
+#else
+	#define GS 7*12 //define the guess size
+#endif
 #define INTEGRATION_STEP_SIZE 10
 
-#define use_multithreading
-//#define use_matrix_log
+
 
 template<typename T> struct identity {
 	typedef T type;
@@ -57,6 +64,11 @@ public:
 	struct IKFunctor {
 		template<typename T>
 		bool operator()(const T* const x, T* residual) const {
+			//last 12 indices of x are leg lengths
+#ifdef INCLUDE_WRIST
+			//index GS-13 is wrist roll
+			//index GS-14 is wrist flex
+#endif
 
 			using Eigen::Matrix;
 			typedef Matrix<T, 3, 3> Matrix3t;
@@ -112,6 +124,11 @@ public:
 //			Vector4t p5_init_s = V4DtoT<T>(p5_init_s_);
 //			Vector4t p6_init_s = V4DtoT<T>(p6_init_s_);
 
+#ifdef INCLUDE_WRIST
+			//extract wrist angles
+			T wrist_roll = x[GS-13];
+			T wrist_flex = x[GS-14];
+#endif
 			//extract leg lengths from guess
 			T L1 = x[GS - 12];
 			T L2 = x[GS - 11];
@@ -198,7 +215,7 @@ public:
 			cr10.set_init_state(y10_init);
 			cr11.set_init_state(y11_init);
 			cr12.set_init_state(y12_init);
-#ifdef use_multithreading
+#ifdef USE_MULTITHREADING
 			boost::thread t7(boost::bind(&cosserat_rod<T>::integrate, &cr7, T(0), L7, L7 / T(INTEGRATION_STEP_SIZE)));
 			boost::thread t8(boost::bind(&cosserat_rod<T>::integrate, &cr8, T(0), L8, L8 / T(INTEGRATION_STEP_SIZE)));
 			boost::thread t9(boost::bind(&cosserat_rod<T>::integrate, &cr9, T(0), L9, L9 / T(INTEGRATION_STEP_SIZE)));
@@ -404,7 +421,7 @@ public:
 			cr4.set_init_state(y4_init);
 			cr5.set_init_state(y5_init);
 			cr6.set_init_state(y6_init);
-#ifdef use_multithreading
+#ifdef USE_MULTITHREADING
 			boost::thread t1(boost::bind(&cosserat_rod<T>::integrate, &cr1, T(0), L1, L1 / T(INTEGRATION_STEP_SIZE)));
 			boost::thread t2(boost::bind(&cosserat_rod<T>::integrate, &cr2, T(0), L2, L2 / T(INTEGRATION_STEP_SIZE)));
 			boost::thread t3(boost::bind(&cosserat_rod<T>::integrate, &cr3, T(0), L3, L3 / T(INTEGRATION_STEP_SIZE)));
@@ -506,7 +523,7 @@ public:
 			Vector3t res_p12 = p7_end - R7_end * (p7_final - p12_final) - p12_end;
 
 			//force a common material orientation for all the distal rod ends
-#ifdef use_matrix_log
+#ifdef USE_MATRIX_LOG
 			Vector3t res_R1(0.0, 0.0, 0.0);
 			Vector3t res_R2(0.0, 0.0, 0.0);
 			Vector3t res_R3(0.0, 0.0, 0.0);
@@ -690,7 +707,7 @@ public:
 			Vector3t res_p = p_final - p_end;
 			// Matrix3d R_final3x3;
 			// R_final3x3 << R_Final[0], R_Final[3], R_Final[6], R_Final[1], R_Final[4], R_Final[7], R_Final[2], R_Final[5], R_Final[8];
-#ifdef use_matrix_log
+#ifdef USE_MATRIX_LOG
 			Vector3t res_R(T(0.0), T(0.0), T(0.0));
 			if (!(R_final.transpose() * R_end).isZero()) res_R = cosserat_rod::vee((R_final.transpose() * R_end).log());
 #else

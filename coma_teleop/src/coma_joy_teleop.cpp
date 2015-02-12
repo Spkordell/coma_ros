@@ -140,7 +140,7 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 
 			if (solverClient.call(srv)) {
 				for (unsigned int leg; leg < 12; leg++) {
-					//cout << srv.response.leg_lengths[leg] << endl;
+					cout << srv.response.leg_lengths[leg] << endl;
 					int steps = convert_length_to_step(leg, srv.response.leg_lengths[leg]);
 					if (steps < 0) {
 						ROS_ERROR("MINIMUM LEG LENGTH REACHED");

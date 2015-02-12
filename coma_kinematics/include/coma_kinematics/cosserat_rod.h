@@ -158,7 +158,7 @@ template<typename M, int N> inline Jet<M, N> max(const double f, const Jet<M, N>
 //need to set the numeric limits of the jet types since odeint uses it
 namespace std {
 template<>
-class numeric_limits<ceres::Jet<double, 84>> : public numeric_limits<double> {
+class numeric_limits<ceres::Jet<double, 86>> : public numeric_limits<double> {
 };
 }
 namespace std {
