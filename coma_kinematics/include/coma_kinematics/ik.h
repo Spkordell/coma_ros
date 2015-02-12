@@ -28,7 +28,7 @@ class ik {
 public:
 	ik();
 	void solvetest();
-	void solve(Eigen::Vector3d pd, Eigen::Matrix3d Rd, double* leg_lengths);
+	void solve(Eigen::Vector3d pd, Eigen::Matrix3d Rd, double* leg_lengths, double* wrist_angles);
 	static double rad(double degrees);
 	static double deg(double radians);
 	Eigen::Matrix<double, 3, 3> hat(Eigen::Matrix<double, 3, 1> u);

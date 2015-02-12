@@ -150,6 +150,8 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 						motion_cmd.stepper_counts[leg] = steps;
 					}
 				}
+				cout << "wrist_rot: " << deg(srv.response.wrist_rot) << endl;
+				cout << "wrist_flex: " << deg(srv.response.wrist_flex) << endl;
 				if (send_motion_commands) {
 					motion_cmd_out.publish(motion_cmd);
 				}
@@ -163,6 +165,10 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 int coma_joy_teleop::convert_length_to_step(int leg, double length) {
 	static double homed_lengths[12] = { 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01 }; //todo: this needs to be the amount of leg remaining after homing for each rod
 	return (length - homed_lengths[leg]) * STEPS_PER_METER;
+}
+
+double coma_joy_teleop::deg(double radians) {
+	return radians * (180.0 / M_PI);
 }
 
 int main(int argc, char **argv) {

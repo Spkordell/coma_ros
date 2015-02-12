@@ -118,17 +118,20 @@ bool ik::solve_ik(coma_kinematics::solveIK::Request &req, coma_kinematics::solve
 	Eigen::MatrixExponential < Matrix3d > Rdm(Rd);
 	Rdm.compute(Rd);
 	double leg_lengths[12];
+	double wrist_angles[2];
 
-	solve(pd, Rd, leg_lengths);
+	solve(pd, Rd, leg_lengths, wrist_angles);
 
 	for (unsigned int i = 0; i < 12; i++) {
 		res.leg_lengths[i] = leg_lengths[i];
 	}
+	res.wrist_rot = wrist_angles[0];
+	res.wrist_flex = wrist_angles[1];
 
 	return true;
 }
 
-void ik::solve(Vector3d pd, Matrix3d Rd, double* leg_lengths) {
+void ik::solve(Vector3d pd, Matrix3d Rd, double* leg_lengths, double* wrist_angles) {
 
 	using Eigen::Vector3d;
 	using Eigen::Matrix3d;
@@ -169,8 +172,10 @@ void ik::solve(Vector3d pd, Matrix3d Rd, double* leg_lengths) {
 	for (unsigned int rod = 0; rod < 12; rod++) {
 		leg_lengths[rod] = guess_init[(6 * 12 + 2) + rod] + ((rod < 6) ? bottom_lengths[rod] : 0);
 	}
-	std::cout << "rot: " << deg(guess_init[GS-13]) << std::endl;
-	std::cout << "flex: " << deg(guess_init[GS-14]) << std::endl;
+	wrist_angles[0] = guess_init[GS-13]; //wrist rotation
+	wrist_angles[1] = guess_init[GS-14]; //wrist flex
+	//std::cout << "rot: " << deg(guess_init[GS-13]) << std::endl;
+	//std::cout << "flex: " << deg(guess_init[GS-14]) << std::endl;
 #else
 	for (unsigned int rod = 0; rod < 12; rod++) {
 		leg_lengths[rod] = guess_init[(6 * 12) + rod] + ((rod < 6) ? bottom_lengths[rod] : 0);

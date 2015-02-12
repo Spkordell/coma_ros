@@ -19,6 +19,8 @@
 #include "coma_kinematics/solveIK.h"
 #include "coma_serial/teleop_command.h"
 
+#define INCLUDE_WRIST //if defined, model will include a 2DOF wrist
+
 #define MIN_X_POSITION -0.3
 #define MIN_Y_POSITION -0.3
 #define MIN_Z_POSITION 0.0
@@ -64,6 +66,8 @@ private:
 	void motion_resp_cback(const std_msgs::Char::ConstPtr& resp);
 
 	int convert_length_to_step(int leg, double length);
+
+	static double deg(double radians);
 
 	ros::NodeHandle node; /*!< a handle for this ROS node */
 

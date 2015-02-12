@@ -6,3 +6,5 @@ float64 y_rot
 float64 z_rot
 ---
 float64[12] leg_lengths
+float64 wrist_rot
+float64 wrist_flex
