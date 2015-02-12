@@ -197,6 +197,7 @@ int main(int argc, char **argv) {
 //	//solve the starting position
 //	solver.solve(pd, Rd, leg_lengths);
 
+
 	ros::spin();
 
 	return EXIT_SUCCESS;

@@ -19,6 +19,7 @@
 #include "coma_kinematics/cosserat_rod.h"
 #include "coma_kinematics/solveIK.h"
 
+
 #define GS 7*12 //define the guess size
 #define INTEGRATION_STEP_SIZE 10
 

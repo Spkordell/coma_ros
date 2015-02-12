@@ -69,13 +69,14 @@ template<typename T> void cosserat_rod<T>::set_init_state(Eigen::Matrix<T, 18, 1
 		this->init_state[i] = init_state[i];
 	}
 
-	ro = T(.0018034 / 2);							// outer radius m
+	//ro = T(.0018034 / 2);							// outer radius m
+	ro = T(0.00198 / 2);							// outer radius m
 	ri = T(0.00);									// inner radius mc
 	I = T(0.25 * M_PI * (pow(ro, 4) - pow(ri, 4)));	//second moment of area
-	A = T(M_PI * (pow(ro, 2) - pow(ri, 2)));			//area
-	J = T(T(2) * I);										//polar moment
-	E = T(207 * pow(10, 9));							//Pa Youngs mod
-	G = T(79.3 * pow(10, 9));							//Pa shear mod
+	A = T(M_PI * (pow(ro, 2) - pow(ri, 2)));		//area
+	J = T(T(2) * I);								//polar moment
+	E = T(207 * pow(10, 9));						//Pa Youngs mod
+	G = T(79.3 * pow(10, 9));						//Pa shear mod
 	K_bt_inv << T(1) / (E * I), T(0), T(0), T(0), T(1) / (E * I), T(0), T(0), T(0), T(1) / (J * G);
 	K_se_inv << T(1) / (G * A), T(0), T(0), T(0), T(1) / (G * A), T(0), T(0), T(0), T(1) / (E * A);
 }
