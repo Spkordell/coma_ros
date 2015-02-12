@@ -26,6 +26,8 @@
 
 #ifdef INCLUDE_WRIST
 	#define GS 7*12+2
+	#define DIST_TO_FLEX_JOINT 0.001
+	#define DIST_TO_GRIPPER 0.001
 #else
 	#define GS 7*12 //define the guess size
 #endif
@@ -43,6 +45,7 @@ public:
 	void solvetest();
 	void solve(Eigen::Vector3d pd, Eigen::Matrix3d Rd, double* leg_lengths);
 	static double rad(double degrees);
+	static double deg(double radians);
 	Eigen::Matrix<double, 3, 3> hat(Eigen::Matrix<double, 3, 1> u);
 
 	template<typename T> inline static Eigen::Matrix<T, 3, 3> M3DtoT(Eigen::Matrix<double, 3, 3> a) {
@@ -508,13 +511,37 @@ public:
 					+ cosserat_rod<T>::hat(p3_end - p_ct) * n3_end + cosserat_rod<T>::hat(p4_end - p_ct) * n4_end + cosserat_rod<T>::hat(p5_end - p_ct) * n5_end
 					+ cosserat_rod<T>::hat(p6_end - p_ct) * n6_end + m1_end + m2_end + m3_end + m4_end + m5_end + m6_end) - L;
 
+
+#ifdef INCLUDE_WRIST
+			Matrix4t T_rotation_flex; //Transformation from the rotation joint to the flex joint
+			Matrix4t T_flex_gripper; //Transformation from the flex joint to the gripper
+			T_rotation_flex << cos(wrist_roll), -sin(wrist_roll), T(0), T(0), sin(wrist_roll), cos(wrist_roll), T(0), T(0), T(0), T(0), T(0), T(DIST_TO_FLEX_JOINT), T(0), T(0), T(0), T(1);
+			T_flex_gripper << T(1), T(0), T(0), T(0), T(0), cos(wrist_flex), -sin(wrist_flex), T(0), T(0), sin(wrist_flex), cos(wrist_flex), T(DIST_TO_GRIPPER), T(0), T(0), T(0), T(1);
+			Matrix4t T_rotation_gripper = T_flex_gripper * T_rotation_flex;  //Transformation from the rotation joint to the gripper
+
+			Vector4t pdEEt;
+			pdEEt << pd, T(1);
+			Vector3t pdEE = (T_rotation_gripper.transpose()*pdEEt).head(3);
+
+			Matrix4t RdEEt = Matrix<T,4,4>::Zero();
+			RdEEt.block(0, 0, 3, 3) = Rd;
+			RdEEt(3,3) = T(1);
+			Matrix3t RdEE = (T_rotation_gripper.transpose()*RdEEt).block(0,0,3,3);
+
+
+#else
+			Vector3t pdEE = pd;
+			Matrix3t RdEE = Rd;
+#endif
+
+
 			//These are analogous to loop closure equations because they are only satisfied when the positions of the rod ends have the same relative positions as the connection pattern in the top plate
-			Vector3t res_p1 = pd + Rd * p1_final - p1_end;
-			Vector3t res_p2 = pd + Rd * p2_final - p2_end;
-			Vector3t res_p3 = pd + Rd * p3_final - p3_end;
-			Vector3t res_p4 = pd + Rd * p4_final - p4_end;
-			Vector3t res_p5 = pd + Rd * p5_final - p5_end;
-			Vector3t res_p6 = pd + Rd * p6_final - p6_end;
+			Vector3t res_p1 = pdEE + RdEE * p1_final - p1_end;
+			Vector3t res_p2 = pdEE + RdEE * p2_final - p2_end;
+			Vector3t res_p3 = pdEE + RdEE * p3_final - p3_end;
+			Vector3t res_p4 = pdEE + RdEE * p4_final - p4_end;
+			Vector3t res_p5 = pdEE + RdEE * p5_final - p5_end;
+			Vector3t res_p6 = pdEE + RdEE * p6_final - p6_end;
 			Vector3t res_p7 = p7_end - R7_end * (p7_final - p7_final) - p7_end;
 			Vector3t res_p8 = p7_end - R7_end * (p7_final - p8_final) - p8_end;
 			Vector3t res_p9 = p7_end - R7_end * (p7_final - p9_final) - p9_end;
@@ -552,7 +579,7 @@ public:
 #else
 			Matrix<T, 2, 3> rodrigues;
 			rodrigues << T(1), T(0), T(0), T(0), T(1), T(0);
-			Matrix3t Rdt = Rd.transpose();
+			Matrix3t Rdt = RdEE.transpose();
 			Vector3t res_R1;
 			Vector3t res_R2;
 			Vector3t res_R3;
@@ -565,12 +592,12 @@ public:
 			Vector3t res_R10;
 			Vector3t res_R11;
 			Vector3t res_R12;
-			res_R1 << rodrigues * cosserat_rod<T>::vee((R1_end.transpose() * Rd - R1_end * Rdt)), T(0);
-			res_R2 << rodrigues * cosserat_rod<T>::vee((R2_end.transpose() * Rd - R2_end * Rdt)), T(0);
-			res_R3 << rodrigues * cosserat_rod<T>::vee((R3_end.transpose() * Rd - R3_end * Rdt)), T(0);
-			res_R4 << rodrigues * cosserat_rod<T>::vee((R4_end.transpose() * Rd - R4_end * Rdt)), T(0);
-			res_R5 << rodrigues * cosserat_rod<T>::vee((R5_end.transpose() * Rd - R5_end * Rdt)), T(0);
-			res_R6 << rodrigues * cosserat_rod<T>::vee((R6_end.transpose() * Rd - R6_end * Rdt)), T(0);
+			res_R1 << rodrigues * cosserat_rod<T>::vee((R1_end.transpose() * RdEE - R1_end * Rdt)), T(0);
+			res_R2 << rodrigues * cosserat_rod<T>::vee((R2_end.transpose() * RdEE - R2_end * Rdt)), T(0);
+			res_R3 << rodrigues * cosserat_rod<T>::vee((R3_end.transpose() * RdEE - R3_end * Rdt)), T(0);
+			res_R4 << rodrigues * cosserat_rod<T>::vee((R4_end.transpose() * RdEE - R4_end * Rdt)), T(0);
+			res_R5 << rodrigues * cosserat_rod<T>::vee((R5_end.transpose() * RdEE - R5_end * Rdt)), T(0);
+			res_R6 << rodrigues * cosserat_rod<T>::vee((R6_end.transpose() * RdEE - R6_end * Rdt)), T(0);
 			res_R7 << rodrigues * cosserat_rod<T>::vee((R7_end.transpose() * R7_end - R7_end * R7_end.transpose())), T(0);
 			res_R8 << rodrigues * cosserat_rod<T>::vee((R8_end.transpose() * R7_end - R8_end * R7_end.transpose())), T(0);
 			res_R9 << rodrigues * cosserat_rod<T>::vee((R9_end.transpose() * R7_end - R9_end * R7_end.transpose())), T(0);

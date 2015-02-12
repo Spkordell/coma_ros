@@ -26,6 +26,10 @@ double ik::rad(double degrees) {
 	return degrees * (M_PI / 180.0);
 }
 
+double ik::deg(double radians) {
+	return radians * (180.0 / M_PI);
+}
+
 Eigen::Matrix<double, 3, 3> ik::hat(Eigen::Matrix<double, 3, 1> u) {
 	Eigen::Matrix<double, 3, 3> uhat;
 	uhat << 0, -u(2), u(1), u(2), 0, -u(0), -u(1), u(0), 0;
@@ -170,6 +174,9 @@ void ik::solve(Vector3d pd, Matrix3d Rd, double* leg_lengths) {
 		leg_lengths[rod] = guess_init[(6 * 12) + rod] + ((rod < 6) ? bottom_lengths[rod] : 0);
 	}
 #endif
+
+	std::cout << "rot: " << deg(guess_init[GS-13]) << std::endl;
+	std::cout << "flex: " << deg(guess_init[GS-14]) << std::endl;
 
 }
 
