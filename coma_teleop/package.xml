@@ -19,11 +19,13 @@
   <build_depend>std_msgs</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>coma_kinematics</build_depend>
+  <build_depend>coma_serial</build_depend>
 
   <run_depend>joy</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>coma_kinematics</run_depend>
+  <run_depend>coma_serial</run_depend>
   
 </package>

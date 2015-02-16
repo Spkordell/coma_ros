@@ -18,12 +18,12 @@ coma_joy_teleop::coma_joy_teleop() {
 	ros::NodeHandle private_nh("~");
 
 	//initialize arm position variables
-	x_pos = 0;
-	y_pos = 0;
-	z_pos = 0.3;
-	x_rot = 0;
-	y_rot = 0;
-	z_rot = -60;
+	x_pos = INITIAL_X_POS;
+	y_pos = INITIAL_Y_POS;
+	z_pos = INITIAL_Z_POS;
+	x_rot = INITIAL_X_ROT;
+	y_rot = INITIAL_Y_ROT;
+	z_rot = INITIAL_Z_ROT;
 	old_x_pos = 0;
 	old_y_pos = 0;
 	old_z_pos = 0;
@@ -39,7 +39,6 @@ coma_joy_teleop::coma_joy_teleop() {
 	x_pos_multiplier = 0.02;
 	y_pos_multiplier = 0.02;
 	z_pos_multiplier = 0.01;
-
 	x_rot_multiplier = 3.0;
 	y_rot_multiplier = 3.0;
 	z_rot_multiplier = 1.0;
@@ -80,14 +79,20 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 		}
 	} else if (motion_response_received || !send_motion_commands) { //only publish if the board is ready for another command
 		motion_response_received = false;
-		x_pos -= x_pos_multiplier * (joy->axes.at(0));
-		y_pos += y_pos_multiplier * (joy->axes.at(1));
-		z_pos -= z_pos_multiplier * (1 - joy->axes.at(2));
-		z_pos += z_pos_multiplier * (1 - joy->axes.at(5));
-		x_rot -= x_rot_multiplier * (joy->axes.at(3));
-		y_rot += y_rot_multiplier * (joy->axes.at(4));
-		z_rot -= z_rot_multiplier * (joy->buttons.at(4));
-		z_rot += z_rot_multiplier * (joy->buttons.at(5));
+		x_pos -= x_pos_multiplier * (joy->axes.at(0));		//Left stick horizontal
+		y_pos += y_pos_multiplier * (joy->axes.at(1));		//Left Stick vertical
+		z_pos -= z_pos_multiplier * (1 - joy->axes.at(2));  //Left trigger
+		z_pos += z_pos_multiplier * (1 - joy->axes.at(5));  //Right trigger
+		x_rot -= x_rot_multiplier * (joy->axes.at(3));		//Right stick horizontal
+		y_rot += y_rot_multiplier * (joy->axes.at(4));		//Right stick vertical
+		z_rot -= z_rot_multiplier * (joy->buttons.at(4));	//Left button
+		z_rot += z_rot_multiplier * (joy->buttons.at(5));	//Right button
+		if (joy->buttons.at(0)) { 							//A button
+			gripper_open = true;
+		} else if (joy->buttons.at(1)) {					// B button
+			gripper_open = false;
+		}
+		home = joy->buttons.at(2);							//X button
 
 		if (x_pos > MAX_X_POSITION) {
 			x_pos = MAX_X_POSITION;
@@ -121,7 +126,17 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 			z_rot = MIN_Z_ROTATION;
 		}
 
-		if (x_pos != old_x_pos || y_pos != old_y_pos || z_pos != old_z_pos || x_rot != old_x_rot || y_rot != old_y_rot || z_rot != old_z_rot) {
+		if (home) {
+			x_pos = INITIAL_X_POS;
+			y_pos = INITIAL_Y_POS;
+			z_pos = INITIAL_Z_POS;
+			x_rot = INITIAL_X_ROT;
+			y_rot = INITIAL_Y_ROT;
+			z_rot = INITIAL_Z_ROT;
+		}
+
+		if (x_pos != old_x_pos || y_pos != old_y_pos || z_pos != old_z_pos || x_rot != old_x_rot || y_rot != old_y_rot || z_rot != old_z_rot
+				|| gripper_open != old_gripper_open || home != old_home) {
 			cout << x_pos << '\t' << y_pos << '\t' << z_pos << '\t' << x_rot << '\t' << y_rot << '\t' << z_rot << endl;
 			old_x_pos = x_pos;
 			old_y_pos = y_pos;
@@ -129,6 +144,8 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 			old_x_rot = x_rot;
 			old_y_rot = y_rot;
 			old_z_rot = z_rot;
+			old_gripper_open = gripper_open;
+			old_home = home;
 
 			coma_kinematics::solveIK srv;
 			srv.request.x_pos = x_pos;
@@ -150,8 +167,22 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 						motion_cmd.stepper_counts[leg] = steps;
 					}
 				}
+#ifdef INCLUDE_WRIST
 				cout << "wrist_rot: " << deg(srv.response.wrist_rot) << endl;
 				cout << "wrist_flex: " << deg(srv.response.wrist_flex) << endl;
+				motion_cmd.wrist_flex = int(deg(srv.response.wrist_flex));
+				motion_cmd.wrist_rot = int(deg(srv.response.wrist_rot));
+#else
+				motion_cmd.wrist_flex = 0;
+				motion_cmd.wrist_rot = 0;
+#endif
+				motion_cmd.gripper_open = gripper_open;
+				if (gripper_open) {
+					cout << "gripper open" << endl;
+				} else {
+					cout << "gripper closed" << endl;
+				}
+				motion_cmd.home = home;
 				if (send_motion_commands) {
 					motion_cmd_out.publish(motion_cmd);
 				}

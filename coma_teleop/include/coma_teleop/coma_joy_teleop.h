@@ -35,6 +35,13 @@
 #define MAX_Y_ROTATION 90.0
 #define MAX_Z_ROTATION 60.0
 
+#define INITIAL_X_POS 0
+#define INITIAL_Y_POS 0
+#define INITIAL_Z_POS 0.3
+#define INITIAL_X_ROT 0
+#define INITIAL_Y_ROT 0
+#define INITIAL_Z_ROT -60
+
 #define SPROCKET_RADIUS 0.020 // radius in m
 #define STEPS_PER_REVOLUTION 200
 #define SPROCKET_CIRCUMFERENCE 2*M_PI*SPROCKET_RADIUS
@@ -82,12 +89,16 @@ private:
 	double x_rot;
 	double y_rot;
 	double z_rot;
+	bool gripper_open;
+	bool home;
 	double old_x_pos;
 	double old_y_pos;
 	double old_z_pos;
 	double old_x_rot;
 	double old_y_rot;
 	double old_z_rot;
+	bool old_gripper_open;
+	bool old_home;
 
 	double x_pos_multiplier;
 	double y_pos_multiplier;

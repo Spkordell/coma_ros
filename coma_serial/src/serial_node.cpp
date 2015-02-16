@@ -26,12 +26,10 @@ serial_node::serial_node() :
 	//create the ROS topics
 	if (mode_string.compare("teleop") == 0) {
 		mode = TELEOP;
-		step_cmd_in = node.subscribe < coma_serial::teleop_command
-				> ("step_cmd", 0, &serial_node::step_cmd_cback, this);
+		step_cmd_in = node.subscribe < coma_serial::teleop_command > ("step_cmd", 0, &serial_node::step_cmd_cback, this);
 	} else {
 		mode = PATH;
-		step_cmd_in = node.subscribe < coma_serial::path_command
-				> ("step_cmd", 0, &serial_node::step_cmd_cback, this);
+		step_cmd_in = node.subscribe < coma_serial::path_command > ("step_cmd", 0, &serial_node::step_cmd_cback, this);
 	}
 	resp_out = node.advertise < std_msgs::Char > ("resp", 1000);
 
@@ -77,8 +75,7 @@ void serial_node::writeChar(char c) {
 	boost::asio::write(serial, boost::asio::buffer(s, 1)); //use teleop mode
 }
 
-void serial_node::step_cmd_cback(
-		const coma_serial::path_command::ConstPtr& cmd) {
+void serial_node::step_cmd_cback(const coma_serial::path_command::ConstPtr& cmd) {
 	char buffer[30];
 	sprintf(buffer, "%ld:%d:%ld\r", cmd->timestamp, cmd->stepper, cmd->counts);
 	std::string out_buffer(buffer);
@@ -86,13 +83,18 @@ void serial_node::step_cmd_cback(
 	ROS_INFO("%s", out_buffer.c_str());
 }
 
-void serial_node::step_cmd_cback(
-		const coma_serial::teleop_command::ConstPtr& cmd) {
+void serial_node::step_cmd_cback(const coma_serial::teleop_command::ConstPtr& cmd) {
+	if (cmd->home) {
+		writeChar('H');
+		ROS_INFO("Sent homing signal");
+	}
 	ostringstream buffer("");
-	for (int i = 0; i < 11; i++) {
+	for (int i = 0; i < 12; i++) {
 		buffer << cmd->stepper_counts[i] << ':';
 	}
-	buffer << cmd->stepper_counts[11] << '\r';
+	buffer << cmd->wrist_rot << ':';
+	buffer << cmd->wrist_flex << ':';
+	buffer << cmd->gripper_open << '\r';
 	writeString(buffer.str());
 	ROS_INFO("%s", buffer.str().c_str());
 }
@@ -102,7 +104,7 @@ mode_type serial_node::get_mode() {
 }
 
 void serial_node::respThread() {
-	while(1) {
+	while (1) {
 		try {
 			resp.data = readChar();
 			resp_out.publish(resp);
@@ -140,11 +142,11 @@ int main(int argc, char **argv) {
 		ros::spin();
 
 		/*
-		ros::Rate r(40);
-		while (ros::ok()) {
-			ros::spinOnce();
-			r.sleep();
-		}
+		 ros::Rate r(40);
+		 while (ros::ok()) {
+		 ros::spinOnce();
+		 r.sleep();
+		 }
 		 */
 
 	} catch (boost::system::system_error& e) {
