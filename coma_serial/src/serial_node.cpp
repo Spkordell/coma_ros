@@ -94,7 +94,7 @@ void serial_node::step_cmd_cback(const coma_serial::teleop_command::ConstPtr& cm
 	}
 	buffer << cmd->wrist_rot << ':';
 	buffer << cmd->wrist_flex << ':';
-	buffer << cmd->gripper_open << '\r';
+	buffer << (cmd->gripper_open ? '1' : '0') << '\r';
 	writeString(buffer.str());
 	ROS_INFO("%s", buffer.str().c_str());
 }
@@ -107,6 +107,7 @@ void serial_node::respThread() {
 	while (1) {
 		try {
 			resp.data = readChar();
+			//std::cout << resp.data << std::endl;
 			resp_out.publish(resp);
 			if (resp.data == 'F') {
 				ROS_ERROR("FAULT: Stepper Driver Thermal Shutdown or Overcurrent!");

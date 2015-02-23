@@ -23,24 +23,25 @@
 
 #define MIN_X_POSITION -0.3
 #define MIN_Y_POSITION -0.3
-#define MIN_Z_POSITION 0.0
+#define MIN_Z_POSITION 0.33
 #define MIN_X_ROTATION -90.0
 #define MIN_Y_ROTATION -90.0
 #define MIN_Z_ROTATION -60.0
 
 #define MAX_X_POSITION 0.3
 #define MAX_Y_POSITION 0.3
-#define MAX_Z_POSITION 0.6
+#define MAX_Z_POSITION 0.9
 #define MAX_X_ROTATION 90.0
 #define MAX_Y_ROTATION 90.0
 #define MAX_Z_ROTATION 60.0
 
 #define INITIAL_X_POS 0
 #define INITIAL_Y_POS 0
-#define INITIAL_Z_POS 0.3
+#define INITIAL_Z_POS 0.33
 #define INITIAL_X_ROT 0
 #define INITIAL_Y_ROT 0
 #define INITIAL_Z_ROT -60
+//#define INITIAL_Z_ROT 0
 
 #define SPROCKET_RADIUS 0.020 // radius in m
 #define STEPS_PER_REVOLUTION 200

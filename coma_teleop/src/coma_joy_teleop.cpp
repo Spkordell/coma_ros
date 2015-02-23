@@ -62,6 +62,7 @@ void coma_joy_teleop::motion_resp_cback(const std_msgs::Char::ConstPtr& resp) {
 	if (resp->data == 'R') {
 		motion_response_received = true;
 	}
+	//cout << resp->data << endl;
 }
 
 void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
@@ -78,7 +79,6 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 			ROS_INFO("Controller calibration complete!");
 		}
 	} else if (motion_response_received || !send_motion_commands) { //only publish if the board is ready for another command
-		motion_response_received = false;
 		x_pos -= x_pos_multiplier * (joy->axes.at(0));		//Left stick horizontal
 		y_pos += y_pos_multiplier * (joy->axes.at(1));		//Left Stick vertical
 		z_pos -= z_pos_multiplier * (1 - joy->axes.at(2));  //Left trigger
@@ -137,6 +137,7 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 
 		if (x_pos != old_x_pos || y_pos != old_y_pos || z_pos != old_z_pos || x_rot != old_x_rot || y_rot != old_y_rot || z_rot != old_z_rot
 				|| gripper_open != old_gripper_open || home != old_home) {
+
 			cout << x_pos << '\t' << y_pos << '\t' << z_pos << '\t' << x_rot << '\t' << y_rot << '\t' << z_rot << endl;
 			old_x_pos = x_pos;
 			old_y_pos = y_pos;
@@ -161,7 +162,7 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 					int steps = convert_length_to_step(leg, srv.response.leg_lengths[leg]);
 					if (steps < 0) {
 						ROS_ERROR("MINIMUM LEG LENGTH REACHED");
-						motion_response_received = true; //we haven't sent anything so reset the ready flag
+						//motion_response_received = true; //we haven't sent anything so reset the ready flag
 						return;
 					} else {
 						motion_cmd.stepper_counts[leg] = steps;
@@ -170,8 +171,8 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 #ifdef INCLUDE_WRIST
 				cout << "wrist_rot: " << deg(srv.response.wrist_rot) << endl;
 				cout << "wrist_flex: " << deg(srv.response.wrist_flex) << endl;
-				motion_cmd.wrist_flex = int(deg(srv.response.wrist_flex));
-				motion_cmd.wrist_rot = int(deg(srv.response.wrist_rot));
+				motion_cmd.wrist_flex = -1*int(deg(srv.response.wrist_flex));
+				motion_cmd.wrist_rot = -1*int(deg(srv.response.wrist_rot));
 #else
 				motion_cmd.wrist_flex = 0;
 				motion_cmd.wrist_rot = 0;
@@ -184,6 +185,7 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 				}
 				motion_cmd.home = home;
 				if (send_motion_commands) {
+					motion_response_received = false;
 					motion_cmd_out.publish(motion_cmd);
 				}
 			} else {
@@ -194,7 +196,9 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 }
 
 int coma_joy_teleop::convert_length_to_step(int leg, double length) {
-	static double homed_lengths[12] = { 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01 }; //todo: this needs to be the amount of leg remaining after homing for each rod
+	//static double homed_lengths[12] = { 0.34, 0.34, 0.34, 0.34, 0.34, 0.34, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22 };
+	static double homed_lengths[12] = {0.293157, 0.242157, 0.330201, 0.340091, 0.250674, 0.281032, 0.180581, 0.174106, 0.125528, 0.16037, 0.114902, 0.103799};
+	//static double homed_lengths[12] = {0.266679, 0.214968, 0.258396, 0.340091, 0.250674, 0.281032, 0.180581, 0.174106, 0.125528, 0.16037, 0.114902, 0.103799};
 	return (length - homed_lengths[leg]) * STEPS_PER_METER;
 }
 
