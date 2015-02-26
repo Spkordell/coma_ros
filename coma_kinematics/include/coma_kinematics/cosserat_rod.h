@@ -88,8 +88,8 @@ template<typename T> void cosserat_rod<T>::deriv(const state_type &x, state_type
 	typedef Matrix<T, 3, 1> Vector3t;
 
 	//turn ODE input into named variables
-	Vector3t p;
-	p << x[0], x[1], x[2];
+	//Vector3t p;
+	//p << x[0], x[1], x[2];
 	Matrix3t R;
 	R << x[3], x[6], x[9], x[4], x[7], x[10], x[5], x[8], x[11];
 	Vector3t n;
@@ -122,7 +122,7 @@ template<typename T> void cosserat_rod<T>::deriv(const state_type &x, state_type
 	dxdt[8] = R_dot(2, 1);
 	dxdt[9] = R_dot(0, 2);
 	dxdt[10] = R_dot(1, 2);
-	dxdt[11] = R_dot(1, 2);
+	dxdt[11] = R_dot(2, 2);
 	dxdt[12] = n_dot(0);
 	dxdt[13] = n_dot(1);
 	dxdt[14] = n_dot(2);
@@ -275,7 +275,12 @@ template<typename T> Eigen::Matrix<T, 18, 1> cosserat_rod<T>::integrate(const T 
 	namespace od = boost::numeric::odeint;
 
 	//typedef od::runge_kutta_dopri5<state_type> stepper_type;
+	//typedef od::runge_kutta_dopri5<state_type, T, state_type, T, od::range_algebra, Toperations<T>> stepper_type;
+
+
 	typedef od::runge_kutta_dopri5<state_type, T, state_type, T, od::range_algebra, Toperations<T>> stepper_type;
+	//typedef od::runge_kutta4<state_type, T, state_type, T, od::range_algebra, Toperations<T>> stepper_type;
+
 	//typedef od::runge_kutta_dopri5<state_type, T, state_type, T, od::vector_space_algebra> stepper_type; //use if state type is Eigen
 
 	od::integrate_const(od::make_dense_output < stepper_type > (T(1E-6), T(1E-3)), std::bind(&cosserat_rod::deriv, *this, pl::_1, pl::_2, pl::_3), init_state,

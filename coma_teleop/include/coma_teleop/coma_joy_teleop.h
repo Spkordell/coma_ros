@@ -19,21 +19,21 @@
 #include "coma_kinematics/solveIK.h"
 #include "coma_serial/teleop_command.h"
 
-#define INCLUDE_WRIST //if defined, model will include a 2DOF wrist
+//#define INCLUDE_WRIST //if defined, model will include a 2DOF wrist
 
 #define MIN_X_POSITION -0.3
 #define MIN_Y_POSITION -0.3
 #define MIN_Z_POSITION 0.33
 #define MIN_X_ROTATION -90.0
 #define MIN_Y_ROTATION -90.0
-#define MIN_Z_ROTATION -60.0
+#define MIN_Z_ROTATION -120.0
 
 #define MAX_X_POSITION 0.3
 #define MAX_Y_POSITION 0.3
 #define MAX_Z_POSITION 0.9
 #define MAX_X_ROTATION 90.0
 #define MAX_Y_ROTATION 90.0
-#define MAX_Z_ROTATION 60.0
+#define MAX_Z_ROTATION 0.0
 
 #define INITIAL_X_POS 0
 #define INITIAL_Y_POS 0

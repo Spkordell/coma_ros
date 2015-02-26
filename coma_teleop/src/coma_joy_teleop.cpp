@@ -162,7 +162,6 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 					int steps = convert_length_to_step(leg, srv.response.leg_lengths[leg]);
 					if (steps < 0) {
 						ROS_ERROR("MINIMUM LEG LENGTH REACHED");
-						//motion_response_received = true; //we haven't sent anything so reset the ready flag
 						return;
 					} else {
 						motion_cmd.stepper_counts[leg] = steps;
@@ -187,6 +186,11 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 				if (send_motion_commands) {
 					motion_response_received = false;
 					motion_cmd_out.publish(motion_cmd);
+				} else {
+					for(unsigned int leg = 0; leg < 11; leg++) {
+						cout << motion_cmd.stepper_counts[leg] << ':';
+					}
+					cout << motion_cmd.stepper_counts[11] << endl;
 				}
 			} else {
 				ROS_ERROR("Failed to call solver service");
@@ -197,8 +201,8 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 
 int coma_joy_teleop::convert_length_to_step(int leg, double length) {
 	//static double homed_lengths[12] = { 0.34, 0.34, 0.34, 0.34, 0.34, 0.34, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22 };
-	static double homed_lengths[12] = {0.293157, 0.242157, 0.330201, 0.340091, 0.250674, 0.281032, 0.180581, 0.174106, 0.125528, 0.16037, 0.114902, 0.103799};
-	//static double homed_lengths[12] = {0.266679, 0.214968, 0.258396, 0.340091, 0.250674, 0.281032, 0.180581, 0.174106, 0.125528, 0.16037, 0.114902, 0.103799};
+	//static double homed_lengths[12] = {0.293157, 0.242157, 0.330201, 0.340091, 0.250674, 0.281032, 0.180581, 0.174106, 0.125528, 0.16037, 0.114902, 0.103799};
+	static double homed_lengths[12] = {0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01};
 	return (length - homed_lengths[leg]) * STEPS_PER_METER;
 }
 

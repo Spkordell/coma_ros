@@ -99,11 +99,28 @@ ik::ik() {
 		problem_single[rod].AddResidualBlock(cost_function_single[rod], NULL, single_guess_init[rod]);
 	}
 
+	options.minimizer_progress_to_stdout = true;
 	options.linear_solver_type = ceres::DENSE_QR;
-	options.minimizer_progress_to_stdout = false;
-	options.max_num_iterations = 500;
-	options.parameter_tolerance = 1E-12;
-	options.function_tolerance = 1E-12;
+
+	//options.linear_solver_type = ceres::ITERATIVE_SCHUR;
+
+	//options.preconditioner_type = ceres::CLUSTER_TRIDIAGONAL;
+	//options.trust_region_strategy_type = ceres::LEVENBERG_MARQUARDT;
+
+	//options.minimizer_type = ceres::LINE_SEARCH;
+	//options.line_search_direction_type = ceres::BFGS;
+	//options.max_num_line_search_step_size_iterations = 200;
+
+	options.num_threads = 6;
+
+	options.max_num_iterations = 2000;
+	options.parameter_tolerance = 1E-99;
+	//options.function_tolerance = 1E-99;
+	options.function_tolerance = 1E-99;
+
+	//options.min_relative_decrease = 1E-6;
+	//options.max_trust_region_radius = 1E4;
+	//options.preconditioner_type = ceres::CLUSTER::TRIDIAGONAL;
 
 	// create the ROS service
 	solverService = node.advertiseService("solve_ik", &ik::solve_ik, this);
@@ -148,7 +165,9 @@ void ik::solve(Vector3d pd, Matrix3d Rd, double* leg_lengths, double* wrist_angl
 	//run the solver
 	Solve(options, &problem, &summary);
 
-	//std::cout << summary.BriefReport() << "\n";
+	std::cout << summary.BriefReport() << std::endl;
+	std:: cout << summary.FullReport() << std::endl;
+
 
 	///solve for the bottom lengths
 	Eigen::Matrix<double, 6, 1> bottom_lengths;
