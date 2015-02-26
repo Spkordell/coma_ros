@@ -204,12 +204,12 @@ public:
 			cr11.set_init_state(y11_init);
 			cr12.set_init_state(y12_init);
 #ifdef USE_MULTITHREADING
-			boost::thread t7(boost::bind(&cosserat_rod<T>::integrate, &cr7, T(0), L7, L7 / T(INTEGRATION_STEP_SIZE)));
-			boost::thread t8(boost::bind(&cosserat_rod<T>::integrate, &cr8, T(0), L8, L8 / T(INTEGRATION_STEP_SIZE)));
-			boost::thread t9(boost::bind(&cosserat_rod<T>::integrate, &cr9, T(0), L9, L9 / T(INTEGRATION_STEP_SIZE)));
-			boost::thread t10(boost::bind(&cosserat_rod<T>::integrate, &cr10, T(0), L10, L10 / T(INTEGRATION_STEP_SIZE)));
-			boost::thread t11(boost::bind(&cosserat_rod<T>::integrate, &cr11, T(0), L11, L11 / T(INTEGRATION_STEP_SIZE)));
-			boost::thread t12(boost::bind(&cosserat_rod<T>::integrate, &cr12, T(0), L12, L12 / T(INTEGRATION_STEP_SIZE)));
+			boost::thread t7(boost::bind(&cosserat_rod<T>::integrate, &cr7, T(0), L7, L7 / T(INTEGRATION_STEPS)));
+			boost::thread t8(boost::bind(&cosserat_rod<T>::integrate, &cr8, T(0), L8, L8 / T(INTEGRATION_STEPS)));
+			boost::thread t9(boost::bind(&cosserat_rod<T>::integrate, &cr9, T(0), L9, L9 / T(INTEGRATION_STEPS)));
+			boost::thread t10(boost::bind(&cosserat_rod<T>::integrate, &cr10, T(0), L10, L10 / T(INTEGRATION_STEPS)));
+			boost::thread t11(boost::bind(&cosserat_rod<T>::integrate, &cr11, T(0), L11, L11 / T(INTEGRATION_STEPS)));
+			boost::thread t12(boost::bind(&cosserat_rod<T>::integrate, &cr12, T(0), L12, L12 / T(INTEGRATION_STEPS)));
 			t7.join();
 			t8.join();
 			t9.join();
@@ -225,12 +225,12 @@ public:
 			Vector18t y12 = cr12.result;
 
 #else
-			Vector18t y7 = cr7.integrate(0, L7, L7 / INTEGRATION_STEP_SIZE);
-			Vector18t y8 = cr8.integrate(0, L8, L8 / INTEGRATION_STEP_SIZE);
-			Vector18t y9 = cr9.integrate(0, L9, L9 / INTEGRATION_STEP_SIZE);
-			Vector18t y10 = cr10.integrate(0, L10, L10 / INTEGRATION_STEP_SIZE);
-			Vector18t y11 = cr11.integrate(0, L11, L11 / INTEGRATION_STEP_SIZE);
-			Vector18t y12 = cr12.integrate(0, L12, L12 / INTEGRATION_STEP_SIZE);
+			Vector18t y7 = cr7.integrate(0, L7, L7 / INTEGRATION_STEPS);
+			Vector18t y8 = cr8.integrate(0, L8, L8 / INTEGRATION_STEPS);
+			Vector18t y9 = cr9.integrate(0, L9, L9 / INTEGRATION_STEPS);
+			Vector18t y10 = cr10.integrate(0, L10, L10 / INTEGRATION_STEPS);
+			Vector18t y11 = cr11.integrate(0, L11, L11 / INTEGRATION_STEPS);
+			Vector18t y12 = cr12.integrate(0, L12, L12 / INTEGRATION_STEPS);
 #endif
 
 			//extract results from top link integration
@@ -350,7 +350,7 @@ public:
 			m6_init << x[33], x[34], T(0);
 
 			//centroid of all the bottom segment leg ends
-			Vector3t p_cb = (p7_end + p8_end + p9_end + p10_end + p11_end + p12_end) / T(6);
+			Vector3t p_cb = (p7_end + p8_end + p9_end + p10_end + p11_end + p12_end) / T(6.0);
 
 			//transformation from base to mid_plate
 			Matrix4t T_mid;
@@ -410,12 +410,12 @@ public:
 			cr5.set_init_state(y5_init);
 			cr6.set_init_state(y6_init);
 #ifdef USE_MULTITHREADING
-			boost::thread t1(boost::bind(&cosserat_rod<T>::integrate, &cr1, T(0), L1, L1 / T(INTEGRATION_STEP_SIZE)));
-			boost::thread t2(boost::bind(&cosserat_rod<T>::integrate, &cr2, T(0), L2, L2 / T(INTEGRATION_STEP_SIZE)));
-			boost::thread t3(boost::bind(&cosserat_rod<T>::integrate, &cr3, T(0), L3, L3 / T(INTEGRATION_STEP_SIZE)));
-			boost::thread t4(boost::bind(&cosserat_rod<T>::integrate, &cr4, T(0), L4, L4 / T(INTEGRATION_STEP_SIZE)));
-			boost::thread t5(boost::bind(&cosserat_rod<T>::integrate, &cr5, T(0), L5, L5 / T(INTEGRATION_STEP_SIZE)));
-			boost::thread t6(boost::bind(&cosserat_rod<T>::integrate, &cr6, T(0), L6, L6 / T(INTEGRATION_STEP_SIZE)));
+			boost::thread t1(boost::bind(&cosserat_rod<T>::integrate, &cr1, T(0), L1, L1 / T(INTEGRATION_STEPS)));
+			boost::thread t2(boost::bind(&cosserat_rod<T>::integrate, &cr2, T(0), L2, L2 / T(INTEGRATION_STEPS)));
+			boost::thread t3(boost::bind(&cosserat_rod<T>::integrate, &cr3, T(0), L3, L3 / T(INTEGRATION_STEPS)));
+			boost::thread t4(boost::bind(&cosserat_rod<T>::integrate, &cr4, T(0), L4, L4 / T(INTEGRATION_STEPS)));
+			boost::thread t5(boost::bind(&cosserat_rod<T>::integrate, &cr5, T(0), L5, L5 / T(INTEGRATION_STEPS)));
+			boost::thread t6(boost::bind(&cosserat_rod<T>::integrate, &cr6, T(0), L6, L6 / T(INTEGRATION_STEPS)));
 			t1.join();
 			t2.join();
 			t3.join();
@@ -429,12 +429,12 @@ public:
 			Vector18t y5 = cr5.result;
 			Vector18t y6 = cr6.result;
 #else
-			Vector18t y1 = cr1.integrate(0, L1, L1 / INTEGRATION_STEP_SIZE);
-			Vector18t y2 = cr2.integrate(0, L2, L2 / INTEGRATION_STEP_SIZE);
-			Vector18t y3 = cr3.integrate(0, L3, L3 / INTEGRATION_STEP_SIZE);
-			Vector18t y4 = cr4.integrate(0, L4, L4 / INTEGRATION_STEP_SIZE);
-			Vector18t y5 = cr5.integrate(0, L5, L5 / INTEGRATION_STEP_SIZE);
-			Vector18t y6 = cr6.integrate(0, L6, L6 / INTEGRATION_STEP_SIZE);
+			Vector18t y1 = cr1.integrate(0, L1, L1 / INTEGRATION_STEPS);
+			Vector18t y2 = cr2.integrate(0, L2, L2 / INTEGRATION_STEPS);
+			Vector18t y3 = cr3.integrate(0, L3, L3 / INTEGRATION_STEPS);
+			Vector18t y4 = cr4.integrate(0, L4, L4 / INTEGRATION_STEPS);
+			Vector18t y5 = cr5.integrate(0, L5, L5 / INTEGRATION_STEPS);
+			Vector18t y6 = cr6.integrate(0, L6, L6 / INTEGRATION_STEPS);
 #endif
 
 			//extract results from bottom link integration
@@ -488,7 +488,7 @@ public:
 			m6_end << y6[15], y6[16], y6[17];
 
 			//centroid of all top segment leg ends
-			Vector3t p_ct = (p1_end + p2_end + p3_end + p4_end + p5_end + p6_end) / T(6);
+			Vector3t p_ct = (p1_end + p2_end + p3_end + p4_end + p5_end + p6_end) / T(6.0);
 
 			//residual of equilibrium conditions
 			Vector3t res_eq_F_top = (n1_end + n2_end + n3_end + n4_end + n5_end + n6_end) - F;
@@ -706,14 +706,14 @@ public:
 			Vector3t n_init;
 			n_init << x[0], x[1], x[2];
 			Vector3t m_init;
-			m_init << x[3], x[4], 0;
+			m_init << x[3], x[4], T(0.0);
 
 			Vector18t y_init;
 			y_init << p_init, R_init, n_init, m_init;
 
 			cosserat_rod<T> cr;
 			cr.set_init_state(y_init);
-			Vector18t y = cr.integrate(T(0), L, L / T(INTEGRATION_STEP_SIZE));
+			Vector18t y = cr.integrate(T(0), L, L / T(INTEGRATION_STEPS));
 
 			Vector3t p_end;
 			p_end << y[0], y[1], y[2];

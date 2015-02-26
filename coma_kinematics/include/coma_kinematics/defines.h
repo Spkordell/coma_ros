@@ -13,6 +13,6 @@
 #define GS 7*12 //define the guess size
 #endif
 #define SGS 7 //define the single guess size
-#define INTEGRATION_STEP_SIZE 20
+#define INTEGRATION_STEPS 20
 
 #endif //DEFINES_H

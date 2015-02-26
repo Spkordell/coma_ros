@@ -110,7 +110,8 @@ template<typename T> void cosserat_rod<T>::deriv(const state_type &x, state_type
 	n_dot << T(0), T(0), T(0);
 	Vector3t m_dot = -p_dot.cross(n);
 
-	//pack back into vector //todo: clean this
+	//todo: clean this
+	//pack back into vector
 	dxdt[0] = p_dot(0);
 	dxdt[1] = p_dot(1);
 	dxdt[2] = p_dot(2);
