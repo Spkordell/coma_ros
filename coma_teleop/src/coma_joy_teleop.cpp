@@ -138,6 +138,7 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 		if (x_pos != old_x_pos || y_pos != old_y_pos || z_pos != old_z_pos || x_rot != old_x_rot || y_rot != old_y_rot || z_rot != old_z_rot
 				|| gripper_open != old_gripper_open || home != old_home) {
 
+			cout << "------------------------------------------------------------" <<endl;
 			cout << x_pos << '\t' << y_pos << '\t' << z_pos << '\t' << x_rot << '\t' << y_rot << '\t' << z_rot << endl;
 			old_x_pos = x_pos;
 			old_y_pos = y_pos;
@@ -200,9 +201,9 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 }
 
 int coma_joy_teleop::convert_length_to_step(int leg, double length) {
-	//static double homed_lengths[12] = { 0.34, 0.34, 0.34, 0.34, 0.34, 0.34, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22 };
+	static double homed_lengths[12] = { 0.34, 0.34, 0.34, 0.34, 0.34, 0.34, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22 };
 	//static double homed_lengths[12] = {0.293157, 0.242157, 0.330201, 0.340091, 0.250674, 0.281032, 0.180581, 0.174106, 0.125528, 0.16037, 0.114902, 0.103799};
-	static double homed_lengths[12] = {0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01};
+	//static double homed_lengths[12] = {0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01};
 	return (length - homed_lengths[leg]) * STEPS_PER_METER;
 }
 

@@ -12,7 +12,12 @@
 #else
 #define GS 7*12 //define the guess size
 #endif
+
 #define SGS 7 //define the single guess size
 #define INTEGRATION_STEPS 20
+#define MIN_LEG_LENGTH_TOP 0.12
+#define MIN_LEG_LENGTH_BOTTOM 0.22
+
+
 
 #endif //DEFINES_H

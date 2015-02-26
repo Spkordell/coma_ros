@@ -526,18 +526,32 @@ public:
 #endif
 
 			//These are analogous to loop closure equations because they are only satisfied when the positions of the rod ends have the same relative positions as the connection pattern in the top plate
-			Vector3t res_p1 = pdEE + RdEE * p1_final - p1_end;
-			Vector3t res_p2 = pdEE + RdEE * p2_final - p2_end;
-			Vector3t res_p3 = pdEE + RdEE * p3_final - p3_end;
-			Vector3t res_p4 = pdEE + RdEE * p4_final - p4_end;
-			Vector3t res_p5 = pdEE + RdEE * p5_final - p5_end;
-			Vector3t res_p6 = pdEE + RdEE * p6_final - p6_end;
-			Vector3t res_p7 = p7_end - R7_end * (p7_final - p7_final) - p7_end;
-			Vector3t res_p8 = p7_end - R7_end * (p7_final - p8_final) - p8_end;
-			Vector3t res_p9 = p7_end - R7_end * (p7_final - p9_final) - p9_end;
-			Vector3t res_p10 = p7_end - R7_end * (p7_final - p10_final) - p10_end;
-			Vector3t res_p11 = p7_end - R7_end * (p7_final - p11_final) - p11_end;
-			Vector3t res_p12 = p7_end - R7_end * (p7_final - p12_final) - p12_end;
+//			Vector3t res_p1 = pdEE + RdEE * p1_final - p1_end;
+//			Vector3t res_p2 = pdEE + RdEE * p2_final - p2_end;
+//			Vector3t res_p3 = pdEE + RdEE * p3_final - p3_end;
+//			Vector3t res_p4 = pdEE + RdEE * p4_final - p4_end;
+//			Vector3t res_p5 = pdEE + RdEE * p5_final - p5_end;
+//			Vector3t res_p6 = pdEE + RdEE * p6_final - p6_end;
+//			Vector3t res_p7 = p7_end - R7_end * (p7_final - p7_final) - p7_end;
+//			Vector3t res_p8 = p7_end - R7_end * (p7_final - p8_final) - p8_end;
+//			Vector3t res_p9 = p7_end - R7_end * (p7_final - p9_final) - p9_end;
+//			Vector3t res_p10 = p7_end - R7_end * (p7_final - p10_final) - p10_end;
+//			Vector3t res_p11 = p7_end - R7_end * (p7_final - p11_final) - p11_end;
+//			Vector3t res_p12 = p7_end - R7_end * (p7_final - p12_final) - p12_end;
+			Vector3t min_length_res;
+			min_length_res << T(1e99), T(1e99), T(1e99);
+			Vector3t res_p1 = ((L1 > T(MIN_LEG_LENGTH_TOP)) ? pdEE + RdEE * p1_final - p1_end : min_length_res);
+			Vector3t res_p2 = ((L2 > T(MIN_LEG_LENGTH_TOP)) ? pdEE + RdEE * p2_final - p2_end : min_length_res);
+			Vector3t res_p3 = ((L3 > T(MIN_LEG_LENGTH_TOP)) ? pdEE + RdEE * p3_final - p3_end : min_length_res);
+			Vector3t res_p4 = ((L4 > T(MIN_LEG_LENGTH_TOP)) ? pdEE + RdEE * p4_final - p4_end : min_length_res);
+			Vector3t res_p5 = ((L5 > T(MIN_LEG_LENGTH_TOP)) ? pdEE + RdEE * p5_final - p5_end : min_length_res);
+			Vector3t res_p6 = ((L6 > T(MIN_LEG_LENGTH_TOP)) ? pdEE + RdEE * p6_final - p6_end : min_length_res);
+			Vector3t res_p7 = ((L7 > T(MIN_LEG_LENGTH_BOTTOM)) ? p7_end - R7_end * (p7_final - p7_final) - p7_end : min_length_res);
+			Vector3t res_p8 = ((L8 > T(MIN_LEG_LENGTH_BOTTOM)) ? p7_end - R7_end * (p7_final - p8_final) - p8_end : min_length_res);
+			Vector3t res_p9 = ((L9 > T(MIN_LEG_LENGTH_BOTTOM)) ? p7_end - R7_end * (p7_final - p9_final) - p9_end : min_length_res);
+			Vector3t res_p10 = ((L10 > T(MIN_LEG_LENGTH_BOTTOM)) ? p7_end - R7_end * (p7_final - p10_final) - p10_end : min_length_res);
+			Vector3t res_p11 = ((L11 > T(MIN_LEG_LENGTH_BOTTOM)) ? p7_end - R7_end * (p7_final - p11_final) - p11_end : min_length_res);
+			Vector3t res_p12 = ((L12 > T(MIN_LEG_LENGTH_BOTTOM)) ? p7_end - R7_end * (p7_final - p12_final) - p12_end : min_length_res);
 
 			//force a common material orientation for all the distal rod ends
 #ifdef USE_MATRIX_LOG

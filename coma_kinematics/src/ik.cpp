@@ -80,9 +80,14 @@ ik::ik() {
 	for (unsigned int i = 0; i < GS - 12; i++) {
 		guess_init[i] = 0;
 	}
-	for (unsigned int i = GS - 12; i < GS; i++) {
-		guess_init[i] = 0.15; //initialize leg lengths to 0.15 m
+	for (unsigned int i = GS - 6; i < GS; i++) {
+		guess_init[i] = MIN_LEG_LENGTH_BOTTOM+1E-12; //initialize bottom leg lengths
 	}
+	for (unsigned int i = GS - 12; i < GS-6; i++) {
+		guess_init[i] = MIN_LEG_LENGTH_TOP+1E-12; //initialize top leg lengths
+	}
+
+
 	for (unsigned int rod = 0; rod < 6; rod++) {
 		for (unsigned int i = 0; i < 7; i++) {
 			single_guess_init[rod][i] = 0;
@@ -115,8 +120,7 @@ ik::ik() {
 
 	options.max_num_iterations = 2000;
 	options.parameter_tolerance = 1E-99;
-	//options.function_tolerance = 1E-99;
-	options.function_tolerance = 1E-99;
+	options.function_tolerance = 1E-12;
 
 	//options.min_relative_decrease = 1E-6;
 	//options.max_trust_region_radius = 1E4;
@@ -136,6 +140,12 @@ bool ik::solve_ik(coma_kinematics::solveIK::Request &req, coma_kinematics::solve
 	Rdm.compute(Rd);
 	double leg_lengths[12];
 	double wrist_angles[2];
+
+	if (req.z_pos < 42) { //when the legs are really short, need to re-initialize top legs to prevent solver getting stuck in local minima
+		for (unsigned int i = GS - 12; i < GS-6; i++) {
+			guess_init[i] = MIN_LEG_LENGTH_TOP+1E-12; //initialize top leg lengths to min length
+		}
+	}
 
 	solve(pd, Rd, leg_lengths, wrist_angles);
 
@@ -166,7 +176,7 @@ void ik::solve(Vector3d pd, Matrix3d Rd, double* leg_lengths, double* wrist_angl
 	Solve(options, &problem, &summary);
 
 	std::cout << summary.BriefReport() << std::endl;
-	std:: cout << summary.FullReport() << std::endl;
+	//std:: cout << summary.FullReport() << std::endl;
 
 
 	///solve for the bottom lengths
