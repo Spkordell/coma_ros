@@ -541,31 +541,45 @@ public:
 
 			//force a common material orientation for all the distal rod ends
 #ifdef USE_MATRIX_LOG
-			Vector3t res_R1(0.0, 0.0, 0.0);
-			Vector3t res_R2(0.0, 0.0, 0.0);
-			Vector3t res_R3(0.0, 0.0, 0.0);
-			Vector3t res_R4(0.0, 0.0, 0.0);
-			Vector3t res_R5(0.0, 0.0, 0.0);
-			Vector3t res_R6(0.0, 0.0, 0.0);
-			Vector3t res_R7(0.0, 0.0, 0.0);
-			Vector3t res_R8(0.0, 0.0, 0.0);
-			Vector3t res_R9(0.0, 0.0, 0.0);
-			Vector3t res_R10(0.0, 0.0, 0.0);
-			Vector3t res_R11(0.0, 0.0, 0.0);
-			Vector3t res_R12(0.0, 0.0, 0.0);
-			Matrix3d Rdt = Rd.transpose();
-			if (!(Rdt * R1_end).isZero()) res_R1 = cosserat_rod::vee((Rdt * R1_end).log());
-			if (!(Rdt * R2_end).isZero()) res_R2 = cosserat_rod::vee((Rdt * R2_end).log());
-			if (!(Rdt * R3_end).isZero()) res_R3 = cosserat_rod::vee((Rdt * R3_end).log());
-			if (!(Rdt * R4_end).isZero()) res_R4 = cosserat_rod::vee((Rdt * R4_end).log());
-			if (!(Rdt * R5_end).isZero()) res_R5 = cosserat_rod::vee((Rdt * R5_end).log());
-			if (!(Rdt * R6_end).isZero()) res_R6 = cosserat_rod::vee((Rdt * R6_end).log());
-			if (!(R7_end.transpose() * R7_end).isZero()) res_R7 = cosserat_rod::vee((R7_end.transpose() * R7_end).log());
-			if (!(R8_end.transpose() * R7_end).isZero()) res_R8 = cosserat_rod::vee((R8_end.transpose() * R7_end).log());
-			if (!(R9_end.transpose() * R7_end).isZero()) res_R9 = cosserat_rod::vee((R9_end.transpose() * R7_end).log());
-			if (!(R10_end.transpose() * R7_end).isZero()) res_R10 = cosserat_rod::vee((R10_end.transpose() * R7_end).log());
-			if (!(R11_end.transpose() * R7_end).isZero()) res_R11 = cosserat_rod::vee((R11_end.transpose() * R7_end).log());
-			if (!(R12_end.transpose() * R7_end).isZero()) res_R12 = cosserat_rod::vee((R12_end.transpose() * R7_end).log());
+			Vector3t res_R1;
+			Vector3t res_R2;
+			Vector3t res_R3;
+			Vector3t res_R4;
+			Vector3t res_R5;
+			Vector3t res_R6;
+			Vector3t res_R7;
+			Vector3t res_R8;
+			Vector3t res_R9;
+			Vector3t res_R10;
+			Vector3t res_R11;
+			Vector3t res_R12;
+			res_R1 << T(0.0), T(0.0), T(0.0);
+			res_R2 << T(0.0), T(0.0), T(0.0);
+			res_R3 << T(0.0), T(0.0), T(0.0);
+			res_R4 << T(0.0), T(0.0), T(0.0);
+			res_R5 << T(0.0), T(0.0), T(0.0);
+			res_R6 << T(0.0), T(0.0), T(0.0);
+			res_R7 << T(0.0), T(0.0), T(0.0);
+			res_R8 << T(0.0), T(0.0), T(0.0);
+			res_R9 << T(0.0), T(0.0), T(0.0);
+			res_R10 << T(0.0), T(0.0), T(0.0);
+			res_R11 << T(0.0), T(0.0), T(0.0);
+			res_R12 << T(0.0), T(0.0), T(0.0);
+			Matrix3t Rdt = RdEE.transpose();
+			//Eigen::MatrixLogarithmAtomic < Matrix3t > Rdtm;
+			//Rdtm.compute(Rdt);
+			if (!(Rdt * R1_end).isZero()) res_R1 = cosserat_rod<T>::vee((Rdt * R1_end).log());
+			if (!(Rdt * R2_end).isZero()) res_R2 = cosserat_rod<T>::vee((Rdt * R2_end).log());
+			if (!(Rdt * R3_end).isZero()) res_R3 = cosserat_rod<T>::vee((Rdt * R3_end).log());
+			if (!(Rdt * R4_end).isZero()) res_R4 = cosserat_rod<T>::vee((Rdt * R4_end).log());
+			if (!(Rdt * R5_end).isZero()) res_R5 = cosserat_rod<T>::vee((Rdt * R5_end).log());
+			if (!(Rdt * R6_end).isZero()) res_R6 = cosserat_rod<T>::vee((Rdt * R6_end).log());
+			if (!(R7_end.transpose() * R7_end).isZero()) res_R7 = cosserat_rod<T>::vee((R7_end.transpose() * R7_end).log());
+			if (!(R8_end.transpose() * R7_end).isZero()) res_R8 = cosserat_rod<T>::vee((R8_end.transpose() * R7_end).log());
+			if (!(R9_end.transpose() * R7_end).isZero()) res_R9 = cosserat_rod<T>::vee((R9_end.transpose() * R7_end).log());
+			if (!(R10_end.transpose() * R7_end).isZero()) res_R10 = cosserat_rod<T>::vee((R10_end.transpose() * R7_end).log());
+			if (!(R11_end.transpose() * R7_end).isZero()) res_R11 = cosserat_rod<T>::vee((R11_end.transpose() * R7_end).log());
+			if (!(R12_end.transpose() * R7_end).isZero()) res_R12 = cosserat_rod<T>::vee((R12_end.transpose() * R7_end).log());
 #else
 			Matrix<T, 2, 3> rodrigues;
 			rodrigues << T(1), T(0), T(0), T(0), T(1), T(0);
@@ -725,8 +739,9 @@ public:
 			// Matrix3d R_final3x3;
 			// R_final3x3 << R_Final[0], R_Final[3], R_Final[6], R_Final[1], R_Final[4], R_Final[7], R_Final[2], R_Final[5], R_Final[8];
 #ifdef USE_MATRIX_LOG
-			Vector3t res_R(T(0.0), T(0.0), T(0.0));
-			if (!(R_final.transpose() * R_end).isZero()) res_R = cosserat_rod::vee((R_final.transpose() * R_end).log());
+			Vector3t res_R;
+			res_R << T(0.0), T(0.0), T(0.0);
+			if (!(R_final.transpose() * R_end).isZero()) res_R = cosserat_rod<T>::vee((R_final.transpose() * R_end).log());
 #else
 			Matrix<T, 2, 3> rodrigues;
 			rodrigues << T(1), T(0), T(0), T(0), T(1), T(0);

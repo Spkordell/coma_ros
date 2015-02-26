@@ -99,7 +99,7 @@ ik::ik() {
 		problem_single[rod].AddResidualBlock(cost_function_single[rod], NULL, single_guess_init[rod]);
 	}
 
-	options.minimizer_progress_to_stdout = true;
+	options.minimizer_progress_to_stdout = false;
 	options.linear_solver_type = ceres::DENSE_QR;
 
 	//options.linear_solver_type = ceres::ITERATIVE_SCHUR;
