@@ -1,7 +1,8 @@
+#include <cmath>
 #include <ros/ros.h>
 #include <visualization_msgs/Marker.h>
 
-#include <cmath>
+#include "coma_rviz/vis.h"
 
 int main(int argc, char** argv) {
 	ros::init(argc, argv, "points_and_lines");

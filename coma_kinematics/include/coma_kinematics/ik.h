@@ -19,6 +19,7 @@
 #include "coma_kinematics/cosserat_rod.h"
 #include "coma_kinematics/solveIK.h"
 #include "coma_kinematics/defines.h"
+#include "coma_rviz/vis.h"
 
 template<typename T> struct identity {
 	typedef T type;
