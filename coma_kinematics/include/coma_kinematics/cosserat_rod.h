@@ -33,11 +33,15 @@ public:
 
 	Eigen::Matrix<T, 18, 1> result;
 
+	bool save_positions;
+	Eigen::Matrix<T,20,3> positions;
+
 private:
 	void write_deriv(const state_type &x, const T t);
 	void deriv(const state_type &x, state_type &dxdt, T t);
 
 	state_type init_state;
+	unsigned int at_position; //used for saving position data for later visualization
 
 	//physical parameters of the legs
 	T ro;	// outer radius m
@@ -75,7 +79,7 @@ template<typename T> void cosserat_rod<T>::set_init_state(Eigen::Matrix<T, 18, 1
 	ri = T(0.00);									// inner radius mc
 	I = T(0.25 * M_PI * (pow(ro, 4) - pow(ri, 4)));	//second moment of area
 	A = T(M_PI * (pow(ro, 2) - pow(ri, 2)));		//area
-	J = T(T(2) * I);								//polar moment
+	J = T(2) * I;								//polar moment
 	E = T(207 * pow(10, 9));						//Pa Youngs mod
 	G = T(79.3 * pow(10, 9));						//Pa shear mod
 	K_bt_inv << T(1) / (E * I), T(0), T(0), T(0), T(1) / (E * I), T(0), T(0), T(0), T(1) / (J * G);
@@ -133,6 +137,20 @@ template<typename T> void cosserat_rod<T>::deriv(const state_type &x, state_type
 }
 
 template<typename T> void cosserat_rod<T>::write_deriv(const state_type &x, const T t) {
+//	cout << t;
+//	for (unsigned int i = 0; i < 18; i++) {
+//		cout << '\t' << x[i];
+//	}
+//	cout << endl;
+}
+
+template<> void cosserat_rod<double>::write_deriv(const state_type &x, const double t) {
+	if (save_positions) {
+		positions(at_position,0) = x[0];
+		positions(at_position,1) = x[1];
+		positions(at_position,2) = x[2];
+		at_position++;
+	}
 //	cout << t;
 //	for (unsigned int i = 0; i < 18; i++) {
 //		cout << '\t' << x[i];
@@ -274,16 +292,13 @@ public:
 template<typename T> Eigen::Matrix<T, 18, 1> cosserat_rod<T>::integrate(const T start, const T end, const T dt) {
 	namespace pl = std::placeholders;
 	namespace od = boost::numeric::odeint;
-
-	//typedef od::runge_kutta_dopri5<state_type> stepper_type;
-	//typedef od::runge_kutta_dopri5<state_type, T, state_type, T, od::range_algebra, Toperations<T>> stepper_type;
-
-
 	typedef od::runge_kutta_dopri5<state_type, T, state_type, T, od::range_algebra, Toperations<T>> stepper_type;
-	//typedef od::runge_kutta4<state_type, T, state_type, T, od::range_algebra, Toperations<T>> stepper_type;
 
-	//typedef od::runge_kutta_dopri5<state_type, T, state_type, T, od::vector_space_algebra> stepper_type; //use if state type is Eigen
-
+//	if (save_positions) {
+//		Eigen::Matrix<T,num_steps,3>();
+//		positions =
+//	}
+	at_position = 0;
 	od::integrate_const(od::make_dense_output < stepper_type > (T(1E-6), T(1E-3)), std::bind(&cosserat_rod::deriv, *this, pl::_1, pl::_2, pl::_3), init_state,
 			start, end, dt, std::bind(&cosserat_rod::write_deriv, *this, pl::_1, pl::_2));
 

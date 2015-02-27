@@ -76,6 +76,8 @@ ik::ik() {
 	ikfunctor->p10_final_ = *(new Vector3d(r_out * cos(rad(240 - deg)), r_out * sin(rad(240 - deg)), 0));
 	ikfunctor->p11_final_ = *(new Vector3d(r_out * cos(rad(240 + deg)), r_out * sin(rad(240 + deg)), 0));
 
+	ikfunctor->visualization_enabled = true;
+
 	//initialize first guess
 	for (unsigned int i = 0; i < GS - 12; i++) {
 		guess_init[i] = 0;

@@ -14,7 +14,7 @@
 #endif
 
 #define SGS 7 //define the single guess size
-#define INTEGRATION_STEPS 20
+#define INTEGRATION_STEPS 20  //note: search for 20 in cosserat_rod.h, that needs changed to if you change this
 #define MIN_LEG_LENGTH_TOP 0.12
 #define MIN_LEG_LENGTH_BOTTOM 0.22
 

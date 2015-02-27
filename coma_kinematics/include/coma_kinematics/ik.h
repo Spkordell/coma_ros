@@ -203,13 +203,21 @@ public:
 			cr10.set_init_state(y10_init);
 			cr11.set_init_state(y11_init);
 			cr12.set_init_state(y12_init);
+			cr7.save_positions = visualization_enabled;
+			cr8.save_positions = visualization_enabled;
+			cr9.save_positions = visualization_enabled;
+			cr10.save_positions = visualization_enabled;
+			cr11.save_positions = visualization_enabled;
+			cr12.save_positions = visualization_enabled;
 #ifdef USE_MULTITHREADING
+
 			boost::thread t7(boost::bind(&cosserat_rod<T>::integrate, &cr7, T(0), L7, L7 / T(INTEGRATION_STEPS)));
 			boost::thread t8(boost::bind(&cosserat_rod<T>::integrate, &cr8, T(0), L8, L8 / T(INTEGRATION_STEPS)));
 			boost::thread t9(boost::bind(&cosserat_rod<T>::integrate, &cr9, T(0), L9, L9 / T(INTEGRATION_STEPS)));
 			boost::thread t10(boost::bind(&cosserat_rod<T>::integrate, &cr10, T(0), L10, L10 / T(INTEGRATION_STEPS)));
 			boost::thread t11(boost::bind(&cosserat_rod<T>::integrate, &cr11, T(0), L11, L11 / T(INTEGRATION_STEPS)));
 			boost::thread t12(boost::bind(&cosserat_rod<T>::integrate, &cr12, T(0), L12, L12 / T(INTEGRATION_STEPS)));
+
 			t7.join();
 			t8.join();
 			t9.join();
@@ -225,13 +233,27 @@ public:
 			Vector18t y12 = cr12.result;
 
 #else
-			Vector18t y7 = cr7.integrate(0, L7, L7 / INTEGRATION_STEPS);
-			Vector18t y8 = cr8.integrate(0, L8, L8 / INTEGRATION_STEPS);
-			Vector18t y9 = cr9.integrate(0, L9, L9 / INTEGRATION_STEPS);
-			Vector18t y10 = cr10.integrate(0, L10, L10 / INTEGRATION_STEPS);
-			Vector18t y11 = cr11.integrate(0, L11, L11 / INTEGRATION_STEPS);
-			Vector18t y12 = cr12.integrate(0, L12, L12 / INTEGRATION_STEPS);
+			cr7.integrate(T(0), L7, L7 / T(INTEGRATION_STEPS));
+			cr8.integrate(T(0), L8, L8 / T(INTEGRATION_STEPS));
+			cr9.integrate(T(0), L9, L9 / T(INTEGRATION_STEPS));
+			cr10.integrate(T(0), L10, L10 / T(INTEGRATION_STEPS));
+			cr11.integrate(T(0), L11, L11 / T(INTEGRATION_STEPS));
+			cr12.integrate(T(0), L12, L12 / T(INTEGRATION_STEPS));
+			Vector18t y7 = cr7.result;
+			Vector18t y8 = cr8.result;
+			Vector18t y9 = cr9.result;
+			Vector18t y10 = cr10.result;
+			Vector18t y11 = cr11.result;
+			Vector18t y12 = cr12.result;
 #endif
+			if (visualization_enabled) {
+				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rod7positions, cr7.positions, identity<T>());
+				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rod8positions, cr8.positions, identity<T>());
+				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rod9positions, cr9.positions, identity<T>());
+				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rod10positions, cr10.positions, identity<T>());
+				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rod11positions, cr11.positions, identity<T>());
+				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rod12positions, cr12.positions, identity<T>());
+			}
 
 			//extract results from top link integration
 			Vector3t p7_end;
@@ -409,6 +431,12 @@ public:
 			cr4.set_init_state(y4_init);
 			cr5.set_init_state(y5_init);
 			cr6.set_init_state(y6_init);
+			cr1.save_positions = visualization_enabled;
+			cr2.save_positions = visualization_enabled;
+			cr3.save_positions = visualization_enabled;
+			cr4.save_positions = visualization_enabled;
+			cr5.save_positions = visualization_enabled;
+			cr6.save_positions = visualization_enabled;
 #ifdef USE_MULTITHREADING
 			boost::thread t1(boost::bind(&cosserat_rod<T>::integrate, &cr1, T(0), L1, L1 / T(INTEGRATION_STEPS)));
 			boost::thread t2(boost::bind(&cosserat_rod<T>::integrate, &cr2, T(0), L2, L2 / T(INTEGRATION_STEPS)));
@@ -429,13 +457,27 @@ public:
 			Vector18t y5 = cr5.result;
 			Vector18t y6 = cr6.result;
 #else
-			Vector18t y1 = cr1.integrate(0, L1, L1 / INTEGRATION_STEPS);
-			Vector18t y2 = cr2.integrate(0, L2, L2 / INTEGRATION_STEPS);
-			Vector18t y3 = cr3.integrate(0, L3, L3 / INTEGRATION_STEPS);
-			Vector18t y4 = cr4.integrate(0, L4, L4 / INTEGRATION_STEPS);
-			Vector18t y5 = cr5.integrate(0, L5, L5 / INTEGRATION_STEPS);
-			Vector18t y6 = cr6.integrate(0, L6, L6 / INTEGRATION_STEPS);
+			cr1.integrate(T(0), L1, L1 / T(INTEGRATION_STEPS));
+			cr2.integrate(T(0), L2, L2 / T(INTEGRATION_STEPS));
+			cr3.integrate(T(0), L3, L3 / T(INTEGRATION_STEPS));
+			cr4.integrate(T(0), L4, L4 / T(INTEGRATION_STEPS));
+			cr5.integrate(T(0), L5, L5 / T(INTEGRATION_STEPS));
+			cr6.integrate(T(0), L6, L6 / T(INTEGRATION_STEPS));
+			Vector18t y1 = cr1.result;
+			Vector18t y2 = cr2.result;
+			Vector18t y3 = cr3.result;
+			Vector18t y4 = cr4.result;
+			Vector18t y5 = cr5.result;
+			Vector18t y6 = cr6.result;
 #endif
+			if (visualization_enabled) {
+				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rod1positions, cr1.positions, identity<T>());
+				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rod2positions, cr2.positions, identity<T>());
+				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rod3positions, cr3.positions, identity<T>());
+				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rod4positions, cr4.positions, identity<T>());
+				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rod5positions, cr5.positions, identity<T>());
+				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rod6positions, cr6.positions, identity<T>());
+			}
 
 			//extract results from bottom link integration
 			Vector3t p1_end;
@@ -637,6 +679,8 @@ public:
 			return true;
 		}
 
+		bool visualization_enabled;
+
 		//desired positions and forces
 		Eigen::Vector3d F_;  //applied force at end effector
 		Eigen::Vector3d L_;  //applied moment at end effector
@@ -685,7 +729,23 @@ public:
 		Eigen::Vector4d p5_init_s;
 		Eigen::Vector4d p6_init_s;
 
+		//position integrations for each rod, saved for visualization
+		Eigen::Matrix<double,INTEGRATION_STEPS,3> rod1positions;
+		Eigen::Matrix<double,INTEGRATION_STEPS,3> rod2positions;
+		Eigen::Matrix<double,INTEGRATION_STEPS,3> rod3positions;
+		Eigen::Matrix<double,INTEGRATION_STEPS,3> rod4positions;
+		Eigen::Matrix<double,INTEGRATION_STEPS,3> rod5positions;
+		Eigen::Matrix<double,INTEGRATION_STEPS,3> rod6positions;
+		Eigen::Matrix<double,INTEGRATION_STEPS,3> rod7positions;
+		Eigen::Matrix<double,INTEGRATION_STEPS,3> rod8positions;
+		Eigen::Matrix<double,INTEGRATION_STEPS,3> rod9positions;
+		Eigen::Matrix<double,INTEGRATION_STEPS,3> rod10positions;
+		Eigen::Matrix<double,INTEGRATION_STEPS,3> rod11positions;
+		Eigen::Matrix<double,INTEGRATION_STEPS,3> rod12positions;
 	private:
+
+
+
 
 		template<typename T> struct StoreM3d {
 			template<typename TP> void operator()(Eigen::Matrix<double, 3, 3> &to, Eigen::Matrix<T, 3, 3> from, identity<TP>) const {
@@ -701,6 +761,15 @@ public:
 			}
 
 			void operator()(Eigen::Matrix<double, 4, 1> &to, Eigen::Matrix<T, 4, 1> from, identity<double>) const {
+				to = from;
+			}
+		};
+
+		template<typename T> struct StoreM20_3d {
+			template<typename TP> void operator()(Eigen::Matrix<double, 20, 3> &to, Eigen::Matrix<T, 20, 3> from, identity<TP>) const {
+			}
+
+			void operator()(Eigen::Matrix<double, 30, 3> &to, Eigen::Matrix<T, 20, 3> from, identity<double>) const {
 				to = from;
 			}
 		};
