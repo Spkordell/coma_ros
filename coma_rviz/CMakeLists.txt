@@ -4,7 +4,7 @@ project(coma_rviz)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED COMPONENTS roscpp)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -106,6 +106,9 @@ catkin_package(
 # target_link_libraries(coma_rviz_node
 #   ${catkin_LIBRARIES}
 # )
+
+add_executable(visualization src/visualization.cpp)
+target_link_libraries(visualization ${catkin_LIBRARIES})
 
 #############
 ## Install ##
