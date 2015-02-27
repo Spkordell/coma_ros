@@ -171,10 +171,6 @@ bool ik::solve_ik(coma_kinematics::solveIK::Request &req, coma_kinematics::solve
 				viz.rod[i].x[j] = ikfunctor->rodpositions[i](j,0);
 				viz.rod[i].y[j] = ikfunctor->rodpositions[i](j,1);
 				viz.rod[i].z[j] = ikfunctor->rodpositions[i](j,2);
-//				std::cout << ikfunctor->rodpositions[i](j,0) << std::endl;
-//				std::cout << ikfunctor->rodpositions[i](j,1) << std::endl;
-//				std::cout << ikfunctor->rodpositions[i](j,2) << std::endl;
-//				viz.rod[0].z[0] = 0;
 			}
 		}
 		vis_pub.publish(viz);

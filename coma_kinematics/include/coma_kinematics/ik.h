@@ -759,7 +759,7 @@ public:
 			template<typename TP> void operator()(Eigen::Matrix<double, 20, 3> &to, Eigen::Matrix<T, 20, 3> from, identity<TP>) const {
 			}
 
-			void operator()(Eigen::Matrix<double, 30, 3> &to, Eigen::Matrix<T, 20, 3> from, identity<double>) const {
+			void operator()(Eigen::Matrix<double, INTEGRATION_STEPS, 3> &to, Eigen::Matrix<T, INTEGRATION_STEPS, 3> from, identity<double>) const {
 				to = from;
 			}
 		};
