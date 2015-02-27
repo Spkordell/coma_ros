@@ -75,6 +75,11 @@ catkin_package(
 #   ${catkin_LIBRARIES}
 # )
 
+include_directories(
+  include
+  ${catkin_INCLUDE_DIRS}	
+)
+
 add_executable(visualization src/visualization.cpp)
 target_link_libraries(visualization ${catkin_LIBRARIES})
 add_dependencies(visualization coma_rviz_generate_messages_cpp)

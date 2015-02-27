@@ -5,7 +5,7 @@
  * motion_demo creates a ROS node for testing/demonstrating coma
  *
  * \author Steven Kordell, WPI - spkordell@wpi.edu
- * \date January 11, 2014
+ * \date January 11, 2015
  */
 
 #ifndef MOTION_DEMO_H_
