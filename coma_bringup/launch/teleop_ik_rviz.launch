@@ -1,0 +1,18 @@
+<!--
+  Author: Steven Kordell, Worcester Polytechnic Institute
+  Version: January 11, 2015
+-->
+
+<launch>
+  <node pkg="coma_kinematics" type="ik" name="ik" output="screen"/>
+  <node pkg="coma_teleop" type="coma_joy_teleop" name="coma_joy_telep" output="screen">
+  	<param name="send_motion_commands" type="bool" value="false" />
+  </node>
+  <node pkg="joy" type="joy_node" name="joy_node">
+    <param name="deadzone" type="double" value="0.033" />
+    <param name="autorepeat_rate" type="double" value="30" />
+    <param name="coalesce_interval" type="double" value="0.033" />
+  </node>
+  <node pkg="coma_rviz" type="visualization" name="visualization"/>
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find coma_rviz)/rviz/visualization.rviz"/>
+</launch>
