@@ -248,12 +248,12 @@ public:
 			Vector18t y12 = cr12.result;
 #endif
 			if (visualization_enabled) {
-				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rod7positions, cr7.positions, identity<T>());
-				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rod8positions, cr8.positions, identity<T>());
-				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rod9positions, cr9.positions, identity<T>());
-				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rod10positions, cr10.positions, identity<T>());
-				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rod11positions, cr11.positions, identity<T>());
-				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rod12positions, cr12.positions, identity<T>());
+				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[6], cr7.positions, identity<T>());
+				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[7], cr8.positions, identity<T>());
+				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[8], cr9.positions, identity<T>());
+				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[9], cr10.positions, identity<T>());
+				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[10], cr11.positions, identity<T>());
+				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[11], cr12.positions, identity<T>());
 			}
 
 			//extract results from top link integration
@@ -472,12 +472,12 @@ public:
 			Vector18t y6 = cr6.result;
 #endif
 			if (visualization_enabled) {
-				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rod1positions, cr1.positions, identity<T>());
-				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rod2positions, cr2.positions, identity<T>());
-				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rod3positions, cr3.positions, identity<T>());
-				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rod4positions, cr4.positions, identity<T>());
-				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rod5positions, cr5.positions, identity<T>());
-				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rod6positions, cr6.positions, identity<T>());
+				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[0], cr1.positions, identity<T>());
+				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[1], cr2.positions, identity<T>());
+				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[2], cr3.positions, identity<T>());
+				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[3], cr4.positions, identity<T>());
+				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[4], cr5.positions, identity<T>());
+				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[5], cr6.positions, identity<T>());
 			}
 
 			//extract results from bottom link integration
@@ -731,18 +731,7 @@ public:
 		Eigen::Vector4d p6_init_s;
 
 		//position integrations for each rod, saved for visualization
-		Eigen::Matrix<double,INTEGRATION_STEPS,3> rod1positions;
-		Eigen::Matrix<double,INTEGRATION_STEPS,3> rod2positions;
-		Eigen::Matrix<double,INTEGRATION_STEPS,3> rod3positions;
-		Eigen::Matrix<double,INTEGRATION_STEPS,3> rod4positions;
-		Eigen::Matrix<double,INTEGRATION_STEPS,3> rod5positions;
-		Eigen::Matrix<double,INTEGRATION_STEPS,3> rod6positions;
-		Eigen::Matrix<double,INTEGRATION_STEPS,3> rod7positions;
-		Eigen::Matrix<double,INTEGRATION_STEPS,3> rod8positions;
-		Eigen::Matrix<double,INTEGRATION_STEPS,3> rod9positions;
-		Eigen::Matrix<double,INTEGRATION_STEPS,3> rod10positions;
-		Eigen::Matrix<double,INTEGRATION_STEPS,3> rod11positions;
-		Eigen::Matrix<double,INTEGRATION_STEPS,3> rod12positions;
+		Eigen::Matrix<double,INTEGRATION_STEPS,3> rodpositions[12];
 	private:
 
 
@@ -861,6 +850,7 @@ private:
 	ceres::Solver::Summary summary;
 
 	ros::ServiceServer solverService;
+	ros::Publisher vis_pub;
 
 	bool solve_ik(coma_kinematics::solveIK::Request &req, coma_kinematics::solveIK::Response &res);
 

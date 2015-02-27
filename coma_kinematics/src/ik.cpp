@@ -131,6 +131,10 @@ ik::ik() {
 	// create the ROS service
 	solverService = node.advertiseService("solve_ik", &ik::solve_ik, this);
 
+	if (ikfunctor->visualization_enabled) {
+		vis_pub = node.advertise<coma_rviz::vis>("rod_pos", 10);
+	}
+
 	ROS_INFO("COMA IK Solver Server Started");
 }
 
@@ -157,6 +161,24 @@ bool ik::solve_ik(coma_kinematics::solveIK::Request &req, coma_kinematics::solve
 	res.wrist_rot = wrist_angles[0];
 	res.wrist_flex = wrist_angles[1];
 
+	if (ikfunctor->visualization_enabled) {
+		coma_rviz::vis viz;
+		for (unsigned int i = 0; i < 12; i++) {
+			viz.rod[i].x = std::vector<double>(INTEGRATION_STEPS);
+			viz.rod[i].y = std::vector<double>(INTEGRATION_STEPS);
+			viz.rod[i].z = std::vector<double>(INTEGRATION_STEPS);
+			for (unsigned int j = 0; j < INTEGRATION_STEPS; j++) {
+				viz.rod[i].x[j] = ikfunctor->rodpositions[i](j,0);
+				viz.rod[i].y[j] = ikfunctor->rodpositions[i](j,1);
+				viz.rod[i].z[j] = ikfunctor->rodpositions[i](j,2);
+//				std::cout << ikfunctor->rodpositions[i](j,0) << std::endl;
+//				std::cout << ikfunctor->rodpositions[i](j,1) << std::endl;
+//				std::cout << ikfunctor->rodpositions[i](j,2) << std::endl;
+//				viz.rod[0].z[0] = 0;
+			}
+		}
+		vis_pub.publish(viz);
+	}
 	return true;
 }
 
