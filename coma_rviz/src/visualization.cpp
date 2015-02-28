@@ -9,20 +9,33 @@ visualization::visualization() {
 }
 
 void visualization::rodposCallback(const coma_rviz::vis::ConstPtr& msg) {
-	visualization_msgs::Marker points, leg[12];
-	points.header.frame_id = "/base";
-	points.header.stamp = ros::Time::now();
+	visualization_msgs::Marker points, leg[12], top_plate, mid_plate;
+	points.header.frame_id = top_plate.header.frame_id = mid_plate.header.frame_id = "/base";
+	points.header.stamp = top_plate.header.stamp = mid_plate.header.stamp = ros::Time::now();
 	points.ns = "model legs";
-	points.action = visualization_msgs::Marker::ADD;
-	points.pose.orientation.w = 1.0;
+	top_plate.ns = "top plate";
+	mid_plate.ns = "bottom plate";
+	points.action = top_plate.action = mid_plate.action = visualization_msgs::Marker::ADD;
+	points.pose.orientation.w = top_plate.pose.orientation.w = mid_plate.pose.orientation.w = 1.0;
 	points.id = 0;
+	top_plate.id = 13;
+	mid_plate.id = 14;
 	points.type = visualization_msgs::Marker::POINTS;
+	top_plate.type = mid_plate.type = visualization_msgs::Marker::LINE_STRIP;
 	// POINTS markers use x and y scale for width/height respectively
-	points.scale.x = 0.2;
-	points.scale.y = 0.2;
+	points.scale.x = 0.005;
+	points.scale.y = 0.005;
+	top_plate.scale.x = 0.005;
+	mid_plate.scale.x = 0.005;
 	// Points are green
 	points.color.g = 1.0f;
 	points.color.a = 1.0;
+	//plates are black
+	mid_plate.color.a = 1.0;
+	mid_plate.color.r = 1.0;
+
+	top_plate.color.a = 1.0;
+	top_plate.color.r = 1.0;
 
 	for (unsigned int i = 0; i < 12; i++) {
 		leg[i].header.frame_id = points.header.frame_id;
@@ -35,7 +48,7 @@ void visualization::rodposCallback(const coma_rviz::vis::ConstPtr& msg) {
 		leg[i].type = visualization_msgs::Marker::LINE_STRIP;
 
 		//LINE_STRIP/LINE_LIST markers use only the x component of scale, for the line width
-		leg[i].scale.x = 0.1;
+		leg[i].scale.x = 0.005;
 
 		//legs are blue
 		leg[i].color.a = 1.0;
@@ -54,8 +67,20 @@ void visualization::rodposCallback(const coma_rviz::vis::ConstPtr& msg) {
 			leg[i].points.push_back(p);
 		}
 		marker_pub.publish(leg[i]);
+
+		geometry_msgs::Point p;
+		p.x = msg->rod[i].x[19];
+		p.y = msg->rod[i].y[19];
+		p.z = msg->rod[i].z[19];
+		if (i < 6) {
+			top_plate.points.push_back(p);
+		} else {
+			mid_plate.points.push_back(p);
+		}
 	}
 	marker_pub.publish(points);
+	marker_pub.publish(top_plate);
+	marker_pub.publish(mid_plate);
 }
 
 int main(int argc, char** argv) {

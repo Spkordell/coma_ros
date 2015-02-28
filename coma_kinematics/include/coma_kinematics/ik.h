@@ -756,7 +756,7 @@ public:
 		};
 
 		template<typename T> struct StoreM20_3d {
-			template<typename TP> void operator()(Eigen::Matrix<double, 20, 3> &to, Eigen::Matrix<T, 20, 3> from, identity<TP>) const {
+			template<typename TP> void operator()(Eigen::Matrix<double, INTEGRATION_STEPS, 3> &to, Eigen::Matrix<T, INTEGRATION_STEPS, 3> from, identity<TP>) const {
 			}
 
 			void operator()(Eigen::Matrix<double, INTEGRATION_STEPS, 3> &to, Eigen::Matrix<T, INTEGRATION_STEPS, 3> from, identity<double>) const {
