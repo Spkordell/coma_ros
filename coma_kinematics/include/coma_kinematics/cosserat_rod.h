@@ -22,7 +22,6 @@
 
 template<typename T> class cosserat_rod {
 	typedef boost::array<T, 18> state_type; /* The type of container used to hold the state vector */
-	//typedef Eigen::Matrix<T, 18, 1> state_type; /* The type of container used to hold the state vector */
 
 public:
 	void set_init_state(Eigen::Matrix<T, 18, 1> init_state);
@@ -37,11 +36,10 @@ public:
 	Eigen::Matrix<T,20,3> positions;
 
 private:
-	void write_deriv(const state_type &x, const T t);
+	void write_deriv(unsigned int* at_position, Eigen::Matrix<T,20,3>* pos, const state_type &x, const T t);
 	void deriv(const state_type &x, state_type &dxdt, T t);
 
 	state_type init_state;
-	unsigned int at_position; //used for saving position data for later visualization
 
 	//physical parameters of the legs
 	T ro;	// outer radius m
@@ -267,7 +265,7 @@ public:
 	};
 };
 
-template<typename T> void cosserat_rod<T>::write_deriv(const state_type &x, const T t) {
+template<typename T> void cosserat_rod<T>::write_deriv(unsigned int* at_position, Eigen::Matrix<T,20,3>* pos, const state_type &x, const T t) {
 //	cout << t;
 //	for (unsigned int i = 0; i < 18; i++) {
 //		cout << '\t' << x[i];
@@ -276,12 +274,12 @@ template<typename T> void cosserat_rod<T>::write_deriv(const state_type &x, cons
 }
 
 
-template<> void cosserat_rod<double>::write_deriv(const state_type &x, const double t) {
+template<> void cosserat_rod<double>::write_deriv(unsigned int* at_position, Eigen::Matrix<double,20,3>* pos, const state_type &x, const double t) {
 	if (save_positions) {
-		positions(at_position,0) = x[0];
-		positions(at_position,1) = x[1];
-		positions(at_position,2) = x[2];
-		at_position++;
+		(*pos)(*at_position,0) = x[0];
+		(*pos)(*at_position,1) = x[1];
+		(*pos)(*at_position,2) = x[2];
+		(*at_position)++;
 	}
 	//std::cout << t << " : " << x[0] << " : " << x[1] << " : " << x[2] << std::endl;
 //	for (unsigned int i = 0; i < 18; i++) {
@@ -295,9 +293,13 @@ template<typename T> Eigen::Matrix<T, 18, 1> cosserat_rod<T>::integrate(const T 
 	namespace od = boost::numeric::odeint;
 	typedef od::runge_kutta_dopri5<state_type, T, state_type, T, od::range_algebra, Toperations<T>> stepper_type;
 
-	at_position = 0;
+	unsigned int at_position = 0;
+	Eigen::Matrix<T,20,3> pos;
+
 	od::integrate_const(od::make_dense_output < stepper_type > (T(1E-6), T(1E-3)), std::bind(&cosserat_rod<T>::deriv, *this, pl::_1, pl::_2, pl::_3), init_state,
-			start, end, dt, std::bind(&cosserat_rod<T>::write_deriv, *this, pl::_1, pl::_2));
+			start, end, dt, std::bind(&cosserat_rod<T>::write_deriv, *this, &at_position, &pos, pl::_1, pl::_2));
+
+	positions = pos;
 
 	for (unsigned int i = 0; i < 18; i++) {
 		result[i] = init_state[i];
