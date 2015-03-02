@@ -164,10 +164,10 @@ bool ik::solve_ik(coma_kinematics::solveIK::Request &req, coma_kinematics::solve
 	if (ikfunctor->visualization_enabled) {
 		coma_rviz::vis viz;
 		for (unsigned int i = 0; i < 12; i++) {
-			viz.rod[i].x = std::vector<double>(INTEGRATION_STEPS);
-			viz.rod[i].y = std::vector<double>(INTEGRATION_STEPS);
-			viz.rod[i].z = std::vector<double>(INTEGRATION_STEPS);
-			for (unsigned int j = 0; j < INTEGRATION_STEPS; j++) {
+			viz.rod[i].x = std::vector<double>(INTEGRATION_STEPS+1);
+			viz.rod[i].y = std::vector<double>(INTEGRATION_STEPS+1);
+			viz.rod[i].z = std::vector<double>(INTEGRATION_STEPS+1);
+			for (unsigned int j = 0; j < INTEGRATION_STEPS+1; j++) {
 				viz.rod[i].x[j] = ikfunctor->rodpositions[i](j,0);
 				viz.rod[i].y[j] = ikfunctor->rodpositions[i](j,1);
 				viz.rod[i].z[j] = ikfunctor->rodpositions[i](j,2);

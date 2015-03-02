@@ -248,12 +248,12 @@ public:
 			Vector18t y12 = cr12.result;
 #endif
 			if (visualization_enabled) {
-				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[6], cr7.positions, identity<T>());
-				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[7], cr8.positions, identity<T>());
-				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[8], cr9.positions, identity<T>());
-				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[9], cr10.positions, identity<T>());
-				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[10], cr11.positions, identity<T>());
-				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[11], cr12.positions, identity<T>());
+				StoreM21_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[6], cr7.positions, identity<T>());
+				StoreM21_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[7], cr8.positions, identity<T>());
+				StoreM21_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[8], cr9.positions, identity<T>());
+				StoreM21_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[9], cr10.positions, identity<T>());
+				StoreM21_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[10], cr11.positions, identity<T>());
+				StoreM21_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[11], cr12.positions, identity<T>());
 			}
 
 			//extract results from top link integration
@@ -472,12 +472,12 @@ public:
 			Vector18t y6 = cr6.result;
 #endif
 			if (visualization_enabled) {
-				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[0], cr1.positions, identity<T>());
-				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[1], cr2.positions, identity<T>());
-				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[2], cr3.positions, identity<T>());
-				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[3], cr4.positions, identity<T>());
-				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[4], cr5.positions, identity<T>());
-				StoreM20_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[5], cr6.positions, identity<T>());
+				StoreM21_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[0], cr1.positions, identity<T>());
+				StoreM21_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[1], cr2.positions, identity<T>());
+				StoreM21_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[2], cr3.positions, identity<T>());
+				StoreM21_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[3], cr4.positions, identity<T>());
+				StoreM21_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[4], cr5.positions, identity<T>());
+				StoreM21_3d<T>()(const_cast<IKFunctor*>(this)->rodpositions[5], cr6.positions, identity<T>());
 			}
 
 			//extract results from bottom link integration
@@ -731,12 +731,9 @@ public:
 		Eigen::Vector4d p6_init_s;
 
 		//position integrations for each rod, saved for visualization
-		Eigen::Matrix<double,INTEGRATION_STEPS,3> rodpositions[12];
+		Eigen::Matrix<double,INTEGRATION_STEPS+1,3> rodpositions[12];
+
 	private:
-
-
-
-
 		template<typename T> struct StoreM3d {
 			template<typename TP> void operator()(Eigen::Matrix<double, 3, 3> &to, Eigen::Matrix<T, 3, 3> from, identity<TP>) const {
 			}
@@ -755,11 +752,11 @@ public:
 			}
 		};
 
-		template<typename T> struct StoreM20_3d {
-			template<typename TP> void operator()(Eigen::Matrix<double, INTEGRATION_STEPS, 3> &to, Eigen::Matrix<T, INTEGRATION_STEPS, 3> from, identity<TP>) const {
+		template<typename T> struct StoreM21_3d {
+			template<typename TP> void operator()(Eigen::Matrix<double, INTEGRATION_STEPS+1, 3> &to, Eigen::Matrix<T, INTEGRATION_STEPS+1, 3> from, identity<TP>) const {
 			}
 
-			void operator()(Eigen::Matrix<double, INTEGRATION_STEPS, 3> &to, Eigen::Matrix<T, INTEGRATION_STEPS, 3> from, identity<double>) const {
+			void operator()(Eigen::Matrix<double, INTEGRATION_STEPS+1, 3> &to, Eigen::Matrix<T, INTEGRATION_STEPS+1, 3> from, identity<double>) const {
 				to = from;
 			}
 		};

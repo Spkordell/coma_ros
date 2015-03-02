@@ -2,7 +2,7 @@
 #define DEFINES_H_
 
 //#define INCLUDE_WRIST 		//if defined, model will include a 2DOF wrist
-#define USE_MULTITHREADING 	//if defined, model will perform rod integrations in multiple threads
+//#define USE_MULTITHREADING 	//if defined, model will perform rod integrations in multiple threads
 //#define USE_MATRIX_LOG 	//if defined, alignment residuals will be calculated using matrix logarithms instead of rodrigues' formula
 
 #ifdef INCLUDE_WRIST

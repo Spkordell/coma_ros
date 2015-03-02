@@ -21,6 +21,7 @@
 #include "coma_kinematics/defines.h"
 
 template<typename T> class cosserat_rod {
+
 	typedef boost::array<T, 18> state_type; /* The type of container used to hold the state vector */
 
 public:
@@ -33,10 +34,10 @@ public:
 	Eigen::Matrix<T, 18, 1> result;
 
 	bool save_positions;
-	Eigen::Matrix<T,20,3> positions;
+	Eigen::Matrix<T,21,3> positions;
 
 private:
-	void write_deriv(unsigned int* at_position, Eigen::Matrix<T,20,3>* pos, const state_type &x, const T t);
+	void write_deriv(unsigned int* at_position, Eigen::Matrix<T,21,3>* pos, const state_type &x, const T t);
 	void deriv(const state_type &x, state_type &dxdt, T t);
 
 	state_type init_state;
@@ -67,7 +68,6 @@ template<typename T> Eigen::Matrix<T, 3, 1> cosserat_rod<T>::vee(Eigen::Matrix<T
 }
 
 template<typename T> void cosserat_rod<T>::set_init_state(Eigen::Matrix<T, 18, 1> init_state) {
-	//this->init_state = Tstate<T>(init_state);
 	for (unsigned int i = 0; i < 18; i++) {
 		this->init_state[i] = init_state[i];
 	}
@@ -149,8 +149,6 @@ template<typename M, int N> inline Jet<M, N> max(const double f, const Jet<M, N>
 
 }
 
-//todo, generalize these, for values other than 84 and 7
-//todo, may want to extend from numeric_limits<T> intead and only change the epsilon and is_specialized values.
 //need to set the numeric limits of the jet types since odeint uses it
 namespace std {
 template<>
@@ -265,27 +263,28 @@ public:
 	};
 };
 
-template<typename T> void cosserat_rod<T>::write_deriv(unsigned int* at_position, Eigen::Matrix<T,20,3>* pos, const state_type &x, const T t) {
-//	cout << t;
-//	for (unsigned int i = 0; i < 18; i++) {
-//		cout << '\t' << x[i];
-//	}
-//	cout << endl;
-}
-
-
-template<> void cosserat_rod<double>::write_deriv(unsigned int* at_position, Eigen::Matrix<double,20,3>* pos, const state_type &x, const double t) {
-	if (save_positions) {
-		(*pos)(*at_position,0) = x[0];
-		(*pos)(*at_position,1) = x[1];
-		(*pos)(*at_position,2) = x[2];
-		(*at_position)++;
-	}
-	//std::cout << t << " : " << x[0] << " : " << x[1] << " : " << x[2] << std::endl;
+template<typename T> void cosserat_rod<T>::write_deriv(unsigned int* at_position, Eigen::Matrix<T,21,3>* pos, const state_type &x, const T t) {
+//	std::cout << t;
 //	for (unsigned int i = 0; i < 18; i++) {
 //		std::cout << '\t' << x[i];
 //	}
 //	std::cout << std::endl;
+}
+
+
+template<> void cosserat_rod<double>::write_deriv(unsigned int* at_position, Eigen::Matrix<double,21,3>* pos, const state_type &x, const double t) {
+	if (save_positions) {
+//		std::cout << *at_position << " : ";
+		(*pos)(*at_position,0) = x[0];
+		(*pos)(*at_position,1) = x[1];
+		(*pos)(*at_position,2) = x[2];
+		(*at_position)++;
+//		std::cout << t;
+//		for (unsigned int i = 0; i < 18; i++) {
+//			std::cout << " : " << x[i];
+//		}
+//		std::cout << std::endl;
+	}
 }
 
 template<typename T> Eigen::Matrix<T, 18, 1> cosserat_rod<T>::integrate(const T start, const T end, const T dt) {
@@ -294,7 +293,7 @@ template<typename T> Eigen::Matrix<T, 18, 1> cosserat_rod<T>::integrate(const T 
 	typedef od::runge_kutta_dopri5<state_type, T, state_type, T, od::range_algebra, Toperations<T>> stepper_type;
 
 	unsigned int at_position = 0;
-	Eigen::Matrix<T,20,3> pos;
+	Eigen::Matrix<T,21,3> pos;
 
 	od::integrate_const(od::make_dense_output < stepper_type > (T(1E-6), T(1E-3)), std::bind(&cosserat_rod<T>::deriv, *this, pl::_1, pl::_2, pl::_3), init_state,
 			start, end, dt, std::bind(&cosserat_rod<T>::write_deriv, *this, &at_position, &pos, pl::_1, pl::_2));
