@@ -3,7 +3,7 @@
 visualization::visualization() {
 
 	rod_pos_sub = n.subscribe < coma_rviz::vis > ("/rod_pos", 10, &visualization::rodposCallback, this);
-	marker_pub = n.advertise < visualization_msgs::Marker > ("visualization_marker", 10);
+	marker_pub = n.advertise < visualization_msgs::Marker > ("visualization_marker", 50);
 
 	ROS_INFO("Visualization Node Started");
 }
@@ -36,7 +36,7 @@ void visualization::rodposCallback(const coma_rviz::vis::ConstPtr& msg) {
 	for (unsigned int i = 0; i < 12; i++) {
 		leg[i].header.frame_id = points.header.frame_id;
 		leg[i].header.stamp = points.header.stamp;
-		leg[i].ns = "leg " + boost::lexical_cast < std::string > (int(i));
+		leg[i].ns = "leg " + boost::lexical_cast < std::string > (i+1);
 		leg[i].action = points.action;
 		leg[i].pose.orientation.w = points.pose.orientation.w;
 
@@ -48,7 +48,6 @@ void visualization::rodposCallback(const coma_rviz::vis::ConstPtr& msg) {
 
 		//legs are blue
 		leg[i].color.a = 1.0;
-
 	}
 
 	//set leg colors
@@ -64,6 +63,8 @@ void visualization::rodposCallback(const coma_rviz::vis::ConstPtr& msg) {
 	leg[9].color.r = 1.0;leg[9].color.g = 0.0;leg[9].color.b = 1.0;    //magenta
 	leg[10].color.r = 0.0;leg[10].color.g = 1.0;leg[10].color.b = 1.0; //cyan
 	leg[11].color.r = 1.0;leg[11].color.g = 1.0;leg[11].color.b = 0.0; //yellow
+
+
 
 	// Create the vertices for the points and lines
 	for (unsigned int i = 0; i < 12; i++) {
@@ -88,6 +89,17 @@ void visualization::rodposCallback(const coma_rviz::vis::ConstPtr& msg) {
 			mid_plate.points.push_back(p);
 		}
 	}
+	//close loops for top/bottom plate
+	geometry_msgs::Point p;
+	p.x = msg->rod[0].x[19];
+	p.y = msg->rod[0].y[19];
+	p.z = msg->rod[0].z[19];
+	top_plate.points.push_back(p);
+	p.x = msg->rod[6].x[19];
+	p.y = msg->rod[6].y[19];
+	p.z = msg->rod[6].z[19];
+	mid_plate.points.push_back(p);
+
 	marker_pub.publish(points);
 	marker_pub.publish(top_plate);
 	marker_pub.publish(mid_plate);

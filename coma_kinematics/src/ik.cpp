@@ -132,7 +132,7 @@ ik::ik() {
 	solverService = node.advertiseService("solve_ik", &ik::solve_ik, this);
 
 	if (ikfunctor->visualization_enabled) {
-		vis_pub = node.advertise<coma_rviz::vis>("rod_pos", 10);
+		vis_pub = node.advertise<coma_rviz::vis>("rod_pos", 50);
 	}
 
 	ROS_INFO("COMA IK Solver Server Started");
