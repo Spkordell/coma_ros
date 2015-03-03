@@ -5,7 +5,7 @@
  * Solves two-segment inverse kinematics for parallel continuum manipulators
  *
  * \author Steven Kordell, WPI - spkordell@wpi.edu
- * \date January 18, 2014
+ * \date January 18, 2015
  */
 
 #ifndef IK_H_

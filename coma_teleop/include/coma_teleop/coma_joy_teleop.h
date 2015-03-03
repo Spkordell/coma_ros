@@ -6,7 +6,7 @@
  * This node listens to a /joy topic and sends messages to the angular_cmd and cartesian_cmd for the arm.
  *
  * \author Steven Kordell, WPI - spkordell@wpi.edu
- * \date January 11, 2014
+ * \date January 11, 2015
  */
 
 #ifndef COMA_JOY_TELEOP_H_

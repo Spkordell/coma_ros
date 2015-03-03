@@ -5,7 +5,7 @@
  * Solves two-segment inverse kinematics for parallel continuum manipulators
  *
  * \author Steven Kordell, WPI - spkordell@wpi.edu
- * \date January 18, 2014
+ * \date January 18, 2015
  */
 
 #include <coma_kinematics/ik.h>
@@ -108,31 +108,16 @@ ik::ik() {
 
 	options.minimizer_progress_to_stdout = false;
 	options.linear_solver_type = ceres::DENSE_QR;
-
-	//options.linear_solver_type = ceres::ITERATIVE_SCHUR;
-
-	//options.preconditioner_type = ceres::CLUSTER_TRIDIAGONAL;
-	//options.trust_region_strategy_type = ceres::LEVENBERG_MARQUARDT;
-
-	//options.minimizer_type = ceres::LINE_SEARCH;
-	//options.line_search_direction_type = ceres::BFGS;
-	//options.max_num_line_search_step_size_iterations = 200;
-
 	options.num_threads = 6;
-
 	options.max_num_iterations = 2000;
 	options.parameter_tolerance = 1E-99;
 	options.function_tolerance = 1E-12;
-
-	//options.min_relative_decrease = 1E-6;
-	//options.max_trust_region_radius = 1E4;
-	//options.preconditioner_type = ceres::CLUSTER::TRIDIAGONAL;
 
 	// create the ROS service
 	solverService = node.advertiseService("solve_ik", &ik::solve_ik, this);
 
 	if (ikfunctor->visualization_enabled) {
-		vis_pub = node.advertise<coma_rviz::vis>("rod_pos", 50);
+		vis_pub = node.advertise<coma_rviz::vis>("rod_pos", 200);
 	}
 
 	ROS_INFO("COMA IK Solver Server Started");
@@ -147,11 +132,11 @@ bool ik::solve_ik(coma_kinematics::solveIK::Request &req, coma_kinematics::solve
 	double leg_lengths[12];
 	double wrist_angles[2];
 
-	if (req.z_pos < 42) { //when the legs are really short, need to re-initialize top legs to prevent solver getting stuck in local minima
-		for (unsigned int i = GS - 12; i < GS-6; i++) {
-			guess_init[i] = MIN_LEG_LENGTH_TOP+1E-12; //initialize top leg lengths to min length
-		}
-	}
+//	if (req.z_pos < 42) { //when the legs are really short, need to re-initialize top legs to prevent solver getting stuck in local minima
+//		for (unsigned int i = GS - 12; i < GS-6; i++) {
+//			guess_init[i] = MIN_LEG_LENGTH_TOP+1E-12; //initialize top leg lengths to min length
+//		}
+//	}
 
 	solve(pd, Rd, leg_lengths, wrist_angles);
 
@@ -196,7 +181,7 @@ void ik::solve(Vector3d pd, Matrix3d Rd, double* leg_lengths, double* wrist_angl
 	Solve(options, &problem, &summary);
 
 	std::cout << summary.BriefReport() << std::endl;
-	//std:: cout << summary.FullReport() << std::endl;
+	std:: cout << summary.FullReport() << std::endl;
 
 
 	///solve for the bottom lengths

@@ -5,7 +5,7 @@
  *
  *
  * \author Steven Kordell, WPI - spkordell@wpi.edu
- * \date January 19, 2014
+ * \date January 19, 2015
  */
 
 #ifndef COSSERAT_ROD_H_
