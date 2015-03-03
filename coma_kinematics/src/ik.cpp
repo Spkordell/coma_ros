@@ -107,17 +107,17 @@ ik::ik() {
 	}
 
 	options.minimizer_progress_to_stdout = false;
-	options.linear_solver_type = ceres::DENSE_QR;
-	options.num_threads = 6;
-	options.max_num_iterations = 2000;
+	options.linear_solver_type = ceres::SPARSE_NORMAL_CHOLESKY;
+	options.num_threads = 2;
+	options.max_num_iterations = 500;
 	options.parameter_tolerance = 1E-99;
-	options.function_tolerance = 1E-12;
+	options.function_tolerance = 1E-99;
 
 	// create the ROS service
 	solverService = node.advertiseService("solve_ik", &ik::solve_ik, this);
 
 	if (ikfunctor->visualization_enabled) {
-		vis_pub = node.advertise<coma_rviz::vis>("rod_pos", 200);
+		vis_pub = node.advertise<coma_rviz::vis>("rod_pos", 350);
 	}
 
 	ROS_INFO("COMA IK Solver Server Started");

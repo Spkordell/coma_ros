@@ -3,7 +3,7 @@
 visualization::visualization() {
 
 	rod_pos_sub = n.subscribe < coma_rviz::vis > ("/rod_pos", 10, &visualization::rodposCallback, this);
-	marker_pub = n.advertise < visualization_msgs::Marker > ("visualization_marker", 300);
+	marker_pub = n.advertise < visualization_msgs::Marker > ("visualization_marker", 500);
 
 	ROS_INFO("Visualization Node Started");
 }
