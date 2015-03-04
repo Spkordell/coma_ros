@@ -43,13 +43,13 @@ private:
 	state_type init_state;
 
 	//physical parameters of the legs
-	T ro;	// outer radius m
-	T ri;	// inner radius mc
-	T I;	//second moment of area
-	T A;	//area
-	T J;	//polar moment
-	T E;	//Pa Youngs mod
-	T G;	//Pa shear mod
+	double ro;	// outer radius m
+	double ri;	// inner radius mc
+	double I;	//second moment of area
+	double A;	//area
+	double J;	//polar moment
+	double E;	//Pa Youngs mod
+	double G;	//Pa shear mod
 	Eigen::Matrix<T, 3, 3> K_bt_inv;
 	Eigen::Matrix<T, 3, 3> K_se_inv;
 
@@ -73,15 +73,17 @@ template<typename T> void cosserat_rod<T>::set_init_state(Eigen::Matrix<T, 18, 1
 	}
 
 	//ro = T(.0018034 / 2);							// outer radius m
-	ro = T(0.00198 / 2);							// outer radius m
-	ri = T(0.00);									// inner radius mc
-	I = T(0.25 * M_PI * (pow(ro, 4) - pow(ri, 4)));	//second moment of area
-	A = T(M_PI * (pow(ro, 2) - pow(ri, 2)));		//area
-	J = T(2) * I;								//polar moment
-	E = T(207 * 10E9);						//Pa Youngs mod
-	G = T(79.3 * 10E9);						//Pa shear mod
-	K_bt_inv << T(1) / (E * I), T(0), T(0), T(0), T(1) / (E * I), T(0), T(0), T(0), T(1) / (J * G);
-	K_se_inv << T(1) / (G * A), T(0), T(0), T(0), T(1) / (G * A), T(0), T(0), T(0), T(1) / (E * A);
+	ro = 0.00198 / 2;							// outer radius m
+	ri = 0.00;									// inner radius mc
+	I = 0.25 * M_PI * (pow(ro, 4) - pow(ri, 4));	//second moment of area
+	A = M_PI * (pow(ro, 2) - pow(ri, 2));		//area
+	J = 2 * I;								//polar moment
+	//E = T(207 * 10E9);						//Pa Youngs mod
+	//G = T(79.3 * 10E9);						//Pa shear mod
+	E = 207 * 10E8;						//Pa Youngs mod
+	G = 79.3 * 10E8;						//Pa shear mod
+	K_bt_inv << T(1) / T(E * I), T(0), T(0), T(0), T(1) / T(E * I), T(0), T(0), T(0), T(1) / T(J * G);
+	K_se_inv << T(1) / T(G * A), T(0), T(0), T(0), T(1) / T(G * A), T(0), T(0), T(0), T(1) / T(E * A);
 }
 
 template<typename T> void cosserat_rod<T>::deriv(const state_type &x, state_type &dxdt, T t) {

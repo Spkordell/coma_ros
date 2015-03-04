@@ -83,10 +83,12 @@ ik::ik() {
 		guess_init[i] = 0;
 	}
 	for (unsigned int i = GS - 6; i < GS; i++) {
-		guess_init[i] = MIN_LEG_LENGTH_BOTTOM+1E-12; //initialize bottom leg lengths
+		//guess_init[i] = MIN_LEG_LENGTH_BOTTOM+1E-12; //initialize bottom leg lengths
+		guess_init[i] = 0.3;
 	}
 	for (unsigned int i = GS - 12; i < GS-6; i++) {
-		guess_init[i] = MIN_LEG_LENGTH_TOP+1E-12; //initialize top leg lengths
+		//guess_init[i] = MIN_LEG_LENGTH_TOP+1E-12; //initialize top leg lengths
+		guess_init[i] = 0.3;
 	}
 
 
@@ -108,10 +110,12 @@ ik::ik() {
 
 	options.minimizer_progress_to_stdout = false;
 	options.linear_solver_type = ceres::SPARSE_NORMAL_CHOLESKY;
+	//options.linear_solver_type = ceres::DENSE_QR;
 	options.num_threads = 2;
 	options.max_num_iterations = 500;
-	options.parameter_tolerance = 1E-99;
 	options.function_tolerance = 1E-99;
+	options.parameter_tolerance = 1E-30;
+
 
 	// create the ROS service
 	solverService = node.advertiseService("solve_ik", &ik::solve_ik, this);
@@ -132,19 +136,15 @@ bool ik::solve_ik(coma_kinematics::solveIK::Request &req, coma_kinematics::solve
 	double leg_lengths[12];
 	double wrist_angles[2];
 
-//	if (req.z_pos < 0.42) { //when the legs are really short, need to re-initialize top legs to prevent solver getting stuck in local minima
-//		for (unsigned int i = GS - 12; i < GS-6; i++) {
-//			guess_init[i] = MIN_LEG_LENGTH_TOP+1E-12; //initialize top leg lengths to min length
-//		}
-//	}
-
-	//to prevent lower link from getting caught in local, initialize the lengths to half the height
-//	if (req.z_pos > 0.45) {
-//		for (unsigned int i = GS - 6; i < GS; i++) {
-//			guess_init[i] = MIN_LEG_LENGTH_BOTTOM+(req.z_pos/2); //initialize bottom leg lengths
-//		}
-//	}
-
+	for (unsigned int i = 0; i < GS - 12; i++) {
+		guess_init[i] = 0;
+	}
+	for (unsigned int i = GS - 6; i < GS; i++) {
+		guess_init[i] = 0.3;
+	}
+	for (unsigned int i = GS - 12; i < GS-6; i++) {
+		guess_init[i] = 0.3;
+	}
 
 	solve(pd, Rd, leg_lengths, wrist_angles);
 
