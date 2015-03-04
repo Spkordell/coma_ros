@@ -132,11 +132,19 @@ bool ik::solve_ik(coma_kinematics::solveIK::Request &req, coma_kinematics::solve
 	double leg_lengths[12];
 	double wrist_angles[2];
 
-//	if (req.z_pos < 42) { //when the legs are really short, need to re-initialize top legs to prevent solver getting stuck in local minima
+//	if (req.z_pos < 0.42) { //when the legs are really short, need to re-initialize top legs to prevent solver getting stuck in local minima
 //		for (unsigned int i = GS - 12; i < GS-6; i++) {
 //			guess_init[i] = MIN_LEG_LENGTH_TOP+1E-12; //initialize top leg lengths to min length
 //		}
 //	}
+
+	//to prevent lower link from getting caught in local, initialize the lengths to half the height
+//	if (req.z_pos > 0.45) {
+//		for (unsigned int i = GS - 6; i < GS; i++) {
+//			guess_init[i] = MIN_LEG_LENGTH_BOTTOM+(req.z_pos/2); //initialize bottom leg lengths
+//		}
+//	}
+
 
 	solve(pd, Rd, leg_lengths, wrist_angles);
 
@@ -181,7 +189,7 @@ void ik::solve(Vector3d pd, Matrix3d Rd, double* leg_lengths, double* wrist_angl
 	Solve(options, &problem, &summary);
 
 	std::cout << summary.BriefReport() << std::endl;
-	std:: cout << summary.FullReport() << std::endl;
+	//std:: cout << summary.FullReport() << std::endl;
 
 
 	///solve for the bottom lengths
