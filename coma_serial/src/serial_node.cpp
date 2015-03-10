@@ -87,16 +87,17 @@ void serial_node::step_cmd_cback(const coma_serial::teleop_command::ConstPtr& cm
 	if (cmd->home) {
 		writeChar('H');
 		ROS_INFO("Sent homing signal");
+	} else {
+		ostringstream buffer("");
+		for (int i = 0; i < 12; i++) {
+			buffer << cmd->stepper_counts[i] << ':';
+		}
+		buffer << cmd->wrist_rot << ':';
+		buffer << cmd->wrist_flex << ':';
+		buffer << (cmd->gripper_open ? '1' : '0') << '\r';
+		writeString(buffer.str());
+		ROS_INFO("%s", buffer.str().c_str());
 	}
-	ostringstream buffer("");
-	for (int i = 0; i < 12; i++) {
-		buffer << cmd->stepper_counts[i] << ':';
-	}
-	buffer << cmd->wrist_rot << ':';
-	buffer << cmd->wrist_flex << ':';
-	buffer << (cmd->gripper_open ? '1' : '0') << '\r';
-	writeString(buffer.str());
-	ROS_INFO("%s", buffer.str().c_str());
 }
 
 mode_type serial_node::get_mode() {

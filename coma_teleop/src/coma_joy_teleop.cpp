@@ -24,12 +24,16 @@ coma_joy_teleop::coma_joy_teleop() {
 	x_rot = INITIAL_X_ROT;
 	y_rot = INITIAL_Y_ROT;
 	z_rot = INITIAL_Z_ROT;
-	old_x_pos = 0;
-	old_y_pos = 0;
-	old_z_pos = 0;
-	old_x_rot = 0;
-	old_y_rot = 0;
-	old_z_rot = 0;
+	gripper_open = true;
+	home = false;
+	old_x_pos = INITIAL_X_POS;
+	old_y_pos = INITIAL_Y_POS;
+	old_z_pos = INITIAL_Z_POS;
+	old_x_rot = INITIAL_X_ROT;
+	old_y_rot = INITIAL_Y_ROT;
+	old_z_rot = INITIAL_Z_ROT;
+	old_gripper_open = true;
+	old_home = false;
 
 	calibrated = false;
 	initLeftTrigger = false;
@@ -135,10 +139,27 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 			z_rot = INITIAL_Z_ROT;
 		}
 
-		if (x_pos != old_x_pos || y_pos != old_y_pos || z_pos != old_z_pos || x_rot != old_x_rot || y_rot != old_y_rot || z_rot != old_z_rot
-				|| gripper_open != old_gripper_open || home != old_home) {
+		if (home != old_home) {
+			old_home = home;
+			if (home) {
+				motion_cmd.home = true;
+				motion_cmd.wrist_flex = 0;
+				motion_cmd.wrist_rot = 0;
+				motion_cmd.gripper_open = gripper_open;
+				for (unsigned int leg; leg < 12; leg++) {
+					motion_cmd.stepper_counts[leg] = 0;
+				}
+				if (send_motion_commands) {
+					motion_response_received = false;
+					motion_cmd_out.publish(motion_cmd);
+				}
+			}
+		}
 
-			cout << "------------------------------------------------------------" <<endl;
+		if (x_pos != old_x_pos || y_pos != old_y_pos || z_pos != old_z_pos || x_rot != old_x_rot || y_rot != old_y_rot || z_rot != old_z_rot
+				|| gripper_open != old_gripper_open) {
+
+			cout << "------------------------------------------------------------" << endl;
 			cout << x_pos << '\t' << y_pos << '\t' << z_pos << '\t' << x_rot << '\t' << y_rot << '\t' << z_rot << endl;
 			old_x_pos = x_pos;
 			old_y_pos = y_pos;
@@ -147,7 +168,6 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 			old_y_rot = y_rot;
 			old_z_rot = z_rot;
 			old_gripper_open = gripper_open;
-			old_home = home;
 
 			coma_kinematics::solveIK srv;
 			srv.request.x_pos = x_pos;
@@ -183,12 +203,12 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 				} else {
 					cout << "gripper closed" << endl;
 				}
-				motion_cmd.home = home;
+				motion_cmd.home = false;
 				if (send_motion_commands) {
 					motion_response_received = false;
 					motion_cmd_out.publish(motion_cmd);
 				} else {
-					for(unsigned int leg = 0; leg < 11; leg++) {
+					for (unsigned int leg = 0; leg < 11; leg++) {
 						cout << motion_cmd.stepper_counts[leg] << ':';
 					}
 					cout << motion_cmd.stepper_counts[11] << endl;
