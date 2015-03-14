@@ -140,10 +140,10 @@ bool ik::solve_ik(coma_kinematics::solveIK::Request &req, coma_kinematics::solve
 		guess_init[i] = 0;
 	}
 	for (unsigned int i = GS - 6; i < GS; i++) {
-		guess_init[i] = 0.3;
+		guess_init[i] = 0.3; //bottom
 	}
 	for (unsigned int i = GS - 12; i < GS-6; i++) {
-		guess_init[i] = 0.3;
+		guess_init[i] = 0.3; //top
 	}
 
 	solve(pd, Rd, leg_lengths, wrist_angles);

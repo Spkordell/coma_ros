@@ -20,6 +20,7 @@
   <run_depend>coma_kinematics</run_depend>
   <run_depend>coma_teleop</run_depend>
   <run_depend>coma_rviz</run_depend>
+  <run_depend>coma_simple_planner</run_depend>
 
   <export>
     <metapackage/>
