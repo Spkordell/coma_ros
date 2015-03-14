@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package>
+  <name>coma_simple_planner</name>
+  <version>0.0.0</version>
+  <description>The coma_simple_planner package</description>
+
+  <maintainer email="spkordell@wpi.edu">Steven Kordell</maintainer>
+  <license>BSD</license>
+
+  <author email="spkordell@wpi.edu">Steven Kordell</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <export>
+  </export>
+</package>
