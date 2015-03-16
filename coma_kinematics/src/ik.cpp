@@ -189,7 +189,7 @@ void ik::solve(Vector3d pd, Matrix3d Rd, double* leg_lengths, double* wrist_angl
 	Solve(options, &problem, &summary);
 
 	std::cout << summary.BriefReport() << std::endl;
-	//std:: cout << summary.FullReport() << std::endl;
+	std:: cout << summary.FullReport() << std::endl;
 
 
 	///solve for the bottom lengths
