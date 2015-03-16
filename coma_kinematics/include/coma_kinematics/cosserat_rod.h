@@ -88,15 +88,6 @@ template<typename T> void cosserat_rod<T>::set_init_state(Eigen::Matrix<T, 18, 1
 
 template<typename T> void cosserat_rod<T>::deriv(const state_type &x, state_type &dxdt, T t) {
 
-	T RA = x[3];
-	T RB = x[4];
-	T RC = x[5];
-	T RD = x[6];
-	T RE = x[7];
-	T RF = x[8];
-	T RG = x[9];
-	T RH = x[10];
-	T RI = x[11];
 	T SA = K_se_inv(0,0);
 	T SB = K_se_inv(0,1);
 	T SC = K_se_inv(0,2);
@@ -115,22 +106,17 @@ template<typename T> void cosserat_rod<T>::deriv(const state_type &x, state_type
 	T BG = K_bt_inv(2,0);
 	T BH = K_bt_inv(2,1);
 	T BI = K_bt_inv(2,2);
-	T nA = x[12];
-	T nB = x[13];
-	T nC = x[14];
-	T mA = x[15];
-	T mB = x[16];
-	T mC = x[17];
+
 
 	//compute kinematic variables from the internal force and moment using the linear constitutive law
 	T v[3];
-	v[0] = nA*(RA*SA + RD*SB + RG*SC) + nB*(RB*SA + RE*SB + RH*SC) + nC*(RC*SA + RF*SB + RI*SC);
-	v[1] = nA*(RA*SD + RD*SE + RG*SF) + nB*(RB*SD + RE*SE + RH*SF) + nC*(RC*SD + RF*SE + RI*SF);
-	v[2] = nA*(RA*SG + RD*SH + RG*SI) + nB*(RB*SG + RE*SH + RH*SI) + nC*(RC*SG + RF*SH + RI*SI) + T(1);
+	v[0] = x[12]*(x[3]*SA + x[6]*SB + x[9]*SC) + x[13]*(x[4]*SA + x[7]*SB + x[10]*SC) + x[14]*(x[5]*SA + x[8]*SB + x[11]*SC);
+	v[1] = x[12]*(x[3]*SD + x[6]*SE + x[9]*SF) + x[13]*(x[4]*SD + x[7]*SE + x[10]*SF) + x[14]*(x[5]*SD + x[8]*SE + x[11]*SF);
+	v[2] = x[12]*(x[3]*SG + x[6]*SH + x[9]*SI) + x[13]*(x[4]*SG + x[7]*SH + x[10]*SI) + x[14]*(x[5]*SG + x[8]*SH + x[11]*SI) + T(1);
 	T u[3];
-	u[0] = mA*(BA*RA + BB*RD + BC*RG) + mB*(BA*RB + BB*RE + BC*RH) + mC*(BA*RC + BB*RF + BC*RI);
-	u[1] = mA*(BD*RA + BE*RD + BF*RG) + mB*(BD*RB + BE*RE + BF*RH) + mC*(BD*RC + BE*RF + BF*RI);
-	u[2] = mA*(BG*RA + BH*RD + BI*RG) + mB*(BG*RB + BH*RE + BI*RH) + mC*(BG*RC + BH*RF + BI*RI);
+	u[0] = x[15]*(BA*x[3] + BB*x[6] + BC*x[9]) + x[16]*(BA*x[4] + BB*x[7] + BC*x[10]) + x[17]*(BA*x[5] + BB*x[8] + BC*x[11]);
+	u[1] = x[15]*(BD*x[3] + BE*x[6] + BF*x[9]) + x[16]*(BD*x[4] + BE*x[7] + BF*x[10]) + x[17]*(BD*x[5] + BE*x[8] + BF*x[11]);
+	u[2] = x[15]*(BG*x[3] + BH*x[6] + BI*x[9]) + x[16]*(BG*x[4] + BH*x[7] + BI*x[10]) + x[17]*(BG*x[5] + BH*x[8] + BI*x[11]);
 
 	T vA = v[0];
 	T vB = v[1];
@@ -140,24 +126,24 @@ template<typename T> void cosserat_rod<T>::deriv(const state_type &x, state_type
 	T uC = u[2];
 
 	//compute state variable derivatives from cosserat rod equations
-	dxdt[0] = RA*vA + RD*vB + RG*vC;
-	dxdt[1] = RB*vA + RE*vB + RH*vC;
-	dxdt[2] = RC*vA + RF*vB + RI*vC;
-	dxdt[3] = RD*uC - RG*uB;
-	dxdt[4] = RE*uC - RH*uB;
-	dxdt[5] = RF*uC - RI*uB;
-	dxdt[6] = RG*uA - RA*uC;
-	dxdt[7] = RH*uA - RB*uC;
-	dxdt[8] = RI*uA - RC*uC;
-	dxdt[9] = RA*uB - RD*uA;
-	dxdt[10] = RB*uB - RE*uA;
-	dxdt[11] = RC*uB - RF*uA;
+	dxdt[0] = x[3]*vA + x[6]*vB + x[9]*vC;
+	dxdt[1] = x[4]*vA + x[7]*vB + x[10]*vC;
+	dxdt[2] = x[5]*vA + x[8]*vB + x[11]*vC;
+	dxdt[3] = x[6]*uC - x[9]*uB;
+	dxdt[4] = x[7]*uC - x[10]*uB;
+	dxdt[5] = x[8]*uC - x[11]*uB;
+	dxdt[6] = x[9]*uA - x[3]*uC;
+	dxdt[7] = x[10]*uA - x[4]*uC;
+	dxdt[8] = x[11]*uA - x[5]*uC;
+	dxdt[9] = x[3]*uB - x[6]*uA;
+	dxdt[10] = x[4]*uB - x[7]*uA;
+	dxdt[11] = x[5]*uB - x[8]*uA;
 	dxdt[12] = T(0);
 	dxdt[13] = T(0);
 	dxdt[14] = T(0);
-	dxdt[15] = nB*(RC*vA + RF*vB + RI*vC) - nC*(RB*vA + RE*vB + RH*vC);
-	dxdt[16] = nC*(RA*vA + RD*vB + RG*vC) - nA*(RC*vA + RF*vB + RI*vC);
-	dxdt[17] = nA*(RB*vA + RE*vB + RH*vC) - nB*(RA*vA + RD*vB + RG*vC);
+	dxdt[15] = x[13]*(x[5]*vA + x[8]*vB + x[11]*vC) - x[14]*(x[4]*vA + x[7]*vB + x[10]*vC);
+	dxdt[16] = x[14]*(x[3]*vA + x[6]*vB + x[9]*vC) - x[12]*(x[5]*vA + x[8]*vB + x[11]*vC);
+	dxdt[17] = x[12]*(x[4]*vA + x[7]*vB + x[10]*vC) - x[13]*(x[3]*vA + x[6]*vB + x[9]*vC);
 
 
 	/*
