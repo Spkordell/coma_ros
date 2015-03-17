@@ -117,8 +117,8 @@ template<typename T> void cosserat_rod<T>::deriv(const state_type &x, state_type
 	dxdt[16] = x[14]*(x[3]*v[0] + x[6]*v[1] + x[9]*v[2]) - x[12]*(x[5]*v[0] + x[8]*v[1] + x[11]*v[2]);
 	dxdt[17] = x[12]*(x[4]*v[0] + x[7]*v[1] + x[10]*v[2]) - x[13]*(x[3]*v[0] + x[6]*v[1] + x[9]*v[2]);
 
-
 	/*
+	The below performs the same calculations as the code above but using Eigen Matrices. The above was derived for efficiency.
 
 	using Eigen::Matrix;
 	typedef Matrix<T, 3, 3> Matrix3t;

@@ -1,0 +1,14 @@
+float64 start_x_pos
+float64 start_y_pos
+float64 start_z_pos
+float64 start_x_rot
+float64 start_y_rot
+float64 start_z_rot
+float64 goal_x_pos
+float64 goal_y_pos
+float64 goal_z_pos
+float64 goal_x_rot
+float64 goal_y_rot
+float64 goal_z_rot
+---
+configuration[] config
