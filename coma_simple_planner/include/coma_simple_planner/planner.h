@@ -14,6 +14,7 @@
 #include <cmath>
 #include <ros/ros.h>
 
+#include "coma_kinematics/solveIK.h"
 #include "coma_simple_planner/configuration.h"
 #include "coma_simple_planner/path_request.h"
 
@@ -29,6 +30,11 @@ public:
 
 private:
 	ros::NodeHandle n;
+
+	ros::ServiceServer plannerService;
+	ros::ServiceClient solverClient;
+
+	bool plan_path(coma_simple_planner::path_request::Request &req, coma_simple_planner::path_request::Response &res);
 };
 
 /*!
