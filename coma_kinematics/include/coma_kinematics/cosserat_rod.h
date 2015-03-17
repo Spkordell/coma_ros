@@ -87,63 +87,35 @@ template<typename T> void cosserat_rod<T>::set_init_state(Eigen::Matrix<T, 18, 1
 }
 
 template<typename T> void cosserat_rod<T>::deriv(const state_type &x, state_type &dxdt, T t) {
-
-	T SA = K_se_inv(0,0);
-	T SB = K_se_inv(0,1);
-	T SC = K_se_inv(0,2);
-	T SD = K_se_inv(1,0);
-	T SE = K_se_inv(1,1);
-	T SF = K_se_inv(1,2);
-	T SG = K_se_inv(2,0);
-	T SH = K_se_inv(2,1);
-	T SI = K_se_inv(2,2);
-	T BA = K_bt_inv(0,0);
-	T BB = K_bt_inv(0,1);
-	T BC = K_bt_inv(0,2);
-	T BD = K_bt_inv(1,0);
-	T BE = K_bt_inv(1,1);
-	T BF = K_bt_inv(1,2);
-	T BG = K_bt_inv(2,0);
-	T BH = K_bt_inv(2,1);
-	T BI = K_bt_inv(2,2);
-
-
 	//compute kinematic variables from the internal force and moment using the linear constitutive law
 	T v[3];
-	v[0] = x[12]*(x[3]*SA + x[6]*SB + x[9]*SC) + x[13]*(x[4]*SA + x[7]*SB + x[10]*SC) + x[14]*(x[5]*SA + x[8]*SB + x[11]*SC);
-	v[1] = x[12]*(x[3]*SD + x[6]*SE + x[9]*SF) + x[13]*(x[4]*SD + x[7]*SE + x[10]*SF) + x[14]*(x[5]*SD + x[8]*SE + x[11]*SF);
-	v[2] = x[12]*(x[3]*SG + x[6]*SH + x[9]*SI) + x[13]*(x[4]*SG + x[7]*SH + x[10]*SI) + x[14]*(x[5]*SG + x[8]*SH + x[11]*SI) + T(1);
+	v[0] = x[12]*(x[3]*K_se_inv(0,0) + x[6]*K_se_inv(0,1) + x[9]*K_se_inv(0,2)) + x[13]*(x[4]*K_se_inv(0,0) + x[7]*K_se_inv(0,1) + x[10]*K_se_inv(0,2)) + x[14]*(x[5]*K_se_inv(0,0) + x[8]*K_se_inv(0,1) + x[11]*K_se_inv(0,2));
+	v[1] = x[12]*(x[3]*K_se_inv(1,0) + x[6]*K_se_inv(1,1) + x[9]*K_se_inv(1,2)) + x[13]*(x[4]*K_se_inv(1,0) + x[7]*K_se_inv(1,1) + x[10]*K_se_inv(1,2)) + x[14]*(x[5]*K_se_inv(1,0) + x[8]*K_se_inv(1,1) + x[11]*K_se_inv(1,2));
+	v[2] = x[12]*(x[3]*K_se_inv(2,0) + x[6]*K_se_inv(2,1) + x[9]*K_se_inv(2,2)) + x[13]*(x[4]*K_se_inv(2,0) + x[7]*K_se_inv(2,1) + x[10]*K_se_inv(2,2)) + x[14]*(x[5]*K_se_inv(2,0) + x[8]*K_se_inv(2,1) + x[11]*K_se_inv(2,2)) + T(1);
 	T u[3];
-	u[0] = x[15]*(BA*x[3] + BB*x[6] + BC*x[9]) + x[16]*(BA*x[4] + BB*x[7] + BC*x[10]) + x[17]*(BA*x[5] + BB*x[8] + BC*x[11]);
-	u[1] = x[15]*(BD*x[3] + BE*x[6] + BF*x[9]) + x[16]*(BD*x[4] + BE*x[7] + BF*x[10]) + x[17]*(BD*x[5] + BE*x[8] + BF*x[11]);
-	u[2] = x[15]*(BG*x[3] + BH*x[6] + BI*x[9]) + x[16]*(BG*x[4] + BH*x[7] + BI*x[10]) + x[17]*(BG*x[5] + BH*x[8] + BI*x[11]);
-
-	T vA = v[0];
-	T vB = v[1];
-	T vC = v[2];
-	T uA = u[0];
-	T uB = u[1];
-	T uC = u[2];
+	u[0] = x[15]*(K_bt_inv(0,0)*x[3] + K_bt_inv(0,1)*x[6] + K_bt_inv(0,2)*x[9]) + x[16]*(K_bt_inv(0,0)*x[4] + K_bt_inv(0,1)*x[7] + K_bt_inv(0,2)*x[10]) + x[17]*(K_bt_inv(0,0)*x[5] + K_bt_inv(0,1)*x[8] + K_bt_inv(0,2)*x[11]);
+	u[1] = x[15]*(K_bt_inv(1,0)*x[3] + K_bt_inv(1,1)*x[6] + K_bt_inv(1,2)*x[9]) + x[16]*(K_bt_inv(1,0)*x[4] + K_bt_inv(1,1)*x[7] + K_bt_inv(1,2)*x[10]) + x[17]*(K_bt_inv(1,0)*x[5] + K_bt_inv(1,1)*x[8] + K_bt_inv(1,2)*x[11]);
+	u[2] = x[15]*(K_bt_inv(2,0)*x[3] + K_bt_inv(2,1)*x[6] + K_bt_inv(2,2)*x[9]) + x[16]*(K_bt_inv(2,0)*x[4] + K_bt_inv(2,1)*x[7] + K_bt_inv(2,2)*x[10]) + x[17]*(K_bt_inv(2,0)*x[5] + K_bt_inv(2,1)*x[8] + K_bt_inv(2,2)*x[11]);
 
 	//compute state variable derivatives from cosserat rod equations
-	dxdt[0] = x[3]*vA + x[6]*vB + x[9]*vC;
-	dxdt[1] = x[4]*vA + x[7]*vB + x[10]*vC;
-	dxdt[2] = x[5]*vA + x[8]*vB + x[11]*vC;
-	dxdt[3] = x[6]*uC - x[9]*uB;
-	dxdt[4] = x[7]*uC - x[10]*uB;
-	dxdt[5] = x[8]*uC - x[11]*uB;
-	dxdt[6] = x[9]*uA - x[3]*uC;
-	dxdt[7] = x[10]*uA - x[4]*uC;
-	dxdt[8] = x[11]*uA - x[5]*uC;
-	dxdt[9] = x[3]*uB - x[6]*uA;
-	dxdt[10] = x[4]*uB - x[7]*uA;
-	dxdt[11] = x[5]*uB - x[8]*uA;
+	dxdt[0] = x[3]*v[0] + x[6]*v[1] + x[9]*v[2];
+	dxdt[1] = x[4]*v[0] + x[7]*v[1] + x[10]*v[2];
+	dxdt[2] = x[5]*v[0] + x[8]*v[1] + x[11]*v[2];
+	dxdt[3] = x[6]*u[2] - x[9]*u[1];
+	dxdt[4] = x[7]*u[2] - x[10]*u[1];
+	dxdt[5] = x[8]*u[2] - x[11]*u[1];
+	dxdt[6] = x[9]*u[0] - x[3]*u[2];
+	dxdt[7] = x[10]*u[0]- x[4]*u[2];
+	dxdt[8] = x[11]*u[0]- x[5]*u[2];
+	dxdt[9] = x[3]*u[1] - x[6]*u[0];
+	dxdt[10] = x[4]*u[1] - x[7]*u[0];
+	dxdt[11] = x[5]*u[1] - x[8]*u[0];
 	dxdt[12] = T(0);
 	dxdt[13] = T(0);
 	dxdt[14] = T(0);
-	dxdt[15] = x[13]*(x[5]*vA + x[8]*vB + x[11]*vC) - x[14]*(x[4]*vA + x[7]*vB + x[10]*vC);
-	dxdt[16] = x[14]*(x[3]*vA + x[6]*vB + x[9]*vC) - x[12]*(x[5]*vA + x[8]*vB + x[11]*vC);
-	dxdt[17] = x[12]*(x[4]*vA + x[7]*vB + x[10]*vC) - x[13]*(x[3]*vA + x[6]*vB + x[9]*vC);
+	dxdt[15] = x[13]*(x[5]*v[0] + x[8]*v[1] + x[11]*v[2]) - x[14]*(x[4]*v[0] + x[7]*v[1] + x[10]*v[2]);
+	dxdt[16] = x[14]*(x[3]*v[0] + x[6]*v[1] + x[9]*v[2]) - x[12]*(x[5]*v[0] + x[8]*v[1] + x[11]*v[2]);
+	dxdt[17] = x[12]*(x[4]*v[0] + x[7]*v[1] + x[10]*v[2]) - x[13]*(x[3]*v[0] + x[6]*v[1] + x[9]*v[2]);
 
 
 	/*
