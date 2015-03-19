@@ -10,21 +10,26 @@ planner::planner() {
 }
 
 bool planner::plan_path(coma_simple_planner::path_request::Request &req, coma_simple_planner::path_request::Response &res) {
+
+	int numSteps = 10;
 	coma_kinematics::solveIK srv;
-	srv.request.x_pos = req.start_x_pos;
-	srv.request.y_pos = req.start_y_pos;
-	srv.request.z_pos = req.start_z_pos;
-	srv.request.x_rot = req.start_x_rot;
-	srv.request.y_rot = req.start_y_rot;
-	srv.request.z_rot = req.start_z_rot;
-	if (solverClient.call(srv)) {
-		res.config = std::vector<coma_simple_planner::configuration>(2);
-		for (unsigned int leg; leg < 12; leg++) {
-			res.config[0].leg_lengths[leg] = srv.response.leg_lengths[leg];
+	res.config = std::vector < coma_simple_planner::configuration > (numSteps);
+	for (unsigned int i = 0; i < numSteps; i++) {
+		srv.request.x_pos = i * ((req.goal_x_pos - req.start_x_pos) / numSteps) + req.start_x_pos;
+		srv.request.y_pos = i * ((req.goal_y_pos - req.start_y_pos) / numSteps) + req.start_y_pos;
+		srv.request.z_pos = i * ((req.goal_z_pos - req.start_z_pos) / numSteps) + req.start_z_pos;
+		//todo: should use quaternions for angle interporlation (euler angles will be very messy)?
+		srv.request.x_rot = i * ((req.goal_x_rot - req.start_x_rot) / numSteps) + req.start_x_rot;
+		srv.request.y_rot = i * ((req.goal_y_rot - req.start_y_rot) / numSteps) + req.start_y_rot;
+		srv.request.z_rot = i * ((req.goal_z_rot - req.start_z_rot) / numSteps) + req.start_z_rot;
+		if (solverClient.call(srv)) {
+			for (unsigned int leg; leg < 12; leg++) {
+				res.config[i].leg_lengths[leg] = srv.response.leg_lengths[leg];
+			}
+			res.config[i].wrist_flex = srv.response.wrist_flex;
+			res.config[i].wrist_rot = srv.response.wrist_rot;
 		}
 	}
-	res.config[0].wrist_flex = srv.response.wrist_flex;
-	res.config[0].wrist_rot = srv.response.wrist_rot;
 
 	return true;
 }
