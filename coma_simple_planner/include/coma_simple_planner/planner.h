@@ -13,6 +13,7 @@
 
 #include <cmath>
 #include <ros/ros.h>
+#include <tf/transform_datatypes.h>
 
 #include "coma_kinematics/solveIK.h"
 #include "coma_simple_planner/configuration.h"

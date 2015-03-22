@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(coma_simple_planner)
 
-find_package(catkin REQUIRED COMPONENTS roscpp std_msgs message_generation)
+find_package(catkin REQUIRED COMPONENTS roscpp std_msgs message_generation tf)
 
 ## Generate messages in the 'msg' folder
 add_message_files(
