@@ -8,6 +8,7 @@
   <node pkg="coma_kinematics" type="ik" name="ik" output="screen" />
   <node pkg="coma_teleop" type="coma_joy_teleop" name="coma_joy_telep" output="screen">
   	<param name="send_motion_commands" type="bool" value="true" />
+  	<param name="use_real_ik" type="bool" value="true" />
   </node>
   <node pkg="joy" type="joy_node" name="joy_node">
     <param name="deadzone" type="double" value="0.033" />

@@ -108,10 +108,14 @@ private:
 	double y_rot_multiplier;
 	double z_rot_multiplier;
 
+	double homed_lengths[12] = { 0.34, 0.34, 0.34, 0.34, 0.34, 0.34, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22 };
+	double leg_lengths[12]; //only used in fake_ik mode (0-5 = top, 6-11 = bottom)
+
 	bool initLeftTrigger; /*!< flag for whether the left trigger is initialized */
 	bool initRightTrigger; /*!< flag for whether the right trigger is initialized */
 	bool calibrated; /*!< flag for whether the controller is calibrated */
 	bool send_motion_commands; /*!< if true, node will send motion commands to the manipulator */
+	bool use_real_ik; /*!< if true, node will send motion commands to the ik solver, if false, node will approximate ik */
 
 	coma_serial::teleop_command motion_cmd; /*!< stepper command */
 	bool motion_response_received;
