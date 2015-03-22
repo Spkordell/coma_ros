@@ -165,7 +165,14 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 				motion_cmd.gripper_open = gripper_open;
 				for (unsigned int leg; leg < 12; leg++) {
 					motion_cmd.stepper_counts[leg] = 0;
+					leg_lengths[leg] = homed_lengths[leg];
 				}
+				old_x_pos = x_pos;
+				old_y_pos = y_pos;
+				old_z_pos = z_pos;
+				old_x_rot = x_rot;
+				old_y_rot = y_rot;
+				old_z_rot = z_rot;
 				if (send_motion_commands) {
 					motion_response_received = false;
 					motion_cmd_out.publish(motion_cmd);
@@ -269,7 +276,7 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 
 				//rotate about x and y
 				double theta = atan2((y_rot - old_y_rot), (x_rot - old_x_rot));
-				double r = sqrt((x_rot - old_x_rot)*(x_rot - old_x_rot)+(y_rot - old_y_rot)*(y_rot - old_y_rot));
+				double r = sqrt((x_rot - old_x_rot) * (x_rot - old_x_rot) + (y_rot - old_y_rot) * (y_rot - old_y_rot));
 				if (theta <= .1745 && theta > -0.1745) {
 					leg_lengths[0] += r;
 					leg_lengths[1] += r;
@@ -297,7 +304,7 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 
 				//translate about x and y
 				theta = atan2((y_pos - old_y_pos), (x_pos - old_x_pos));
-				r = sqrt((x_pos - old_x_pos)*(x_pos - old_x_pos)+(y_pos - old_y_pos)*(y_pos - old_y_pos));
+				r = sqrt((x_pos - old_x_pos) * (x_pos - old_x_pos) + (y_pos - old_y_pos) * (y_pos - old_y_pos));
 				if (theta <= .1745 && theta > -0.1745) {
 					leg_lengths[11] += r;
 					leg_lengths[8] += r;
@@ -322,7 +329,6 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 					leg_lengths[10] += r;
 					leg_lengths[7] += r;
 				}
-
 
 				for (unsigned int leg; leg < 12; leg++) {
 					cout << leg_lengths[leg] << endl;
