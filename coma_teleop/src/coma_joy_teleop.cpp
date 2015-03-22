@@ -20,6 +20,7 @@ coma_joy_teleop::coma_joy_teleop() {
 	//read in parameters
 	private_nh.param<bool>("send_motion_commands", send_motion_commands, true);
 	private_nh.param<bool>("use_real_ik", use_real_ik, true);
+	private_nh.param<bool>("smooth_path", smooth_path, false);
 
 	//initialize arm position variables
 	x_pos = INITIAL_X_POS;
@@ -61,19 +62,25 @@ coma_joy_teleop::coma_joy_teleop() {
 	}
 
 	// create the ROS topics
+	joy_sub = node.subscribe < sensor_msgs::Joy > ("joy", 1, &coma_joy_teleop::joy_cback, this);
 	if (send_motion_commands) {
 		motion_cmd_out = node.advertise < coma_serial::teleop_command > ("/serial_node/step_cmd", 1000);
 		motion_resp_in = node.subscribe < std_msgs::Char > ("/serial_node/resp", 100, &coma_joy_teleop::motion_resp_cback, this);
 	}
-	joy_sub = node.subscribe < sensor_msgs::Joy > ("joy", 1, &coma_joy_teleop::joy_cback, this);
 	if (use_real_ik) {
-		solverClient = node.serviceClient < coma_kinematics::solveIK > ("solve_ik");
+		if (smooth_path) {
+			pathSolverClient = node.serviceClient < coma_simple_planner::path_request > ("plan_path");
+
+		} else {
+			solverClient = node.serviceClient < coma_kinematics::solveIK > ("solve_ik");
+		}
 	} else {
 		for (unsigned int i = 0; i < 12; i++) {
 			//initialize leg lengths to zero
 			leg_lengths[i] = homed_lengths[i];
 		}
 	}
+
 	ROS_INFO("COMA Motion Demo Node Started");
 	ROS_INFO("Calibrate the controller by pressing and releasing both triggers");
 
@@ -82,6 +89,51 @@ coma_joy_teleop::coma_joy_teleop() {
 void coma_joy_teleop::motion_resp_cback(const std_msgs::Char::ConstPtr& resp) {
 	if (resp->data == 'R') {
 		motion_response_received = true;
+	}
+}
+
+void coma_joy_teleop::transmit_leg_lengths(double lengths[12], double wrist_flex, double wrist_rot) {
+	for (unsigned int leg; leg < 12; leg++) {
+		cout << lengths[leg] << endl;
+		int steps = convert_length_to_step(leg, lengths[leg]);
+		if (steps < 0) {
+			ROS_ERROR("MINIMUM LEG LENGTH REACHED");
+			old_x_pos = x_pos;
+			old_y_pos = y_pos;
+			old_z_pos = z_pos;
+			old_x_rot = x_rot;
+			old_y_rot = y_rot;
+			old_z_rot = z_rot;
+			old_gripper_open = gripper_open;
+			return;
+		} else {
+			motion_cmd.stepper_counts[leg] = steps;
+		}
+	}
+#ifdef INCLUDE_WRIST
+	cout << "wrist_rot: " << deg(wrist_rot) << endl;
+	cout << "wrist_flex: " << deg(wrist_flex) << endl;
+	motion_cmd.wrist_flex = -1*int(deg(wrist_flex));
+	motion_cmd.wrist_rot = -1*int(deg(wrist_rot));
+#else
+	motion_cmd.wrist_flex = 0;
+	motion_cmd.wrist_rot = 0;
+#endif
+	motion_cmd.gripper_open = gripper_open;
+	if (gripper_open) {
+		cout << "gripper open" << endl;
+	} else {
+		cout << "gripper closed" << endl;
+	}
+	motion_cmd.home = false;
+	if (send_motion_commands) {
+		motion_response_received = false;
+		motion_cmd_out.publish(motion_cmd);
+	} else {
+		for (unsigned int leg = 0; leg < 11; leg++) {
+			cout << motion_cmd.stepper_counts[leg] << ':';
+		}
+		cout << motion_cmd.stepper_counts[11] << endl;
 	}
 }
 
@@ -130,7 +182,6 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 			} else if (z_pos < MIN_Z_POSITION) {
 				z_pos = MIN_Z_POSITION;
 			}
-
 			if (x_rot > MAX_X_ROTATION) {
 				x_rot = MAX_X_ROTATION;
 			} else if (x_rot < MIN_X_ROTATION) {
@@ -187,60 +238,45 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 			cout << x_pos << '\t' << y_pos << '\t' << z_pos << '\t' << x_rot << '\t' << y_rot << '\t' << z_rot << endl;
 
 			if (use_real_ik) {
-				coma_kinematics::solveIK srv;
-				srv.request.x_pos = x_pos;
-				srv.request.y_pos = y_pos;
-				srv.request.z_pos = z_pos;
-				srv.request.x_rot = x_rot;
-				srv.request.y_rot = y_rot;
-				srv.request.z_rot = z_rot;
 
-				if (solverClient.call(srv)) {
-					for (unsigned int leg; leg < 12; leg++) {
-						cout << srv.response.leg_lengths[leg] << endl;
-						int steps = convert_length_to_step(leg, srv.response.leg_lengths[leg]);
-						if (steps < 0) {
-							ROS_ERROR("MINIMUM LEG LENGTH REACHED");
-							old_x_pos = x_pos;
-							old_y_pos = y_pos;
-							old_z_pos = z_pos;
-							old_x_rot = x_rot;
-							old_y_rot = y_rot;
-							old_z_rot = z_rot;
-							old_gripper_open = gripper_open;
-							return;
-						} else {
-							motion_cmd.stepper_counts[leg] = steps;
-						}
-					}
-#ifdef INCLUDE_WRIST
-					cout << "wrist_rot: " << deg(srv.response.wrist_rot) << endl;
-					cout << "wrist_flex: " << deg(srv.response.wrist_flex) << endl;
-					motion_cmd.wrist_flex = -1*int(deg(srv.response.wrist_flex));
-					motion_cmd.wrist_rot = -1*int(deg(srv.response.wrist_rot));
-#else
-					motion_cmd.wrist_flex = 0;
-					motion_cmd.wrist_rot = 0;
-#endif
-					motion_cmd.gripper_open = gripper_open;
-					if (gripper_open) {
-						cout << "gripper open" << endl;
+				if (!smooth_path) {
+					coma_kinematics::solveIK srv;
+					srv.request.x_pos = x_pos;
+					srv.request.y_pos = y_pos;
+					srv.request.z_pos = z_pos;
+					srv.request.x_rot = x_rot;
+					srv.request.y_rot = y_rot;
+					srv.request.z_rot = z_rot;
+					if (solverClient.call(srv)) {
+						transmit_leg_lengths(srv.response.leg_lengths.c_array(), srv.response.wrist_flex, srv.response.wrist_rot);
 					} else {
-						cout << "gripper closed" << endl;
-					}
-					motion_cmd.home = false;
-					if (send_motion_commands) {
-						motion_response_received = false;
-						motion_cmd_out.publish(motion_cmd);
-					} else {
-						for (unsigned int leg = 0; leg < 11; leg++) {
-							cout << motion_cmd.stepper_counts[leg] << ':';
-						}
-						cout << motion_cmd.stepper_counts[11] << endl;
+						ROS_ERROR("Failed to call solver service");
 					}
 				} else {
-					ROS_ERROR("Failed to call solver service");
+					//attempt to make a smooth path between start and goal by calling the path planner instead of the ik solver
+					coma_simple_planner::path_request srv;
+					srv.request.start_x_pos = old_x_pos;
+					srv.request.start_y_pos = old_y_pos;
+					srv.request.start_z_pos = old_z_pos;
+					srv.request.start_x_rot = old_x_rot;
+					srv.request.start_y_rot = old_y_rot;
+					srv.request.start_z_rot = old_z_rot;
+					srv.request.goal_x_pos = x_pos;
+					srv.request.goal_y_pos = y_pos;
+					srv.request.goal_z_pos = z_pos;
+					srv.request.goal_x_rot = x_rot;
+					srv.request.goal_y_rot = y_rot;
+					srv.request.goal_z_rot = z_rot;
+					if (pathSolverClient.call(srv)) {
+						for (unsigned int i = 0; i < srv.response.config.size(); i++){
+							transmit_leg_lengths(srv.response.config[i].leg_lengths.c_array(), srv.response.config[i].wrist_flex, srv.response.config[i].wrist_rot);
+						}
+
+					} else {
+						ROS_ERROR("Failed to call path planning service");
+					}
 				}
+
 			} else { //use fake ik
 
 				//rotate about z
@@ -330,44 +366,9 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 					leg_lengths[7] += r;
 				}
 
-				for (unsigned int leg; leg < 12; leg++) {
-					cout << leg_lengths[leg] << endl;
-					int steps = convert_length_to_step(leg, leg_lengths[leg]);
-					if (steps < 0) {
-						ROS_ERROR("MINIMUM LEG LENGTH REACHED");
-						old_x_pos = x_pos;
-						old_y_pos = y_pos;
-						old_z_pos = z_pos;
-						old_x_rot = x_rot;
-						old_y_rot = y_rot;
-						old_z_rot = z_rot;
-						old_gripper_open = gripper_open;
-						return;
-					} else {
-						motion_cmd.stepper_counts[leg] = steps;
-					}
-				}
-				motion_cmd.wrist_flex = 0;
-				motion_cmd.wrist_rot = 0;
-				motion_cmd.gripper_open = gripper_open;
-				if (gripper_open) {
-					cout << "gripper open" << endl;
-				} else {
-					cout << "gripper closed" << endl;
-				}
-				motion_cmd.home = false;
-				if (send_motion_commands) {
-					motion_response_received = false;
-					motion_cmd_out.publish(motion_cmd);
-				} else {
-					for (unsigned int leg = 0; leg < 11; leg++) {
-						cout << motion_cmd.stepper_counts[leg] << ':';
-					}
-					cout << motion_cmd.stepper_counts[11] << endl;
-				}
+				transmit_leg_lengths(leg_lengths, 0, 0);
 
 			}
-
 			old_x_pos = x_pos;
 			old_y_pos = y_pos;
 			old_z_pos = z_pos;

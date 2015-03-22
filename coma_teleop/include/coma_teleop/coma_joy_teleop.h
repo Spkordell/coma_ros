@@ -16,6 +16,7 @@
 #include <sensor_msgs/Joy.h>
 #include <std_msgs/Char.h>
 
+#include "coma_simple_planner/path_request.h"
 #include "coma_kinematics/solveIK.h"
 #include "coma_serial/teleop_command.h"
 
@@ -64,18 +65,16 @@ public:
 	coma_joy_teleop();
 
 private:
-	/*!
-	 * Joy topic callback function.
-	 *
-	 * \param joy the message for the joy topic
-	 */
-	void joy_cback(const sensor_msgs::Joy::ConstPtr& joy);
 
+	//callbacks
+	void joy_cback(const sensor_msgs::Joy::ConstPtr& joy);
 	void motion_resp_cback(const std_msgs::Char::ConstPtr& resp);
 
+	//helper methods
 	int convert_length_to_step(int leg, double length);
-
+	void transmit_leg_lengths(double lengths[12], double wrist_flex, double wrist_rot);
 	static double deg(double radians);
+
 
 	ros::NodeHandle node; /*!< a handle for this ROS node */
 
@@ -83,6 +82,7 @@ private:
 	ros::Subscriber motion_resp_in;
 	ros::Subscriber joy_sub; /*!< the joy topic */
 	ros::ServiceClient solverClient;
+	ros::ServiceClient pathSolverClient;
 
 	double x_pos;
 	double y_pos;
@@ -114,8 +114,11 @@ private:
 	bool initLeftTrigger; /*!< flag for whether the left trigger is initialized */
 	bool initRightTrigger; /*!< flag for whether the right trigger is initialized */
 	bool calibrated; /*!< flag for whether the controller is calibrated */
+
+	//parameters
 	bool send_motion_commands; /*!< if true, node will send motion commands to the manipulator */
 	bool use_real_ik; /*!< if true, node will send motion commands to the ik solver, if false, node will approximate ik */
+	bool smooth_path; /*!< if true, node will send desired positions to the path planner to receive a smoother path to the goal */
 
 	coma_serial::teleop_command motion_cmd; /*!< stepper command */
 	bool motion_response_received;

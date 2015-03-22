@@ -27,7 +27,7 @@ bool planner::plan_path(coma_simple_planner::path_request::Request &req, coma_si
 		tf::Matrix3x3 m(start_quart.slerp(goal_quart,i/numSteps));
 		m.getRPY(srv.request.x_rot, srv.request.y_rot, srv.request.z_rot);
 		if (solverClient.call(srv)) {
-			for (unsigned int leg; leg < 12; leg++) {
+			for (unsigned int leg = 0; leg < 12; leg++) {
 				res.config[i].leg_lengths[leg] = srv.response.leg_lengths[leg];
 			}
 			res.config[i].wrist_flex = srv.response.wrist_flex;
