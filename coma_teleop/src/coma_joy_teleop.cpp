@@ -31,6 +31,7 @@ coma_joy_teleop::coma_joy_teleop() {
 	z_rot = INITIAL_Z_ROT;
 	gripper_open = true;
 	home = false;
+	y_button_pressed = false;
 	old_x_pos = INITIAL_X_POS;
 	old_y_pos = INITIAL_Y_POS;
 	old_z_pos = INITIAL_Z_POS;
@@ -39,6 +40,7 @@ coma_joy_teleop::coma_joy_teleop() {
 	old_z_rot = INITIAL_Z_ROT;
 	old_gripper_open = true;
 	old_home = false;
+	old_y_button_pressed = false;
 
 	calibrated = false;
 	initLeftTrigger = false;
@@ -55,10 +57,11 @@ coma_joy_teleop::coma_joy_teleop() {
 	} else {
 		x_pos_multiplier = 0.001;
 		y_pos_multiplier = 0.001;
-		z_pos_multiplier = 0.001;
+		z_pos_multiplier = 0.01;
 		x_rot_multiplier = 0.01;
 		y_rot_multiplier = 0.01;
-		z_rot_multiplier = 0.01;
+		z_rot_multiplier = 0.005;
+		fake_ik_mode = FAKE_IK_BOTH;
 	}
 
 	// create the ROS topics
@@ -105,6 +108,7 @@ void coma_joy_teleop::transmit_leg_lengths(double lengths[12], double wrist_flex
 			old_y_rot = y_rot;
 			old_z_rot = z_rot;
 			old_gripper_open = gripper_open;
+			old_y_button_pressed = y_button_pressed;
 			return;
 		} else {
 			motion_cmd.stepper_counts[leg] = steps;
@@ -161,11 +165,12 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 		z_rot += z_rot_multiplier * (joy->buttons.at(5));	//Right button
 		if (joy->buttons.at(0)) { 							//A button
 			gripper_open = true;
-		} else if (joy->buttons.at(1)) {					// B button
+		} else if (joy->buttons.at(1)) {					//B button
 			gripper_open = false;
 		}
 		home = joy->buttons.at(2);							//X button
-
+		y_button_pressed = joy->buttons.at(3);				//Y button
+		//Y button
 		if (use_real_ik) {
 			if (x_pos > MAX_X_POSITION) {
 				x_pos = MAX_X_POSITION;
@@ -232,7 +237,7 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 		}
 
 		if (x_pos != old_x_pos || y_pos != old_y_pos || z_pos != old_z_pos || x_rot != old_x_rot || y_rot != old_y_rot || z_rot != old_z_rot
-				|| gripper_open != old_gripper_open) {
+				|| gripper_open != old_gripper_open || y_button_pressed != old_y_button_pressed) {
 
 			cout << "------------------------------------------------------------" << endl;
 			cout << x_pos << '\t' << y_pos << '\t' << z_pos << '\t' << x_rot << '\t' << y_rot << '\t' << z_rot << endl;
@@ -268,8 +273,9 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 					srv.request.goal_y_rot = y_rot;
 					srv.request.goal_z_rot = z_rot;
 					if (pathSolverClient.call(srv)) {
-						for (unsigned int i = 0; i < srv.response.config.size(); i++){
-							transmit_leg_lengths(srv.response.config[i].leg_lengths.c_array(), srv.response.config[i].wrist_flex, srv.response.config[i].wrist_rot);
+						for (unsigned int i = 0; i < srv.response.config.size(); i++) {
+							transmit_leg_lengths(srv.response.config[i].leg_lengths.c_array(), srv.response.config[i].wrist_flex,
+									srv.response.config[i].wrist_rot);
 						}
 
 					} else {
@@ -279,91 +285,145 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 
 			} else { //use fake ik
 
-				//rotate about z
-				if (leg_lengths[1] + (z_rot - old_z_rot) > homed_lengths[1] && leg_lengths[3] + (z_rot - old_z_rot) > homed_lengths[3]
-						&& leg_lengths[5] + (z_rot - old_z_rot) > homed_lengths[5]) {
-					leg_lengths[1] += z_rot - old_z_rot;
-					leg_lengths[3] += z_rot - old_z_rot;
-					leg_lengths[5] += z_rot - old_z_rot;
-				} else {
-					leg_lengths[0] -= z_rot - old_z_rot;
-					leg_lengths[2] -= z_rot - old_z_rot;
-					leg_lengths[4] -= z_rot - old_z_rot;
-				}
-				//translate by z
-				bool motion_possible = true;
-				for (unsigned int leg = 0; leg < 6; leg++) {
-					motion_possible &= leg_lengths[leg] + (z_pos - old_z_pos) > homed_lengths[leg];
-				}
-				if (motion_possible) {
-					for (unsigned int leg = 0; leg < 6; leg++) {
-						leg_lengths[leg] += (z_pos - old_z_pos);
+				if (y_button_pressed) {					//Y button
+					switch (fake_ik_mode) {
+					case FAKE_IK_TOP:
+						fake_ik_mode = FAKE_IK_BOTTOM;
+						break;
+					case FAKE_IK_BOTTOM:
+						fake_ik_mode = FAKE_IK_BOTH;
+						break;
+					case FAKE_IK_BOTH:
+						fake_ik_mode = FAKE_IK_TOP;
+						break;
 					}
 				}
-				motion_possible = true;
-				for (unsigned int leg = 6; leg < 12; leg++) {
-					motion_possible &= leg_lengths[leg] + (z_pos - old_z_pos) > homed_lengths[leg];
+				switch (fake_ik_mode) {
+				case FAKE_IK_TOP:
+					std::cout << "active link: top" << std::endl;
+					break;
+				case FAKE_IK_BOTTOM:
+					std::cout << "active link: bottom" << std::endl;
+					break;
+				case FAKE_IK_BOTH:
+					std::cout << "active link: both" << std::endl;
+					break;
 				}
-				if (motion_possible) {
-					for (unsigned int leg = 6; leg < 12; leg++) {
-						leg_lengths[leg] += (z_pos - old_z_pos);
+
+				//rotate about z
+				//top
+				if (fake_ik_mode == FAKE_IK_TOP || fake_ik_mode == FAKE_IK_BOTH) {
+					if (leg_lengths[1] + (z_rot - old_z_rot) > homed_lengths[1] && leg_lengths[3] + (z_rot - old_z_rot) > homed_lengths[3]
+							&& leg_lengths[5] + (z_rot - old_z_rot) > homed_lengths[5]) {
+						leg_lengths[1] += z_rot - old_z_rot;
+						leg_lengths[3] += z_rot - old_z_rot;
+						leg_lengths[5] += z_rot - old_z_rot;
+					} else {
+						leg_lengths[0] -= z_rot - old_z_rot;
+						leg_lengths[2] -= z_rot - old_z_rot;
+						leg_lengths[4] -= z_rot - old_z_rot;
+					}
+				}
+				//bottom
+				if (fake_ik_mode == FAKE_IK_BOTTOM || fake_ik_mode == FAKE_IK_BOTH) {
+					if (leg_lengths[7] + (z_rot - old_z_rot) > homed_lengths[7] && leg_lengths[9] + (z_rot - old_z_rot) > homed_lengths[9]
+							&& leg_lengths[11] + (z_rot - old_z_rot) > homed_lengths[11]) {
+						leg_lengths[7] += z_rot - old_z_rot;
+						leg_lengths[9] += z_rot - old_z_rot;
+						leg_lengths[11] += z_rot - old_z_rot;
+					} else {
+						leg_lengths[6] -= z_rot - old_z_rot;
+						leg_lengths[8] -= z_rot - old_z_rot;
+						leg_lengths[10] -= z_rot - old_z_rot;
 					}
 				}
 
+				//translate by z
+				//bottom
+				bool motion_possible;
+				if (fake_ik_mode == FAKE_IK_TOP || fake_ik_mode == FAKE_IK_BOTH) {
+					motion_possible = true;
+					for (unsigned int leg = 0; leg < 6; leg++) {
+						motion_possible &= leg_lengths[leg] + (z_pos - old_z_pos) > homed_lengths[leg];
+					}
+					if (motion_possible) {
+						for (unsigned int leg = 0; leg < 6; leg++) {
+							leg_lengths[leg] += (z_pos - old_z_pos);
+						}
+					}
+				}
+				if (fake_ik_mode == FAKE_IK_BOTTOM || fake_ik_mode == FAKE_IK_BOTH) {
+					//top
+					motion_possible = true;
+					for (unsigned int leg = 6; leg < 12; leg++) {
+						motion_possible &= leg_lengths[leg] + (z_pos - old_z_pos) > homed_lengths[leg];
+					}
+					if (motion_possible) {
+						for (unsigned int leg = 6; leg < 12; leg++) {
+							leg_lengths[leg] += (z_pos - old_z_pos);
+						}
+					}
+				}
 				//rotate about x and y
-				double theta = atan2((y_rot - old_y_rot), (x_rot - old_x_rot));
-				double r = sqrt((x_rot - old_x_rot) * (x_rot - old_x_rot) + (y_rot - old_y_rot) * (y_rot - old_y_rot));
-				if (theta <= .1745 && theta > -0.1745) {
-					leg_lengths[0] += r;
-					leg_lengths[1] += r;
-				}
-				if (theta <= 1.92 && theta > .1745) {
-					leg_lengths[1] += r;
-					leg_lengths[2] += r;
-				}
-				if (theta <= 2.269 && theta > 1.92) {
-					leg_lengths[2] += r;
-					leg_lengths[3] += r;
-				}
-				if (theta <= M_PI && theta > 2.269 || theta <= -2.269 && theta > -M_PI) {
-					leg_lengths[3] += r;
-					leg_lengths[4] += r;
-				}
-				if (theta <= -1.92 && theta > -2.269) {
-					leg_lengths[4] += r;
-					leg_lengths[5] += r;
-				}
-				if (theta <= -.1745 && theta > -1.92) {
-					leg_lengths[5] += r;
-					leg_lengths[0] += r;
+				double theta;
+				double r;
+				if (fake_ik_mode == FAKE_IK_TOP || fake_ik_mode == FAKE_IK_BOTH) {
+					theta = atan2((y_rot - old_y_rot), (x_rot - old_x_rot));
+					r = sqrt((x_rot - old_x_rot) * (x_rot - old_x_rot) + (y_rot - old_y_rot) * (y_rot - old_y_rot));
+					if (theta <= .1745 && theta > -0.1745) {
+						leg_lengths[0] += r;
+						leg_lengths[1] += r;
+					}
+					if (theta <= 1.92 && theta > .1745) {
+						leg_lengths[1] += r;
+						leg_lengths[2] += r;
+					}
+					if (theta <= 2.269 && theta > 1.92) {
+						leg_lengths[2] += r;
+						leg_lengths[3] += r;
+					}
+					if (theta <= M_PI && theta > 2.269 || theta <= -2.269 && theta > -M_PI) {
+						leg_lengths[3] += r;
+						leg_lengths[4] += r;
+					}
+					if (theta <= -1.92 && theta > -2.269) {
+						leg_lengths[4] += r;
+						leg_lengths[5] += r;
+					}
+					if (theta <= -.1745 && theta > -1.92) {
+						leg_lengths[5] += r;
+						leg_lengths[0] += r;
+					}
 				}
 
 				//translate about x and y
-				theta = atan2((y_pos - old_y_pos), (x_pos - old_x_pos));
-				r = sqrt((x_pos - old_x_pos) * (x_pos - old_x_pos) + (y_pos - old_y_pos) * (y_pos - old_y_pos));
-				if (theta <= .1745 && theta > -0.1745) {
-					leg_lengths[11] += r;
-					leg_lengths[8] += r;
-				}
-				if (theta <= 1.92 && theta > .1745) {
-					leg_lengths[6] += r;
-					leg_lengths[9] += r;
-				}
-				if (theta <= 2.269 && theta > 1.92) {
-					leg_lengths[7] += r;
-					leg_lengths[10] += r;
-				}
-				if (theta <= M_PI && theta > 2.269 || theta <= -2.269 && theta > -M_PI) {
-					leg_lengths[8] += r;
-					leg_lengths[11] += r;
-				}
-				if (theta <= -1.92 && theta > -2.269) {
-					leg_lengths[9] += r;
-					leg_lengths[6] += r;
-				}
-				if (theta <= -.1745 && theta > -1.92) {
-					leg_lengths[10] += r;
-					leg_lengths[7] += r;
+				if (fake_ik_mode == FAKE_IK_BOTTOM || fake_ik_mode == FAKE_IK_BOTH) {
+					theta = atan2((y_pos - old_y_pos), (x_pos - old_x_pos));
+					r = sqrt((x_pos - old_x_pos) * (x_pos - old_x_pos) + (y_pos - old_y_pos) * (y_pos - old_y_pos));
+					if (theta <= .1745 && theta > -0.1745) {
+						leg_lengths[11] += r;
+						leg_lengths[8] += r;
+					}
+					if (theta <= 1.92 && theta > .1745) {
+						leg_lengths[6] += r;
+						leg_lengths[9] += r;
+					}
+					if (theta <= 2.269 && theta > 1.92) {
+						leg_lengths[7] += r;
+						leg_lengths[10] += r;
+					}
+					if (theta <= M_PI && theta > 2.269 || theta <= -2.269 && theta > -M_PI) {
+						leg_lengths[8] += r;
+						leg_lengths[11] += r;
+					}
+					if (theta <= -1.92 && theta > -2.269) {
+						leg_lengths[9] += r;
+						leg_lengths[6] += r;
+					}
+					if (theta <= -.1745 && theta > -1.92) {
+						leg_lengths[10] += r;
+						leg_lengths[7] += r;
+					}
 				}
 
 				transmit_leg_lengths(leg_lengths, 0, 0);
@@ -376,7 +436,7 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 			old_y_rot = y_rot;
 			old_z_rot = z_rot;
 			old_gripper_open = gripper_open;
-
+			old_y_button_pressed = y_button_pressed;
 		}
 	}
 }

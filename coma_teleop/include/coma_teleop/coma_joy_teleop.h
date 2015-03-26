@@ -49,6 +49,10 @@
 #define SPROCKET_CIRCUMFERENCE 2*M_PI*SPROCKET_RADIUS
 #define STEPS_PER_METER STEPS_PER_REVOLUTION/(SPROCKET_CIRCUMFERENCE)
 
+#define FAKE_IK_TOP 0
+#define FAKE_IK_BOTTOM 1
+#define FAKE_IK_BOTH 2
+
 /*!
  * \class coma_joy_teleop
  * \brief Allows for control of coma with a joystick.
@@ -100,6 +104,8 @@ private:
 	double old_z_rot;
 	bool old_gripper_open;
 	bool old_home;
+	bool y_button_pressed;
+	bool old_y_button_pressed;
 
 	double x_pos_multiplier;
 	double y_pos_multiplier;
@@ -114,6 +120,7 @@ private:
 	bool initLeftTrigger; /*!< flag for whether the left trigger is initialized */
 	bool initRightTrigger; /*!< flag for whether the right trigger is initialized */
 	bool calibrated; /*!< flag for whether the controller is calibrated */
+	char fake_ik_mode;
 
 	//parameters
 	bool send_motion_commands; /*!< if true, node will send motion commands to the manipulator */
