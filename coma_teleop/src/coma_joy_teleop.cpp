@@ -55,8 +55,8 @@ coma_joy_teleop::coma_joy_teleop() {
 		y_rot_multiplier = 3.0;
 		z_rot_multiplier = 1.0;
 	} else {
-		x_pos_multiplier = 0.001;
-		y_pos_multiplier = 0.001;
+		x_pos_multiplier = 0.01;
+		y_pos_multiplier = 0.01;
 		z_pos_multiplier = 0.01;
 		x_rot_multiplier = 0.01;
 		y_rot_multiplier = 0.01;
@@ -386,104 +386,114 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 				double theta;
 				double r;
 
-				Eigen::Vector3d delta_vec((x_rot - old_x_rot),(y_rot - old_y_rot),0);
+				Eigen::Vector3d delta_rot_vec((x_rot - old_x_rot), (y_rot - old_y_rot), 0);
 				if (fake_ik_mode == FAKE_IK_TOP || fake_ik_mode == FAKE_IK_BOTH) {
 					for (unsigned int leg = 0; leg < 6; leg++) {
-						leg_lengths[leg] += pos_vec[leg].cross(delta_vec)[2];
+						leg_lengths[leg] += pos_vec[leg].cross(delta_rot_vec)[2];
 					}
 					/*
-					theta = atan2((y_rot - old_y_rot), (x_rot - old_x_rot));
-					r = sqrt((x_rot - old_x_rot) * (x_rot - old_x_rot) + (y_rot - old_y_rot) * (y_rot - old_y_rot));
-					if (theta <= .1745 && theta > -0.1745) {
-						leg_lengths[0] += r;
-						leg_lengths[1] += r;
-					}
-					if (theta <= 1.92 && theta > .1745) {
-						leg_lengths[1] += r;
-						leg_lengths[2] += r;
-					}
-					if (theta <= 2.269 && theta > 1.92) {
-						leg_lengths[2] += r;
-						leg_lengths[3] += r;
-					}
-					if (theta <= M_PI && theta > 2.269 || theta <= -2.269 && theta > -M_PI) {
-						leg_lengths[3] += r;
-						leg_lengths[4] += r;
-					}
-					if (theta <= -1.92 && theta > -2.269) {
-						leg_lengths[4] += r;
-						leg_lengths[5] += r;
-					}
-					if (theta <= -.1745 && theta > -1.92) {
-						leg_lengths[5] += r;
-						leg_lengths[0] += r;
-					}
-					*/
+					 theta = atan2((y_rot - old_y_rot), (x_rot - old_x_rot));
+					 r = sqrt((x_rot - old_x_rot) * (x_rot - old_x_rot) + (y_rot - old_y_rot) * (y_rot - old_y_rot));
+					 if (theta <= .1745 && theta > -0.1745) {
+					 leg_lengths[0] += r;
+					 leg_lengths[1] += r;
+					 }
+					 if (theta <= 1.92 && theta > .1745) {
+					 leg_lengths[1] += r;
+					 leg_lengths[2] += r;
+					 }
+					 if (theta <= 2.269 && theta > 1.92) {
+					 leg_lengths[2] += r;
+					 leg_lengths[3] += r;
+					 }
+					 if (theta <= M_PI && theta > 2.269 || theta <= -2.269 && theta > -M_PI) {
+					 leg_lengths[3] += r;
+					 leg_lengths[4] += r;
+					 }
+					 if (theta <= -1.92 && theta > -2.269) {
+					 leg_lengths[4] += r;
+					 leg_lengths[5] += r;
+					 }
+					 if (theta <= -.1745 && theta > -1.92) {
+					 leg_lengths[5] += r;
+					 leg_lengths[0] += r;
+					 }
+					 */
 				}
 				if (fake_ik_mode == FAKE_IK_BOTTOM || fake_ik_mode == FAKE_IK_BOTH) {
 					for (unsigned int leg = 6; leg < 12; leg++) {
-						leg_lengths[leg] += pos_vec[leg].cross(delta_vec)[2];
+						leg_lengths[leg] += pos_vec[leg].cross(delta_rot_vec)[2];
 					}
 					/*
-					theta = atan2((y_rot - old_y_rot), (x_rot - old_x_rot));
-					r = sqrt((x_rot - old_x_rot) * (x_rot - old_x_rot) + (y_rot - old_y_rot) * (y_rot - old_y_rot));
-					if (theta <= .1745 && theta > -0.1745) {
-						leg_lengths[0] += r;
-						leg_lengths[1] += r;
-					}
-					if (theta <= 1.92 && theta > .1745) {
-						leg_lengths[1] += r;
-						leg_lengths[2] += r;
-					}
-					if (theta <= 2.269 && theta > 1.92) {
-						leg_lengths[2] += r;
-						leg_lengths[3] += r;
-					}
-					if (theta <= M_PI && theta > 2.269 || theta <= -2.269 && theta > -M_PI) {
-						leg_lengths[3] += r;
-						leg_lengths[4] += r;
-					}
-					if (theta <= -1.92 && theta > -2.269) {
-						leg_lengths[4] += r;
-						leg_lengths[5] += r;
-					}
-					if (theta <= -.1745 && theta > -1.92) {
-						leg_lengths[5] += r;
-						leg_lengths[0] += r;
-					}
-					*/
+					 theta = atan2((y_rot - old_y_rot), (x_rot - old_x_rot));
+					 r = sqrt((x_rot - old_x_rot) * (x_rot - old_x_rot) + (y_rot - old_y_rot) * (y_rot - old_y_rot));
+					 if (theta <= .1745 && theta > -0.1745) {
+					 leg_lengths[0] += r;
+					 leg_lengths[1] += r;
+					 }
+					 if (theta <= 1.92 && theta > .1745) {
+					 leg_lengths[1] += r;
+					 leg_lengths[2] += r;
+					 }
+					 if (theta <= 2.269 && theta > 1.92) {
+					 leg_lengths[2] += r;
+					 leg_lengths[3] += r;
+					 }
+					 if (theta <= M_PI && theta > 2.269 || theta <= -2.269 && theta > -M_PI) {
+					 leg_lengths[3] += r;
+					 leg_lengths[4] += r;
+					 }
+					 if (theta <= -1.92 && theta > -2.269) {
+					 leg_lengths[4] += r;
+					 leg_lengths[5] += r;
+					 }
+					 if (theta <= -.1745 && theta > -1.92) {
+					 leg_lengths[5] += r;
+					 leg_lengths[0] += r;
+					 }
+					 */
 				}
 
 				//translate about x and y
+				Eigen::Vector3d delta_pos_vec((x_pos - old_x_pos), (y_pos - old_y_pos), 0);
 				if (fake_ik_mode == FAKE_IK_BOTTOM || fake_ik_mode == FAKE_IK_BOTH) {
-					theta = atan2((y_pos - old_y_pos), (x_pos - old_x_pos));
-					r = sqrt((x_pos - old_x_pos) * (x_pos - old_x_pos) + (y_pos - old_y_pos) * (y_pos - old_y_pos));
-					if (theta <= .1745 && theta > -0.1745) {
-						leg_lengths[11] += r;
-						leg_lengths[8] += r;
+					for (unsigned int leg = 6; leg < 9; leg++) {
+						leg_lengths[leg] += pos_vec[leg].cross(delta_pos_vec)[2] + pos_vec[leg + 3].cross(delta_pos_vec)[2];
+						leg_lengths[leg + 3] += pos_vec[leg].cross(delta_pos_vec)[2] + pos_vec[leg + 3].cross(delta_pos_vec)[2];
 					}
-					if (theta <= 1.92 && theta > .1745) {
-						leg_lengths[6] += r;
-						leg_lengths[9] += r;
-					}
-					if (theta <= 2.269 && theta > 1.92) {
-						leg_lengths[7] += r;
-						leg_lengths[10] += r;
-					}
-					if (theta <= M_PI && theta > 2.269 || theta <= -2.269 && theta > -M_PI) {
-						leg_lengths[8] += r;
-						leg_lengths[11] += r;
-					}
-					if (theta <= -1.92 && theta > -2.269) {
-						leg_lengths[9] += r;
-						leg_lengths[6] += r;
-					}
-					if (theta <= -.1745 && theta > -1.92) {
-						leg_lengths[10] += r;
-						leg_lengths[7] += r;
+//					theta = atan2((y_pos - old_y_pos), (x_pos - old_x_pos));
+//					r = sqrt((x_pos - old_x_pos) * (x_pos - old_x_pos) + (y_pos - old_y_pos) * (y_pos - old_y_pos));
+//					if (theta <= .1745 && theta > -0.1745) {
+//						leg_lengths[11] += r;
+//						leg_lengths[8] += r;
+//					}
+//					if (theta <= 1.92 && theta > .1745) {
+//						leg_lengths[6] += r;
+//						leg_lengths[9] += r;
+//					}
+//					if (theta <= 2.269 && theta > 1.92) {
+//						leg_lengths[7] += r;
+//						leg_lengths[10] += r;
+//					}
+//					if (theta <= M_PI && theta > 2.269 || theta <= -2.269 && theta > -M_PI) {
+//						leg_lengths[8] += r;
+//						leg_lengths[11] += r;
+//					}
+//					if (theta <= -1.92 && theta > -2.269) {
+//						leg_lengths[9] += r;
+//						leg_lengths[6] += r;
+//					}
+//					if (theta <= -.1745 && theta > -1.92) {
+//						leg_lengths[10] += r;
+//						leg_lengths[7] += r;
+//					}
+				}
+				if (fake_ik_mode == FAKE_IK_TOP || fake_ik_mode == FAKE_IK_BOTH) {
+					for (unsigned int leg = 0; leg < 3; leg++) {
+						leg_lengths[leg] += pos_vec[leg].cross(delta_pos_vec)[2] + pos_vec[leg + 3].cross(delta_pos_vec)[2];
+						leg_lengths[leg + 3] += pos_vec[leg].cross(delta_pos_vec)[2] + pos_vec[leg + 3].cross(delta_pos_vec)[2];
 					}
 				}
-
 				transmit_leg_lengths(leg_lengths, 0, 0);
 
 			}
