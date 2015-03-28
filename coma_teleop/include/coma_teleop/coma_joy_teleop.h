@@ -50,6 +50,16 @@
 #define SPROCKET_CIRCUMFERENCE 2*M_PI*SPROCKET_RADIUS
 #define STEPS_PER_METER STEPS_PER_REVOLUTION/(SPROCKET_CIRCUMFERENCE)
 
+#define MIN_LENGTH_BOTTOM 0.22
+#define MIN_LENGTH_TOP 0.34
+
+//#define MAX_DISPLACEMENT 0.4953
+#define MAX_DISPLACEMENT 0.7
+#define MAX_LENGTH_TOP MIN_LENGTH_TOP+MAX_DISPLACEMENT
+#define MAX_LENGTH_BOTTOM MIN_LENGTH_BOTTOM+MAX_DISPLACEMENT
+#define MAX_STEPS_TOP MAX_LENGTH_TOP*STEPS_PER_METER
+#define MAX_STEPS_BOTTOM MAX_LENGTH_BOTTOM*STEPS_PER_METER
+
 #define FAKE_IK_TOP 0
 #define FAKE_IK_BOTTOM 1
 #define FAKE_IK_BOTH 2
@@ -115,7 +125,8 @@ private:
 	double y_rot_multiplier;
 	double z_rot_multiplier;
 
-	double homed_lengths[12] = { 0.34, 0.34, 0.34, 0.34, 0.34, 0.34, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22 };
+	double homed_lengths[12] = { MIN_LENGTH_TOP, MIN_LENGTH_TOP, MIN_LENGTH_TOP, MIN_LENGTH_TOP, MIN_LENGTH_TOP, MIN_LENGTH_TOP, MIN_LENGTH_BOTTOM,
+			MIN_LENGTH_BOTTOM, MIN_LENGTH_BOTTOM, MIN_LENGTH_BOTTOM, MIN_LENGTH_BOTTOM, MIN_LENGTH_BOTTOM };
 	double leg_lengths[12]; //only used in fake_ik mode (0-5 = top, 6-11 = bottom)
 
 	bool initLeftTrigger; /*!< flag for whether the left trigger is initialized */

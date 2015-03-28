@@ -55,11 +55,11 @@ coma_joy_teleop::coma_joy_teleop() {
 		y_rot_multiplier = 3.0;
 		z_rot_multiplier = 1.0;
 	} else {
-		x_pos_multiplier = 0.01;
-		y_pos_multiplier = 0.01;
+		x_pos_multiplier = 0.1;
+		y_pos_multiplier = 0.1;
 		z_pos_multiplier = 0.01;
-		x_rot_multiplier = 0.01;
-		y_rot_multiplier = 0.01;
+		x_rot_multiplier = 0.1;
+		y_rot_multiplier = 0.1;
 		z_rot_multiplier = 0.005;
 		fake_ik_mode = FAKE_IK_BOTH;
 
@@ -117,8 +117,13 @@ void coma_joy_teleop::transmit_leg_lengths(double lengths[12], double wrist_flex
 	for (unsigned int leg; leg < 12; leg++) {
 		cout << lengths[leg] << endl;
 		int steps = convert_length_to_step(leg, lengths[leg]);
-		if (steps < 0) {
-			ROS_ERROR("MINIMUM LEG LENGTH REACHED");
+
+		if (steps < 0 || ((leg < 6) ? (steps > MAX_STEPS_TOP) : (steps > MAX_STEPS_BOTTOM))) {
+			if (steps < 0) {
+				ROS_ERROR("MINIMUM LEG LENGTH REACHED");
+			} else {
+				ROS_ERROR("MAXIMUM LEG LENGTH REACHED");
+			}
 			old_x_pos = x_pos;
 			old_y_pos = y_pos;
 			old_z_pos = z_pos;
@@ -386,8 +391,8 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 				double theta;
 				double r;
 
-				Eigen::Vector3d delta_rot_vec((x_rot - old_x_rot), (y_rot - old_y_rot), 0);
 				if (fake_ik_mode == FAKE_IK_TOP || fake_ik_mode == FAKE_IK_BOTH) {
+					Eigen::Vector3d delta_rot_vec((x_rot - old_x_rot), (y_rot - old_y_rot), 0);
 					for (unsigned int leg = 0; leg < 6; leg++) {
 						leg_lengths[leg] += pos_vec[leg].cross(delta_rot_vec)[2];
 					}
@@ -421,6 +426,7 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 					 */
 				}
 				if (fake_ik_mode == FAKE_IK_BOTTOM || fake_ik_mode == FAKE_IK_BOTH) {
+					Eigen::Vector3d delta_rot_vec((y_rot - old_y_rot), (x_rot - old_x_rot), 0);
 					for (unsigned int leg = 6; leg < 12; leg++) {
 						leg_lengths[leg] += pos_vec[leg].cross(delta_rot_vec)[2];
 					}
@@ -455,8 +461,8 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 				}
 
 				//translate about x and y
-				Eigen::Vector3d delta_pos_vec((x_pos - old_x_pos), (y_pos - old_y_pos), 0);
 				if (fake_ik_mode == FAKE_IK_BOTTOM || fake_ik_mode == FAKE_IK_BOTH) {
+					Eigen::Vector3d delta_pos_vec((x_pos - old_x_pos), (y_pos - old_y_pos), 0);
 					for (unsigned int leg = 6; leg < 9; leg++) {
 						leg_lengths[leg] += pos_vec[leg].cross(delta_pos_vec)[2] + pos_vec[leg + 3].cross(delta_pos_vec)[2];
 						leg_lengths[leg + 3] += pos_vec[leg].cross(delta_pos_vec)[2] + pos_vec[leg + 3].cross(delta_pos_vec)[2];
@@ -489,6 +495,7 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 //					}
 				}
 				if (fake_ik_mode == FAKE_IK_TOP || fake_ik_mode == FAKE_IK_BOTH) {
+					Eigen::Vector3d delta_pos_vec((y_pos - old_y_pos), (x_pos - old_x_pos), 0);
 					for (unsigned int leg = 0; leg < 3; leg++) {
 						leg_lengths[leg] += pos_vec[leg].cross(delta_pos_vec)[2] + pos_vec[leg + 3].cross(delta_pos_vec)[2];
 						leg_lengths[leg + 3] += pos_vec[leg].cross(delta_pos_vec)[2] + pos_vec[leg + 3].cross(delta_pos_vec)[2];
