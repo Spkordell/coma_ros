@@ -12,6 +12,7 @@
 #ifndef COMA_JOY_TELEOP_H_
 #define COMA_JOY_TELEOP_H_
 
+#include <eigen3/Eigen/Dense>
 #include <ros/ros.h>
 #include <sensor_msgs/Joy.h>
 #include <std_msgs/Char.h>
@@ -78,7 +79,7 @@ private:
 	int convert_length_to_step(int leg, double length);
 	void transmit_leg_lengths(double lengths[12], double wrist_flex, double wrist_rot);
 	static double deg(double radians);
-
+	static double rad(double degrees);
 
 	ros::NodeHandle node; /*!< a handle for this ROS node */
 
@@ -121,6 +122,7 @@ private:
 	bool initRightTrigger; /*!< flag for whether the right trigger is initialized */
 	bool calibrated; /*!< flag for whether the controller is calibrated */
 	char fake_ik_mode;
+	Eigen::Vector3d pos_vec[12];
 
 	//parameters
 	bool send_motion_commands; /*!< if true, node will send motion commands to the manipulator */

@@ -62,6 +62,24 @@ coma_joy_teleop::coma_joy_teleop() {
 		y_rot_multiplier = 0.01;
 		z_rot_multiplier = 0.005;
 		fake_ik_mode = FAKE_IK_BOTH;
+
+		double r_in = 0.06126; 	//radius of inner leg hole pattern
+		double r_out = 0.06770; //radius of outer leg hole pattern
+		double deg = 10; //separation in degrees between the hole pairs that are close
+
+		//position of the leg constraints in the local frame at the bottom
+		pos_vec[0] = *(new Eigen::Vector3d(r_in * cos(rad(0 - deg)), r_in * sin(rad(0 - deg)), 0));
+		pos_vec[1] = *(new Eigen::Vector3d(r_in * cos(rad(0 + deg)), r_in * sin(rad(0 + deg)), 0));
+		pos_vec[2] = *(new Eigen::Vector3d(r_in * cos(rad(120 - deg)), r_in * sin(rad(120 - deg)), 0));
+		pos_vec[3] = *(new Eigen::Vector3d(r_in * cos(rad(120 + deg)), r_in * sin(rad(120 + deg)), 0));
+		pos_vec[4] = *(new Eigen::Vector3d(r_in * cos(rad(240 - deg)), r_in * sin(rad(240 - deg)), 0));
+		pos_vec[5] = *(new Eigen::Vector3d(r_in * cos(rad(240 + deg)), r_in * sin(rad(240 + deg)), 0));
+		pos_vec[6] = *(new Eigen::Vector3d(r_out * cos(rad(60 - deg)), r_out * sin(rad(60 - deg)), 0));
+		pos_vec[7] = *(new Eigen::Vector3d(r_out * cos(rad(60 + deg)), r_out * sin(rad(60 + deg)), 0));
+		pos_vec[8] = *(new Eigen::Vector3d(r_out * cos(rad(180 - deg)), r_out * sin(rad(180 - deg)), 0));
+		pos_vec[9] = *(new Eigen::Vector3d(r_out * cos(rad(180 + deg)), r_out * sin(rad(180 + deg)), 0));
+		pos_vec[10] = *(new Eigen::Vector3d(r_out * cos(rad(300 - deg)), r_out * sin(rad(300 - deg)), 0));
+		pos_vec[11] = *(new Eigen::Vector3d(r_out * cos(rad(300 + deg)), r_out * sin(rad(300 + deg)), 0));
 	}
 
 	// create the ROS topics
@@ -367,7 +385,13 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 				//rotate about x and y
 				double theta;
 				double r;
+
+				Eigen::Vector3d delta_vec((x_rot - old_x_rot),(y_rot - old_y_rot),0);
 				if (fake_ik_mode == FAKE_IK_TOP || fake_ik_mode == FAKE_IK_BOTH) {
+					for (unsigned int leg = 0; leg < 6; leg++) {
+						leg_lengths[leg] += pos_vec[leg].cross(delta_vec)[2];
+					}
+					/*
 					theta = atan2((y_rot - old_y_rot), (x_rot - old_x_rot));
 					r = sqrt((x_rot - old_x_rot) * (x_rot - old_x_rot) + (y_rot - old_y_rot) * (y_rot - old_y_rot));
 					if (theta <= .1745 && theta > -0.1745) {
@@ -394,6 +418,40 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 						leg_lengths[5] += r;
 						leg_lengths[0] += r;
 					}
+					*/
+				}
+				if (fake_ik_mode == FAKE_IK_BOTTOM || fake_ik_mode == FAKE_IK_BOTH) {
+					for (unsigned int leg = 6; leg < 12; leg++) {
+						leg_lengths[leg] += pos_vec[leg].cross(delta_vec)[2];
+					}
+					/*
+					theta = atan2((y_rot - old_y_rot), (x_rot - old_x_rot));
+					r = sqrt((x_rot - old_x_rot) * (x_rot - old_x_rot) + (y_rot - old_y_rot) * (y_rot - old_y_rot));
+					if (theta <= .1745 && theta > -0.1745) {
+						leg_lengths[0] += r;
+						leg_lengths[1] += r;
+					}
+					if (theta <= 1.92 && theta > .1745) {
+						leg_lengths[1] += r;
+						leg_lengths[2] += r;
+					}
+					if (theta <= 2.269 && theta > 1.92) {
+						leg_lengths[2] += r;
+						leg_lengths[3] += r;
+					}
+					if (theta <= M_PI && theta > 2.269 || theta <= -2.269 && theta > -M_PI) {
+						leg_lengths[3] += r;
+						leg_lengths[4] += r;
+					}
+					if (theta <= -1.92 && theta > -2.269) {
+						leg_lengths[4] += r;
+						leg_lengths[5] += r;
+					}
+					if (theta <= -.1745 && theta > -1.92) {
+						leg_lengths[5] += r;
+						leg_lengths[0] += r;
+					}
+					*/
 				}
 
 				//translate about x and y
@@ -447,6 +505,10 @@ int coma_joy_teleop::convert_length_to_step(int leg, double length) {
 
 double coma_joy_teleop::deg(double radians) {
 	return radians * (180.0 / M_PI);
+}
+
+double coma_joy_teleop::rad(double degrees) {
+	return degrees * (M_PI / 180.0);
 }
 
 int main(int argc, char **argv) {

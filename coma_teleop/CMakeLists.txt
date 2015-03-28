@@ -7,7 +7,8 @@ set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS joy roscpp sensor_msgs std_msgs)
+find_package(catkin REQUIRED COMPONENTS joy roscpp  cmake_modules sensor_msgs std_msgs)
+find_package(Eigen REQUIRED)
 
 ###################################################
 ## Declare things to be passed to other projects ##
