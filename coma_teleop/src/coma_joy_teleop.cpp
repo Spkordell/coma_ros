@@ -61,6 +61,8 @@ coma_joy_teleop::coma_joy_teleop() {
 		x_rot_multiplier = 0.1;
 		y_rot_multiplier = 0.1;
 		z_rot_multiplier = 0.005;
+		wrist_rotate_multiplier = 1000;
+		wrist_flex_multiplier = 100;
 		fake_ik_mode = FAKE_IK_BOTH;
 
 		double r_in = 0.06126; 	//radius of inner leg hole pattern
@@ -138,10 +140,14 @@ void coma_joy_teleop::transmit_leg_lengths(double lengths[12], double wrist_flex
 		}
 	}
 #ifdef INCLUDE_WRIST
-	cout << "wrist_rot: " << deg(wrist_rot) << endl;
-	cout << "wrist_flex: " << deg(wrist_flex) << endl;
-	motion_cmd.wrist_flex = -1*int(deg(wrist_flex));
-	motion_cmd.wrist_rot = -1*int(deg(wrist_rot));
+//	cout << "wrist_rot: " << deg(wrist_rot) << endl;
+//	cout << "wrist_flex: " << deg(wrist_flex) << endl;
+//	motion_cmd.wrist_flex = -1*int(deg(wrist_flex));
+//	motion_cmd.wrist_rot = -1*int(deg(wrist_rot));
+	cout << "wrist_rot: " << wrist_rot << endl;
+	cout << "wrist_flex: " << wrist_flex << endl;
+	motion_cmd.wrist_flex = int(wrist_flex);
+	motion_cmd.wrist_rot = int(wrist_rot);
 #else
 	motion_cmd.wrist_flex = 0;
 	motion_cmd.wrist_rot = 0;
@@ -317,6 +323,9 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 						fake_ik_mode = FAKE_IK_BOTH;
 						break;
 					case FAKE_IK_BOTH:
+						fake_ik_mode = FAKE_IK_WRIST;
+						break;
+					case FAKE_IK_WRIST:
 						fake_ik_mode = FAKE_IK_TOP;
 						break;
 					}
@@ -330,6 +339,9 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 					break;
 				case FAKE_IK_BOTH:
 					std::cout << "active link: both" << std::endl;
+					break;
+				case FAKE_IK_WRIST:
+					std::cout << "active link: wrist" << std::endl;
 					break;
 				}
 
@@ -494,14 +506,36 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 //						leg_lengths[7] += r;
 //					}
 				}
+
 				if (fake_ik_mode == FAKE_IK_TOP || fake_ik_mode == FAKE_IK_BOTH) {
-					Eigen::Vector3d delta_pos_vec((y_pos - old_y_pos), (x_pos - old_x_pos), 0);
+					Eigen::Vector3d delta_pos_vec((old_y_pos - y_pos), (x_pos - old_x_pos), 0);
 					for (unsigned int leg = 0; leg < 3; leg++) {
 						leg_lengths[leg] += pos_vec[leg].cross(delta_pos_vec)[2] + pos_vec[leg + 3].cross(delta_pos_vec)[2];
 						leg_lengths[leg + 3] += pos_vec[leg].cross(delta_pos_vec)[2] + pos_vec[leg + 3].cross(delta_pos_vec)[2];
 					}
 				}
-				transmit_leg_lengths(leg_lengths, 0, 0);
+
+
+#ifdef INCLUDE_WRIST
+				if (fake_ik_mode == FAKE_IK_WRIST) {
+					wrist_rotate += wrist_rotate_multiplier* (z_pos - old_z_pos);
+					wrist_flex += wrist_flex_multiplier * (y_pos - old_y_pos);
+					if (wrist_rotate > MAX_WRIST_ROTATE) {
+						wrist_rotate = MAX_WRIST_ROTATE;
+					}
+					if (wrist_rotate < MIN_WRIST_ROTATE) {
+						wrist_rotate = MIN_WRIST_ROTATE;
+					}
+					if (wrist_flex > MAX_WRIST_FLEX) {
+						wrist_flex = MAX_WRIST_FLEX;
+					}
+					if (wrist_flex < MIN_WRIST_FLEX) {
+						wrist_flex = MIN_WRIST_FLEX;
+					}
+				}
+#endif
+
+				transmit_leg_lengths(leg_lengths, wrist_flex, wrist_rotate);
 
 			}
 			old_x_pos = x_pos;

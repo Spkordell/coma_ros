@@ -21,7 +21,7 @@
 #include "coma_kinematics/solveIK.h"
 #include "coma_serial/teleop_command.h"
 
-//#define INCLUDE_WRIST //if defined, model will include a 2DOF wrist
+#define INCLUDE_WRIST //if defined, model will include a 2DOF wrist
 
 #define MIN_X_POSITION -0.6
 #define MIN_Y_POSITION -0.6
@@ -63,6 +63,16 @@
 #define FAKE_IK_TOP 0
 #define FAKE_IK_BOTTOM 1
 #define FAKE_IK_BOTH 2
+#ifdef INCLUDE_WRIST
+#define FAKE_IK_WRIST 3
+#endif
+
+#ifdef INCLUDE_WRIST
+#define MIN_WRIST_ROTATE 0
+#define MIN_WRIST_FLEX 0
+#define MAX_WRIST_ROTATE 180
+#define MAX_WRIST_FLEX 180
+#endif
 
 /*!
  * \class coma_joy_teleop
@@ -124,10 +134,15 @@ private:
 	double x_rot_multiplier;
 	double y_rot_multiplier;
 	double z_rot_multiplier;
+	double wrist_flex_multiplier;
+	double wrist_rotate_multiplier;
 
 	double homed_lengths[12] = { MIN_LENGTH_TOP, MIN_LENGTH_TOP, MIN_LENGTH_TOP, MIN_LENGTH_TOP, MIN_LENGTH_TOP, MIN_LENGTH_TOP, MIN_LENGTH_BOTTOM,
-			MIN_LENGTH_BOTTOM, MIN_LENGTH_BOTTOM, MIN_LENGTH_BOTTOM, MIN_LENGTH_BOTTOM, MIN_LENGTH_BOTTOM };
+	MIN_LENGTH_BOTTOM, MIN_LENGTH_BOTTOM, MIN_LENGTH_BOTTOM, MIN_LENGTH_BOTTOM, MIN_LENGTH_BOTTOM };
 	double leg_lengths[12]; //only used in fake_ik mode (0-5 = top, 6-11 = bottom)
+
+	double wrist_rotate = 0;
+	double wrist_flex = 0;
 
 	bool initLeftTrigger; /*!< flag for whether the left trigger is initialized */
 	bool initRightTrigger; /*!< flag for whether the right trigger is initialized */
