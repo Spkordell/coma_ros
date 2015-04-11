@@ -52,6 +52,7 @@ void motion_demo::publish_cmd() {
 //	static int counts[12];
 	if (response_received) { //only publish if the board is ready for another command
 //		response_received = false;
+//		//publish a constant stream of steps
 //		for (unsigned int i; i < 12; i++) {
 //			counts[i] += 20;
 //			cmd.stepper_counts[i] = counts[i];

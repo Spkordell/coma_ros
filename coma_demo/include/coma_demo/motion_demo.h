@@ -44,14 +44,12 @@ public:
 private:
 	ros::NodeHandle node; /*!< a handle for this ROS node */
 
-
 	ros::Subscriber resp_in;
 
 	unsigned int numCmds;
 	std::vector<std::vector<unsigned int> >* step_cmds;
 
 	void resp_cback(const std_msgs::Char::ConstPtr& resp);
-
 
 };
 

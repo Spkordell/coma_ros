@@ -46,6 +46,8 @@ coma_joy_teleop::coma_joy_teleop() {
 	initLeftTrigger = false;
 	initRightTrigger = false;
 	motion_response_received = true;
+	solver_running = false;
+	solution_out_of_date = false;
 
 	if (use_real_ik) {
 		x_pos_multiplier = 0.02;
@@ -113,6 +115,22 @@ void coma_joy_teleop::motion_resp_cback(const std_msgs::Char::ConstPtr& resp) {
 	if (resp->data == 'R') {
 		motion_response_received = true;
 	}
+}
+void coma_joy_teleop::solve_thread() {
+	solver_running = true;
+	coma_kinematics::solveIK srv;
+	srv.request.x_pos = x_pos;
+	srv.request.y_pos = y_pos;
+	srv.request.z_pos = z_pos;
+	srv.request.x_rot = x_rot;
+	srv.request.y_rot = y_rot;
+	srv.request.z_rot = z_rot;
+	if (solverClient.call(srv)) {
+		transmit_leg_lengths(srv.response.leg_lengths.c_array(), srv.response.wrist_flex, srv.response.wrist_rot);
+	} else {
+		ROS_ERROR("Failed to call solver service");
+	}
+	solver_running = false;
 }
 
 void coma_joy_teleop::transmit_leg_lengths(double lengths[12], double wrist_flex, double wrist_rot) {
@@ -266,7 +284,7 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 		}
 
 		if (x_pos != old_x_pos || y_pos != old_y_pos || z_pos != old_z_pos || x_rot != old_x_rot || y_rot != old_y_rot || z_rot != old_z_rot
-				|| gripper_open != old_gripper_open || y_button_pressed != old_y_button_pressed) {
+				|| gripper_open != old_gripper_open || y_button_pressed != old_y_button_pressed || solution_out_of_date) {
 
 			cout << "------------------------------------------------------------" << endl;
 			cout << x_pos << '\t' << y_pos << '\t' << z_pos << '\t' << x_rot << '\t' << y_rot << '\t' << z_rot << endl;
@@ -274,18 +292,18 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 			if (use_real_ik) {
 
 				if (!smooth_path) {
-					coma_kinematics::solveIK srv;
-					srv.request.x_pos = x_pos;
-					srv.request.y_pos = y_pos;
-					srv.request.z_pos = z_pos;
-					srv.request.x_rot = x_rot;
-					srv.request.y_rot = y_rot;
-					srv.request.z_rot = z_rot;
-					if (solverClient.call(srv)) {
-						transmit_leg_lengths(srv.response.leg_lengths.c_array(), srv.response.wrist_flex, srv.response.wrist_rot);
+#ifdef USE_MULTITHREADING
+					if (!solver_running) {
+						//launch the solver in a second thread so we can continue to update the desired position while we are waiting for a solution
+						solver_running = true;
+						solution_out_of_date = false;
+						boost::thread t(boost::bind(&coma_joy_teleop::solve_thread, this));
 					} else {
-						ROS_ERROR("Failed to call solver service");
+						solution_out_of_date = true;
 					}
+#else
+					solve_thread();
+#endif
 				} else {
 					//attempt to make a smooth path between start and goal by calling the path planner instead of the ik solver
 					coma_simple_planner::path_request srv;
@@ -515,10 +533,9 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 					}
 				}
 
-
 #ifdef INCLUDE_WRIST
 				if (fake_ik_mode == FAKE_IK_WRIST) {
-					wrist_rotate += wrist_rotate_multiplier* (z_pos - old_z_pos);
+					wrist_rotate += wrist_rotate_multiplier * (z_pos - old_z_pos);
 					wrist_flex += wrist_flex_multiplier * (y_pos - old_y_pos);
 					if (wrist_rotate > MAX_WRIST_ROTATE) {
 						wrist_rotate = MAX_WRIST_ROTATE;

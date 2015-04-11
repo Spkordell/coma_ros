@@ -12,6 +12,7 @@
 #ifndef COMA_JOY_TELEOP_H_
 #define COMA_JOY_TELEOP_H_
 
+#include <boost/thread.hpp>
 #include <eigen3/Eigen/Dense>
 #include <ros/ros.h>
 #include <sensor_msgs/Joy.h>
@@ -22,6 +23,7 @@
 #include "coma_serial/teleop_command.h"
 
 #define INCLUDE_WRIST //if defined, model will include a 2DOF wrist
+#define USE_MULTITHREADING //if defined, solver will be launched in seperate thread
 
 #define MIN_X_POSITION -0.6
 #define MIN_Y_POSITION -0.6
@@ -98,6 +100,7 @@ private:
 	//helper methods
 	int convert_length_to_step(int leg, double length);
 	void transmit_leg_lengths(double lengths[12], double wrist_flex, double wrist_rot);
+	void solve_thread();
 	static double deg(double radians);
 	static double rad(double degrees);
 
@@ -147,6 +150,8 @@ private:
 	bool initLeftTrigger; /*!< flag for whether the left trigger is initialized */
 	bool initRightTrigger; /*!< flag for whether the right trigger is initialized */
 	bool calibrated; /*!< flag for whether the controller is calibrated */
+	bool solver_running; /*if true, solver is already busy running in another thread*/
+	bool solution_out_of_date; /*if true, the current solution does not match the desired pose and the solver needs to be ran again */
 	char fake_ik_mode;
 	Eigen::Vector3d pos_vec[12];
 

@@ -541,13 +541,13 @@ public:
 
 #ifdef INCLUDE_WRIST
 			Matrix4t T_rotation_flex; //Transformation from the rotation joint to the flex joint
-			Matrix4t T_flex_gripper; //Transformation from the flex joint to the gripper
+			Matrix4t T_flex_gripper;//Transformation from the flex joint to the gripper
 			T_rotation_flex << cos(wrist_roll), -sin(wrist_roll), T(0), T(0), sin(wrist_roll), cos(wrist_roll), T(0), T(0), T(0), T(0), T(1), T(
-			DIST_TO_FLEX_JOINT), T(0), T(0), T(0), T(1);
+					DIST_TO_FLEX_JOINT), T(0), T(0), T(0), T(1);
 			T_flex_gripper << T(1), T(0), T(0), T(0), T(0), cos(wrist_flex), -sin(wrist_flex), T(0), T(0), sin(wrist_flex), cos(wrist_flex), T(DIST_TO_GRIPPER), T(
 					0), T(0), T(0), T(1);
 
-			Matrix4t T_rotation_gripper = T_flex_gripper * T_rotation_flex;  //Transformation from the rotation joint to the gripper
+			Matrix4t T_rotation_gripper = T_flex_gripper * T_rotation_flex;//Transformation from the rotation joint to the gripper
 
 			//invert the T_rotation_gripper matrix;
 			Matrix4t T_gripper_rotation = T_rotation_gripper;
@@ -731,7 +731,7 @@ public:
 		Eigen::Vector4d p6_init_s;
 
 		//position integrations for each rod, saved for visualization
-		Eigen::Matrix<double,INTEGRATION_STEPS+1,3> rodpositions[12];
+		Eigen::Matrix<double, INTEGRATION_STEPS + 1, 3> rodpositions[12];
 
 	private:
 		template<typename T> struct StoreM3d {
@@ -753,10 +753,11 @@ public:
 		};
 
 		template<typename T> struct StoreM21_3d {
-			template<typename TP> void operator()(Eigen::Matrix<double, INTEGRATION_STEPS+1, 3> &to, Eigen::Matrix<T, INTEGRATION_STEPS+1, 3> from, identity<TP>) const {
+			template<typename TP> void operator()(Eigen::Matrix<double, INTEGRATION_STEPS + 1, 3> &to, Eigen::Matrix<T, INTEGRATION_STEPS + 1, 3> from,
+					identity<TP>) const {
 			}
 
-			void operator()(Eigen::Matrix<double, INTEGRATION_STEPS+1, 3> &to, Eigen::Matrix<T, INTEGRATION_STEPS+1, 3> from, identity<double>) const {
+			void operator()(Eigen::Matrix<double, INTEGRATION_STEPS + 1, 3> &to, Eigen::Matrix<T, INTEGRATION_STEPS + 1, 3> from, identity<double>) const {
 				to = from;
 			}
 		};
