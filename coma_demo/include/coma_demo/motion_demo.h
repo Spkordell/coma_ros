@@ -13,6 +13,7 @@
 
 #include <ros/ros.h>
 #include <std_msgs/Char.h>
+#include <vector>
 
 #include "coma_serial/teleop_command.h"
 
@@ -24,6 +25,11 @@
  */
 class motion_demo {
 public:
+
+	coma_serial::teleop_command cmd; /*!< stepper command */
+	bool response_received;
+	ros::Publisher step_cmd_out; /*!< angular arm command topic */
+
 	/*!
 	 * Creates a motion_demo object that can be used control coma. ROS nodes, services, and publishers
 	 * are created and maintained within this object.
@@ -38,13 +44,15 @@ public:
 private:
 	ros::NodeHandle node; /*!< a handle for this ROS node */
 
-	ros::Publisher step_cmd_out; /*!< angular arm command topic */
+
 	ros::Subscriber resp_in;
+
+	unsigned int numCmds;
+	std::vector<std::vector<unsigned int> >* step_cmds;
 
 	void resp_cback(const std_msgs::Char::ConstPtr& resp);
 
-	coma_serial::teleop_command cmd; /*!< stepper command */
-	bool response_received;
+
 };
 
 /*!
