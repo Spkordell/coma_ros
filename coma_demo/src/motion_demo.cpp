@@ -20,7 +20,7 @@ motion_demo::motion_demo() {
 	response_received = true;
 
 	//Build a list of of stepper positions to go to
-	numCmds = 1; //the number of elements in the list
+	numCmds = 4; //the number of elements in the list
 
 	step_cmds = new std::vector<std::vector<unsigned int> >(numCmds, std::vector<unsigned int>(16));
 	//element 0..11 = stepper motor steps
@@ -28,11 +28,84 @@ motion_demo::motion_demo() {
 	//element 13 = wrist rotate? in degrees
 	//element 14 = wrist open or close (1 = open, 0 = closed)
 	//element 15 = delay after sending command in milliseconds
+
+	//Set all steppers to zero position
 	for (unsigned int i = 0; i < 14; i++) {
 		step_cmds->at(0).at(i) = 0;
 	}
 	step_cmds->at(0).at(14) = 1;
-	step_cmds->at(0).at(15) = 2000; //2 second delay
+	step_cmds->at(0).at(15) = 10000; //10 second delay
+
+	//move all steppers to top
+//	for (unsigned int i = 0; i < 12; i++) {
+//		step_cmds->at(1).at(i) = 1000;
+//	}
+//	step_cmds->at(1).at(12) = 0;
+//	step_cmds->at(1).at(13) = 0;
+//	step_cmds->at(1).at(14) = 1;
+//	step_cmds->at(1).at(15) = 10000; //10 second delay
+
+	//move all steppers to mid
+	for (unsigned int i = 0; i < 12; i++) {
+		step_cmds->at(1).at(i) = 500;
+	}
+	step_cmds->at(1).at(12) = 0;
+	step_cmds->at(1).at(13) = 0;
+	step_cmds->at(1).at(14) = 1;
+	step_cmds->at(1).at(15) = 10000; //10 second delay
+
+	//bend to one side
+	step_cmds->at(2).at(0) = 666;
+	step_cmds->at(2).at(1) = 654;
+	step_cmds->at(2).at(2) = 646;
+	step_cmds->at(2).at(3) = 685;
+	step_cmds->at(2).at(4) = 916;
+	step_cmds->at(2).at(5) = 889;
+	step_cmds->at(2).at(6) = 696;
+	step_cmds->at(2).at(7) = 524;
+	step_cmds->at(2).at(8) = 133;
+	step_cmds->at(2).at(9) = 179;
+	step_cmds->at(2).at(10) = 503;
+	step_cmds->at(2).at(11) = 629;
+	step_cmds->at(2).at(12) = 0;
+	step_cmds->at(2).at(13) = 88;
+	step_cmds->at(2).at(14) = 0;
+	step_cmds->at(2).at(15) = 10000;//10 second delay;
+
+	//bend to the other side
+	step_cmds->at(3).at(0) = 548;
+	step_cmds->at(3).at(1) = 667;
+	step_cmds->at(3).at(2) = 953;
+	step_cmds->at(3).at(3) = 877;
+	step_cmds->at(3).at(4) = 353;
+	step_cmds->at(3).at(5) = 310;
+	step_cmds->at(3).at(6) = 291;
+	step_cmds->at(3).at(7) = 374;
+	step_cmds->at(3).at(8) = 712;
+	step_cmds->at(3).at(9) = 705;
+	step_cmds->at(3).at(10) = 337;
+	step_cmds->at(3).at(11) = 261;
+	step_cmds->at(3).at(12) = 0;
+	step_cmds->at(3).at(13) = 69;
+	step_cmds->at(3).at(14) = 0;
+	step_cmds->at(3).at(15) = 10000;//10 second delay;
+
+	//extrapolate between the two
+/*
+	int at = 2;
+	int numSteps = 10;
+	for(unsigned int j = 0; j < 10; j++) {
+		for (unsigned int k = 0; k < 16; k++) {
+		//i * ((goal - start) / numSteps) + start
+			step_cmds->at(at+j).at(k) = j*((goal - step_cmds->at(2).at(k))/numSteps) + step_cmds->at(2).at(k);
+		}
+	}
+
+ */
+
+
+
+
 
 	// create the ROS topics
 	step_cmd_out = node.advertise < coma_serial::teleop_command > ("/serial_node/step_cmd", 1000);
@@ -94,6 +167,8 @@ int main(int argc, char **argv) {
 	demo.response_received = false;
 	demo.step_cmd_out.publish(demo.cmd);
 
+
+	demo.cmd.home = false;
 
 	ros::Rate loop_rate(500);  //rate at which to publish arm velocity commands
 	while (ros::ok()) {

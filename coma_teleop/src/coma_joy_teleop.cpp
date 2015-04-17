@@ -59,12 +59,12 @@ coma_joy_teleop::coma_joy_teleop() {
 	} else {
 		x_pos_multiplier = 0.1;
 		y_pos_multiplier = 0.1;
-		z_pos_multiplier = 0.01;
+		z_pos_multiplier = 0.07;
 		x_rot_multiplier = 0.1;
 		y_rot_multiplier = 0.1;
 		z_rot_multiplier = 0.005;
 		wrist_rotate_multiplier = 1000;
-		wrist_flex_multiplier = 100;
+		wrist_flex_multiplier = 600;
 		fake_ik_mode = FAKE_IK_BOTH;
 
 		double r_in = 0.06126; 	//radius of inner leg hole pattern
@@ -138,21 +138,24 @@ void coma_joy_teleop::transmit_leg_lengths(double lengths[12], double wrist_flex
 		cout << lengths[leg] << endl;
 		int steps = convert_length_to_step(leg, lengths[leg]);
 
-		if (steps < 0 || ((leg < 6) ? (steps > MAX_STEPS_TOP) : (steps > MAX_STEPS_BOTTOM))) {
-			if (steps < 0) {
-				ROS_ERROR("MINIMUM LEG LENGTH REACHED");
-			} else {
-				ROS_ERROR("MAXIMUM LEG LENGTH REACHED");
-			}
-			old_x_pos = x_pos;
-			old_y_pos = y_pos;
-			old_z_pos = z_pos;
-			old_x_rot = x_rot;
-			old_y_rot = y_rot;
-			old_z_rot = z_rot;
-			old_gripper_open = gripper_open;
-			old_y_button_pressed = y_button_pressed;
-			return;
+//		if (steps < 0 || ((leg < 6) ? (steps > MAX_STEPS_TOP) : (steps > MAX_STEPS_BOTTOM))) {
+//			motion_cmd.stepper_counts[leg] = 0;
+//			if (steps < 0) {
+//				ROS_ERROR("MINIMUM LEG LENGTH REACHED");
+//			} else {
+//				ROS_ERROR("MAXIMUM LEG LENGTH REACHED");
+//			}
+//			old_x_pos = x_pos;
+//			old_y_pos = y_pos;
+//			old_z_pos = z_pos;
+//			old_x_rot = x_rot;
+//			old_y_rot = y_rot;
+//			old_z_rot = z_rot;
+//			old_gripper_open = gripper_open;
+//			old_y_button_pressed = y_button_pressed;
+			//return;
+		if (steps < 0) {
+			motion_cmd.stepper_counts[leg] = 0;
 		} else {
 			motion_cmd.stepper_counts[leg] = steps;
 		}
@@ -399,11 +402,11 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 					for (unsigned int leg = 0; leg < 6; leg++) {
 						motion_possible &= leg_lengths[leg] + (z_pos - old_z_pos) > homed_lengths[leg];
 					}
-					if (motion_possible) {
+					//if (motion_possible) {
 						for (unsigned int leg = 0; leg < 6; leg++) {
 							leg_lengths[leg] += (z_pos - old_z_pos);
 						}
-					}
+					//}
 				}
 				if (fake_ik_mode == FAKE_IK_BOTTOM || fake_ik_mode == FAKE_IK_BOTH) {
 					//top
@@ -411,11 +414,11 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 					for (unsigned int leg = 6; leg < 12; leg++) {
 						motion_possible &= leg_lengths[leg] + (z_pos - old_z_pos) > homed_lengths[leg];
 					}
-					if (motion_possible) {
+					//if (motion_possible) {
 						for (unsigned int leg = 6; leg < 12; leg++) {
 							leg_lengths[leg] += (z_pos - old_z_pos);
 						}
-					}
+					//}
 				}
 				//rotate about x and y
 				double theta;
