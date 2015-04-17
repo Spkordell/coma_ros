@@ -20,12 +20,12 @@ motion_demo::motion_demo() {
 	response_received = true;
 
 	//Build a list of of stepper positions to go to
-	numCmds = 4; //the number of elements in the list
+	numCmds = 7; //the number of elements in the list
 
 	step_cmds = new std::vector<std::vector<unsigned int> >(numCmds, std::vector<unsigned int>(16));
 	//element 0..11 = stepper motor steps
-	//element 12 = wrist flex? in degrees
-	//element 13 = wrist rotate? in degrees
+	//element 12 = wrist flex in degrees
+	//element 13 = wrist rotate in degrees
 	//element 14 = wrist open or close (1 = open, 0 = closed)
 	//element 15 = delay after sending command in milliseconds
 
@@ -52,7 +52,7 @@ motion_demo::motion_demo() {
 	step_cmds->at(1).at(12) = 0;
 	step_cmds->at(1).at(13) = 0;
 	step_cmds->at(1).at(14) = 1;
-	step_cmds->at(1).at(15) = 10000; //10 second delay
+	step_cmds->at(1).at(15) = 10; //delay
 
 	//bend to one side
 	step_cmds->at(2).at(0) = 666;
@@ -68,27 +68,79 @@ motion_demo::motion_demo() {
 	step_cmds->at(2).at(10) = 503;
 	step_cmds->at(2).at(11) = 629;
 	step_cmds->at(2).at(12) = 0;
-	step_cmds->at(2).at(13) = 88;
+	step_cmds->at(2).at(13) = 69;
 	step_cmds->at(2).at(14) = 0;
 	step_cmds->at(2).at(15) = 10000;//10 second delay;
 
-	//bend to the other side
-	step_cmds->at(3).at(0) = 548;
-	step_cmds->at(3).at(1) = 667;
-	step_cmds->at(3).at(2) = 953;
-	step_cmds->at(3).at(3) = 877;
-	step_cmds->at(3).at(4) = 353;
-	step_cmds->at(3).at(5) = 310;
-	step_cmds->at(3).at(6) = 291;
-	step_cmds->at(3).at(7) = 374;
-	step_cmds->at(3).at(8) = 712;
-	step_cmds->at(3).at(9) = 705;
-	step_cmds->at(3).at(10) = 337;
-	step_cmds->at(3).at(11) = 261;
+	step_cmds->at(3).at(0) = 706;
+	step_cmds->at(3).at(1) = 680;
+	step_cmds->at(3).at(2) = 754;
+	step_cmds->at(3).at(3) = 796;
+	step_cmds->at(3).at(4) = 909;
+	step_cmds->at(3).at(5) = 893;
+	step_cmds->at(3).at(6) = 316;
+	step_cmds->at(3).at(7) = 218;
+	step_cmds->at(3).at(8) = 137;
+	step_cmds->at(3).at(9) = 218;
+	step_cmds->at(3).at(10) = 653;
+	step_cmds->at(3).at(11) = 671;
 	step_cmds->at(3).at(12) = 0;
 	step_cmds->at(3).at(13) = 69;
 	step_cmds->at(3).at(14) = 0;
-	step_cmds->at(3).at(15) = 10000;//10 second delay;
+	step_cmds->at(3).at(15) = 10; //delay
+
+	step_cmds->at(4).at(0) = 428;
+	step_cmds->at(4).at(1) = 583;
+	step_cmds->at(4).at(2) = 864;
+	step_cmds->at(4).at(3) = 860;
+	step_cmds->at(4).at(4) = 747;
+	step_cmds->at(4).at(5) = 597;
+	step_cmds->at(4).at(6) = 150;
+	step_cmds->at(4).at(7) = 100;
+	step_cmds->at(4).at(8) = 242;
+	step_cmds->at(4).at(9) = 323;
+	step_cmds->at(4).at(10) = 540;
+	step_cmds->at(4).at(11) = 508;
+	step_cmds->at(4).at(12) = 0;
+	step_cmds->at(4).at(13) = 69;
+	step_cmds->at(4).at(14) = 0;
+	step_cmds->at(4).at(15) = 10;//delay
+
+
+	step_cmds->at(5).at(0) = 584;
+	step_cmds->at(5).at(1) = 667;
+	step_cmds->at(5).at(2) = 993;
+	step_cmds->at(5).at(3) = 983;
+	step_cmds->at(5).at(4) = 614;
+	step_cmds->at(5).at(5) = 540;
+	step_cmds->at(5).at(6) = 154;
+	step_cmds->at(5).at(7) = 120;
+	step_cmds->at(5).at(8) = 704;
+	step_cmds->at(5).at(9) = 667;
+	step_cmds->at(5).at(10) = 489;
+	step_cmds->at(5).at(11) = 559;
+	step_cmds->at(5).at(12) = 0;
+	step_cmds->at(5).at(13) = 69;
+	step_cmds->at(5).at(14) = 0;
+	step_cmds->at(5).at(15) = 10; //delay
+
+
+	step_cmds->at(6).at(0) = 548;
+	step_cmds->at(6).at(1) = 667;
+	step_cmds->at(6).at(2) = 953;
+	step_cmds->at(6).at(3) = 877;
+	step_cmds->at(6).at(4) = 353;
+	step_cmds->at(6).at(5) = 310;
+	step_cmds->at(6).at(6) = 291;
+	step_cmds->at(6).at(7) = 374;
+	step_cmds->at(6).at(8) = 712;
+	step_cmds->at(6).at(9) = 705;
+	step_cmds->at(6).at(10) = 337;
+	step_cmds->at(6).at(11) = 261;
+	step_cmds->at(6).at(12) = 0;
+	step_cmds->at(6).at(13) = 69;
+	step_cmds->at(6).at(14) = 0;
+	step_cmds->at(6).at(15) = 10000;//10 second delay;
 
 	//extrapolate between the two
 /*

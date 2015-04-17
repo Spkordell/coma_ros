@@ -129,8 +129,17 @@ private:
 	double old_z_rot;
 	bool old_gripper_open;
 	bool old_home;
+
 	bool y_button_pressed;
+	bool left_arrow_button_pressed;
+	bool right_arrow_button_pressed;
+	bool up_arrow_button_pressed;
+	bool down_arrow_button_pressed;
 	bool old_y_button_pressed;
+	bool old_left_arrow_button_pressed;
+	bool old_right_arrow_button_pressed;
+	bool old_up_arrow_button_pressed;
+	bool old_down_arrow_button_pressed;
 
 	double x_pos_multiplier;
 	double y_pos_multiplier;

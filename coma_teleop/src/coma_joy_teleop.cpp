@@ -32,6 +32,10 @@ coma_joy_teleop::coma_joy_teleop() {
 	gripper_open = true;
 	home = false;
 	y_button_pressed = false;
+	left_arrow_button_pressed = false;
+	right_arrow_button_pressed = false;
+	up_arrow_button_pressed = false;
+	down_arrow_button_pressed = false;
 	old_x_pos = INITIAL_X_POS;
 	old_y_pos = INITIAL_Y_POS;
 	old_z_pos = INITIAL_Z_POS;
@@ -41,6 +45,10 @@ coma_joy_teleop::coma_joy_teleop() {
 	old_gripper_open = true;
 	old_home = false;
 	old_y_button_pressed = false;
+	old_left_arrow_button_pressed = false;
+	old_right_arrow_button_pressed = false;
+	old_up_arrow_button_pressed = false;
+	old_down_arrow_button_pressed = false;
 
 	calibrated = false;
 	initLeftTrigger = false;
@@ -220,7 +228,22 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 		}
 		home = joy->buttons.at(2);							//X button
 		y_button_pressed = joy->buttons.at(3);				//Y button
-		//Y button
+
+		/*
+		if (joy->axes.at(7) == 1) {
+		//up
+		}
+		if (joy->axes.at(7) == -1) {
+		//down
+		}
+		if (joy->axes.at(6) == 1) {
+		//left
+		}
+		if (joy->axes.at(6) == -1) {
+		//right
+		}
+*/
+
 		if (use_real_ik) {
 			if (x_pos > MAX_X_POSITION) {
 				x_pos = MAX_X_POSITION;
