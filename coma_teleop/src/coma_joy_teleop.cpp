@@ -161,7 +161,7 @@ void coma_joy_teleop::transmit_leg_lengths(double lengths[12], double wrist_flex
 //			old_z_rot = z_rot;
 //			old_gripper_open = gripper_open;
 //			old_y_button_pressed = y_button_pressed;
-			//return;
+		//return;
 		if (steps < 0) {
 			motion_cmd.stepper_counts[leg] = 0;
 		} else {
@@ -213,36 +213,25 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 			ROS_INFO("Controller calibration complete!");
 		}
 	} else if (motion_response_received || !send_motion_commands) { //only publish if the board is ready for another command
-		x_pos -= x_pos_multiplier * (joy->axes.at(0));		//Left stick horizontal
-		y_pos += y_pos_multiplier * (joy->axes.at(1));		//Left Stick vertical
-		z_pos -= z_pos_multiplier * (1 - joy->axes.at(2));  //Left trigger
-		z_pos += z_pos_multiplier * (1 - joy->axes.at(5));  //Right trigger
-		x_rot -= x_rot_multiplier * (joy->axes.at(3));		//Right stick horizontal
-		y_rot += y_rot_multiplier * (joy->axes.at(4));		//Right stick vertical
-		z_rot -= z_rot_multiplier * (joy->buttons.at(4));	//Left button
-		z_rot += z_rot_multiplier * (joy->buttons.at(5));	//Right button
-		if (joy->buttons.at(0)) { 							//A button
+		x_pos -= x_pos_multiplier * (joy->axes.at(0));			//Left stick horizontal
+		y_pos += y_pos_multiplier * (joy->axes.at(1));			//Left Stick vertical
+		z_pos -= z_pos_multiplier * (1 - joy->axes.at(2));  	//Left trigger
+		z_pos += z_pos_multiplier * (1 - joy->axes.at(5));  	//Right trigger
+		x_rot -= x_rot_multiplier * (joy->axes.at(3));			//Right stick horizontal
+		y_rot += y_rot_multiplier * (joy->axes.at(4));			//Right stick vertical
+		z_rot -= z_rot_multiplier * (joy->buttons.at(4));		//Left button
+		z_rot += z_rot_multiplier * (joy->buttons.at(5));		//Right button
+		if (joy->buttons.at(0)) { 								//A button
 			gripper_open = true;
-		} else if (joy->buttons.at(1)) {					//B button
+		} else if (joy->buttons.at(1)) {						//B button
 			gripper_open = false;
 		}
-		home = joy->buttons.at(2);							//X button
-		y_button_pressed = joy->buttons.at(3);				//Y button
-
-		/*
-		if (joy->axes.at(7) == 1) {
-		//up
-		}
-		if (joy->axes.at(7) == -1) {
-		//down
-		}
-		if (joy->axes.at(6) == 1) {
-		//left
-		}
-		if (joy->axes.at(6) == -1) {
-		//right
-		}
-*/
+		home = joy->buttons.at(2);								//X button
+		y_button_pressed = joy->buttons.at(3);					//Y button
+		up_arrow_button_pressed = (joy->axes.at(7) == 1);  		//up aD-pad
+		down_arrow_button_pressed = (joy->axes.at(7) == -1);  	//down D-pad
+		left_arrow_button_pressed = (joy->axes.at(6) == 1);		//left D-pad
+		right_arrow_button_pressed = (joy->axes.at(6) == -1);	//right D-pad
 
 		if (use_real_ik) {
 			if (x_pos > MAX_X_POSITION) {
@@ -310,7 +299,9 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 		}
 
 		if (x_pos != old_x_pos || y_pos != old_y_pos || z_pos != old_z_pos || x_rot != old_x_rot || y_rot != old_y_rot || z_rot != old_z_rot
-				|| gripper_open != old_gripper_open || y_button_pressed != old_y_button_pressed || solution_out_of_date) {
+				|| gripper_open != old_gripper_open || y_button_pressed != old_y_button_pressed || up_arrow_button_pressed != old_up_arrow_button_pressed
+				|| down_arrow_button_pressed != old_down_arrow_button_pressed || left_arrow_button_pressed != old_left_arrow_button_pressed
+				|| right_arrow_button_pressed != old_right_arrow_button_pressed || solution_out_of_date) {
 
 			cout << "------------------------------------------------------------" << endl;
 			cout << x_pos << '\t' << y_pos << '\t' << z_pos << '\t' << x_rot << '\t' << y_rot << '\t' << z_rot << endl;
@@ -358,6 +349,20 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 
 			} else { //use fake ik
 
+				//check d-pad buttons and switch mode accordingly
+				if (up_arrow_button_pressed) {
+					fake_ik_mode = FAKE_IK_TOP;
+				}
+				if (down_arrow_button_pressed) {
+					fake_ik_mode = FAKE_IK_BOTTOM;
+				}
+				if (left_arrow_button_pressed) {
+					fake_ik_mode = FAKE_IK_WRIST;
+				}
+				if (right_arrow_button_pressed) {
+					fake_ik_mode = FAKE_IK_BOTH;
+				}
+				//can also toggle mode with y button
 				if (y_button_pressed) {					//Y button
 					switch (fake_ik_mode) {
 					case FAKE_IK_TOP:
@@ -426,9 +431,9 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 						motion_possible &= leg_lengths[leg] + (z_pos - old_z_pos) > homed_lengths[leg];
 					}
 					//if (motion_possible) {
-						for (unsigned int leg = 0; leg < 6; leg++) {
-							leg_lengths[leg] += (z_pos - old_z_pos);
-						}
+					for (unsigned int leg = 0; leg < 6; leg++) {
+						leg_lengths[leg] += (z_pos - old_z_pos);
+					}
 					//}
 				}
 				if (fake_ik_mode == FAKE_IK_BOTTOM || fake_ik_mode == FAKE_IK_BOTH) {
@@ -438,9 +443,9 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 						motion_possible &= leg_lengths[leg] + (z_pos - old_z_pos) > homed_lengths[leg];
 					}
 					//if (motion_possible) {
-						for (unsigned int leg = 6; leg < 12; leg++) {
-							leg_lengths[leg] += (z_pos - old_z_pos);
-						}
+					for (unsigned int leg = 6; leg < 12; leg++) {
+						leg_lengths[leg] += (z_pos - old_z_pos);
+					}
 					//}
 				}
 				//rotate about x and y
@@ -589,6 +594,10 @@ void coma_joy_teleop::joy_cback(const sensor_msgs::Joy::ConstPtr& joy) {
 			old_z_rot = z_rot;
 			old_gripper_open = gripper_open;
 			old_y_button_pressed = y_button_pressed;
+			old_up_arrow_button_pressed = up_arrow_button_pressed;
+			old_down_arrow_button_pressed = down_arrow_button_pressed;
+			old_left_arrow_button_pressed = left_arrow_button_pressed;
+			old_right_arrow_button_pressed = right_arrow_button_pressed;
 		}
 	}
 }
