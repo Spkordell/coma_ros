@@ -41,7 +41,7 @@ motion_demo::motion_demo() {
 	 */
 
 	//speed test
-
+/*
 	//move all steppers to top
 	for (unsigned int i = 0; i < 12; i++) {
 		step_cmds->at(0).at(i) = 1000;
@@ -60,7 +60,7 @@ motion_demo::motion_demo() {
 	step_cmds->at(1).at(13) = 0;
 	step_cmds->at(1).at(14) = 1;
 	step_cmds->at(1).at(15) = 10000; //10 second delay
-
+*/
 	//precision test
 	/*
 	//move all steppers to mid
@@ -279,7 +279,7 @@ int main(int argc, char **argv) {
 	demo.step_cmd_out.publish(demo.cmd);
 	demo.cmd.home = false;
 
-	ros::Duration(10.0).sleep(); //short delay after sending homing command
+	ros::Duration(20.0).sleep(); //short delay after sending homing command
 
 	ros::Rate loop_rate(500);  //rate at which to publish arm velocity commands
 	while (ros::ok()) {
