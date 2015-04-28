@@ -12,6 +12,8 @@
 
 using namespace std;
 
+#define run_agility
+
 motion_demo::motion_demo() {
 	// a private handle for this ROS node (allows retrieval of relative parameters)
 	ros::NodeHandle private_nh("~");
@@ -20,8 +22,12 @@ motion_demo::motion_demo() {
 	response_received = true;
 
 	//Build a list of of stepper positions to go to
+#ifdef run_agility
 	numCmds = 21; //the number of elements in the list
-
+#endif
+#ifndef run_agility
+	numCmds = 6; //the number of elements in the list
+#endif
 	step_cmds = new std::vector<std::vector<unsigned int> >(numCmds, std::vector<unsigned int>(16));
 	//element 0..11 = stepper motor steps
 	//element 12 = wrist flex in degrees
@@ -29,8 +35,8 @@ motion_demo::motion_demo() {
 	//element 14 = wrist open or close (1 = open, 0 = closed)
 	//element 15 = delay after sending command in milliseconds
 
+#ifdef run_agility
 	//agility stuff
-
 	//Set all steppers to zero position
 	for (unsigned int i = 0; i < 12; i++) {
 		step_cmds->at(0).at(i) = 0;
@@ -349,6 +355,108 @@ motion_demo::motion_demo() {
 	step_cmds->at(20).at(13) = 111;
 	step_cmds->at(20).at(14) = 0;
 	step_cmds->at(20).at(15) = 2000; //delay
+#endif //run_agility
+#ifndef run_agility
+	//move all steppers to mid
+	for (unsigned int i = 0; i < 12; i++) {
+		step_cmds->at(0).at(i) = 500;
+	}
+	step_cmds->at(0).at(12) = 64;
+	step_cmds->at(0).at(13) = 137;
+	step_cmds->at(0).at(14) = 1;
+	step_cmds->at(0).at(15) = 5000; //delay
+
+	//seperate rods
+	step_cmds->at(1).at(0) = 789;
+	step_cmds->at(1).at(1) = 789;
+	step_cmds->at(1).at(2) = 789;
+	step_cmds->at(1).at(3) = 789;
+	step_cmds->at(1).at(4) = 789;
+	step_cmds->at(1).at(5) = 789;
+	step_cmds->at(1).at(6) = 338;
+	step_cmds->at(1).at(7) = 338;
+	step_cmds->at(1).at(8) = 338;
+	step_cmds->at(1).at(9) = 338;
+	step_cmds->at(1).at(10) = 338;
+	step_cmds->at(1).at(11) = 338;
+	step_cmds->at(1).at(12) = 180;
+	step_cmds->at(1).at(13) = 64;
+	step_cmds->at(1).at(14) = 1;
+	step_cmds->at(1).at(15) = 2000; //delay
+
+	//bend
+	step_cmds->at(2).at(0) = 553;
+	step_cmds->at(2).at(1) = 753;
+	step_cmds->at(2).at(2) = 1270;
+	step_cmds->at(2).at(3) = 1159;
+	step_cmds->at(2).at(4) = 310;
+	step_cmds->at(2).at(5) = 221;
+	step_cmds->at(2).at(6) = 195;
+	step_cmds->at(2).at(7) = 259;
+	step_cmds->at(2).at(8) = 609;
+	step_cmds->at(2).at(9) = 639;
+	step_cmds->at(2).at(10) = 294;
+	step_cmds->at(2).at(11) = 200;
+	step_cmds->at(2).at(12) = 128;
+	step_cmds->at(2).at(13) = 137;
+	step_cmds->at(2).at(14) = 1;
+	step_cmds->at(2).at(15) = 5000; //delay
+
+	//close claw
+	step_cmds->at(3).at(0) = 553;
+	step_cmds->at(3).at(1) = 753;
+	step_cmds->at(3).at(2) = 1270;
+	step_cmds->at(3).at(3) = 1159;
+	step_cmds->at(3).at(4) = 310;
+	step_cmds->at(3).at(5) = 221;
+	step_cmds->at(3).at(6) = 195;
+	step_cmds->at(3).at(7) = 259;
+	step_cmds->at(3).at(8) = 609;
+	step_cmds->at(3).at(9) = 639;
+	step_cmds->at(3).at(10) = 294;
+	step_cmds->at(3).at(11) = 200;
+	step_cmds->at(3).at(12) = 128;
+	step_cmds->at(3).at(13) = 137;
+	step_cmds->at(3).at(14) = 0;
+	step_cmds->at(3).at(15) = 5000; //delay
+
+	//lift
+	step_cmds->at(4).at(0) = 789;
+	step_cmds->at(4).at(1) = 789;
+	step_cmds->at(4).at(2) = 789;
+	step_cmds->at(4).at(3) = 789;
+	step_cmds->at(4).at(4) = 789;
+	step_cmds->at(4).at(5) = 789;
+	step_cmds->at(4).at(6) = 338;
+	step_cmds->at(4).at(7) = 338;
+	step_cmds->at(4).at(8) = 338;
+	step_cmds->at(4).at(9) = 338;
+	step_cmds->at(4).at(10) = 338;
+	step_cmds->at(4).at(11) = 338;
+	step_cmds->at(4).at(12) = 128;
+	step_cmds->at(4).at(13) = 137;
+	step_cmds->at(4).at(14) = 0;
+	step_cmds->at(4).at(15) = 20; //delay
+
+	//lift
+	step_cmds->at(5).at(0) = 789;
+	step_cmds->at(5).at(1) = 789;
+	step_cmds->at(5).at(2) = 789;
+	step_cmds->at(5).at(3) = 789;
+	step_cmds->at(5).at(4) = 789;
+	step_cmds->at(5).at(5) = 789;
+	step_cmds->at(5).at(6) = 338;
+	step_cmds->at(5).at(7) = 338;
+	step_cmds->at(5).at(8) = 338;
+	step_cmds->at(5).at(9) = 338;
+	step_cmds->at(5).at(10) = 338;
+	step_cmds->at(5).at(11) = 338;
+	step_cmds->at(5).at(12) = 0;
+	step_cmds->at(5).at(13) = 180;
+	step_cmds->at(5).at(14) = 0;
+	step_cmds->at(5).at(15) = 20000; //delay
+
+#endif
 
 	/*
 	 *
